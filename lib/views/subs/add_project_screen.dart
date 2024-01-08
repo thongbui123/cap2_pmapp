@@ -22,8 +22,12 @@ class _AddProjectScreenState extends State<AddProjectScreen> {
   DatabaseReference? projectsRef;
   List<String> memberList = [];
   List<String> memberIdList = [];
+  List<String> phraseList = [];
   List<UserModel> userList = [];
   String? selectedItem;
+  Map<dynamic, dynamic> leaderMap = {};
+  List<String> allLeaders = [];
+  Map<String, String> leaderIdMap = {};
 
   _getUserDetails() async {
     DatabaseEvent snapshot = await userRef!.once();
@@ -40,6 +44,20 @@ class _AddProjectScreenState extends State<AddProjectScreen> {
     if (user != null) {
       userRef = FirebaseDatabase.instance.ref().child('users').child(user!.uid);
       usersRef = FirebaseDatabase.instance.ref().child('users');
+      usersRef?.onValue.listen((event) {
+        setState(() {
+          leaderMap = Map.from(event.snapshot.value as dynamic);
+          for (var leader in leaderMap.values) {
+            UserModel userModel =
+                UserModel.fromMap(Map<String, dynamic>.from(leader));
+            if (userModel.userRole == 'Team Leader') {
+              allLeaders.add(userModel.userId);
+              leaderIdMap[userModel.userId] =
+                  "${userModel.userFirstName} ${userModel.userLastName}";
+            }
+          }
+        });
+      });
       projectsRef = FirebaseDatabase.instance.ref().child('projects');
     }
     _getUserDetails();
@@ -50,6 +68,7 @@ class _AddProjectScreenState extends State<AddProjectScreen> {
   var projectDescriptionController = TextEditingController();
   var startDateController = TextEditingController();
   var endDateController = TextEditingController();
+  var teamLeaderIdController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -81,6 +100,12 @@ class _AddProjectScreenState extends State<AddProjectScreen> {
                     const InputDecoration(hintText: 'Project Description'),
               ),
             ),
+            TextField(
+              controller: teamLeaderIdController,
+              decoration: const InputDecoration(hintText: 'Team Leader'),
+              readOnly: true,
+            ),
+            const SizedBox(height: 10),
             SizedBox(
               child: TextField(
                 controller: startDateController,
@@ -131,6 +156,22 @@ class _AddProjectScreenState extends State<AddProjectScreen> {
             ),
             const SizedBox(
               height: 10,
+            ),
+            const Text('Add Team leaderr'),
+            Center(
+              child: DropdownButton<String>(
+                items: allLeaders.map((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+                onChanged: (String? newValue) {
+                  teamLeaderIdController.text = newValue!;
+                  print('Selected: $newValue');
+                },
+                value: allLeaders[0].toString(),
+              ),
             ),
             const Text('Add Members'),
             StreamBuilder(
@@ -213,7 +254,9 @@ class _AddProjectScreenState extends State<AddProjectScreen> {
                       projectDescriptionController.text,
                       startDateController.text,
                       endDateController.text,
+                      teamLeaderIdController.text,
                       memberIdList,
+                      phraseList,
                       currentUserModel);
                   Navigator.pop(context);
                 },

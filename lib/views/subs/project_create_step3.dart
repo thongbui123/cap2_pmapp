@@ -1,8 +1,21 @@
+import 'package:capstone2_project_management_app/models/process_model.dart';
+import 'package:capstone2_project_management_app/services/project_services.dart';
 import 'package:flutter/material.dart';
-import 'package:capstone2_project_management_app/views/stats/stats.dart';
 
 class projectCreateStep3 extends StatefulWidget {
-  const projectCreateStep3({Key? key}) : super(key: key);
+  final TextEditingController projectNameController;
+  final TextEditingController projectDescriptionController;
+  final TextEditingController startDateController;
+  final TextEditingController endDateController;
+  final String teamLeaderId;
+  const projectCreateStep3(
+      {Key? key,
+      required this.projectNameController,
+      required this.projectDescriptionController,
+      required this.startDateController,
+      required this.endDateController,
+      required this.teamLeaderId})
+      : super(key: key);
 
   @override
   State<projectCreateStep3> createState() => _projectCreateStep3State();
@@ -11,7 +24,12 @@ class projectCreateStep3 extends StatefulWidget {
 List<String> list = <String>['Member', 'Leader'];
 
 class _projectCreateStep3State extends State<projectCreateStep3> {
-  List<String> developmentPhrases = [
+  var projectNameController = TextEditingController();
+  var projectDescriptionController = TextEditingController();
+  var startDateController = TextEditingController();
+  var endDateController = TextEditingController();
+  var teamLeaderIdController = TextEditingController();
+  List<String> phrases = [
     "Requirement and Gathering",
     "Planning",
     "Design",
@@ -21,12 +39,16 @@ class _projectCreateStep3State extends State<projectCreateStep3> {
     "Maintenance"
   ];
 
+  List<String> currentPhrases = [
+    "Distribution",
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
         child: Padding(
-          padding: EdgeInsets.all(defaultPadding),
+          padding: const EdgeInsets.all(15),
           child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -34,9 +56,12 @@ class _projectCreateStep3State extends State<projectCreateStep3> {
                 Row(
                   children: [
                     IconButton(
-                        icon: const Icon(Icons.arrow_back_ios), onPressed: (){Navigator.pop(context);}),
-                    Text(
-                      'PROCESSES',
+                        icon: const Icon(Icons.arrow_back_ios),
+                        onPressed: () {
+                          Navigator.pop(context);
+                        }),
+                    const Text(
+                      'PHRASES',
                       style: TextStyle(
                         fontFamily: 'Anurati',
                         fontSize: 30,
@@ -44,55 +69,114 @@ class _projectCreateStep3State extends State<projectCreateStep3> {
                     ),
                   ],
                 ),
-                SizedBox(height: 5),
-                Divider(),
-                SizedBox(height: 5),
+                const SizedBox(height: 5),
+                const Divider(),
+                const SizedBox(height: 5),
+                const Row(
+                  children: [
+                    Text('Default Phrases(immutable)',
+                        style: TextStyle(fontFamily: 'MontMed')),
+                  ],
+                ),
                 Column(
-                  children: developmentPhrases.map((process) {
+                  children: phrases.map((process) {
                     return Column(
                       children: <Widget>[
                         ListTile(
-                          title: Text(process),
-                          subtitle: Text('Description', style: TextStyle(fontFamily: 'MontMed'),),
+                          leading: const CircleAvatar(
+                            child: Icon(Icons.keyboard_arrow_down),
+                          ),
+                          title: Text(
+                            process,
+                            style: const TextStyle(fontFamily: 'MontMed'),
+                          ),
+                          subtitle: const Text(
+                            'Description',
+                            style: TextStyle(fontFamily: 'MontMed'),
+                          ),
                         ),
-                        Divider(height: 0),
+                        const Divider(height: 0),
                       ],
                     );
                   }).toList(),
                 ),
-                SizedBox(height: 10),
-                Container(
-                  height: 50,
-                  child: Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {_showAddItemDialog(context);},
-                      child: Row(
-                        children: [
-                          Icon(Icons.add),
-                          SizedBox(width: 10),
-                          Text('Define a new process', style: TextStyle(fontFamily: 'MontMed'),),
-                        ],
-                      ),
-                    ),
-                  ),
+                const SizedBox(height: 20),
+                const Row(
+                  children: [
+                    Text('Defined Phrases',
+                        style: TextStyle(fontFamily: 'MontMed')),
+                  ],
                 ),
-                SizedBox(height: 10),
+                Column(
+                  children: currentPhrases.map((process) {
+                    return Column(
+                      children: <Widget>[
+                        ListTile(
+                          leading: const CircleAvatar(
+                            child: Icon(Icons.keyboard_arrow_down),
+                          ),
+                          title: Text(
+                            process,
+                            style: const TextStyle(fontFamily: 'MontMed'),
+                          ),
+                          subtitle: const Text(
+                            'Description',
+                            style: TextStyle(fontFamily: 'MontMed'),
+                          ),
+                          trailing: Ink(
+                            decoration: const ShapeDecoration(
+                              color: Colors.transparent,
+                              shape: CircleBorder(),
+                            ),
+                            child: IconButton(
+                              icon: const Icon(Icons.remove_circle),
+                              color: Colors.redAccent,
+                              onPressed: () {
+                                _removeProcess(process);
+                              },
+                            ),
+                          ),
+                        ),
+                        const Divider(height: 0),
+                      ],
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: 10),
                 Container(
                     height: 50,
                     child: TextButton(
-                      onPressed: (){},
+                      onPressed: _showAddItemDialog,
+                      child: const Row(
+                        children: [
+                          Icon(Icons.add),
+                          SizedBox(width: 10),
+                          Text(
+                            'Define New Phrases',
+                            style: TextStyle(fontFamily: 'MontMed'),
+                          ),
+                        ],
+                      ),
+                    )),
+                const SizedBox(height: 10),
+                Container(
+                    height: 50,
+                    child: TextButton(
+                      onPressed: () {},
                       child: Container(
-                        child: Row(
+                        child: const Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            Text('Initiate Project', style: TextStyle(fontFamily: 'MontMed'),),
+                            Text(
+                              'Initiate Project',
+                              style: TextStyle(fontFamily: 'MontMed'),
+                            ),
                             SizedBox(width: 10),
                             Icon(Icons.arrow_forward_ios),
                           ],
                         ),
                       ),
-                    )
-                ),
+                    )),
               ],
             ),
           ),
@@ -101,7 +185,7 @@ class _projectCreateStep3State extends State<projectCreateStep3> {
     );
   }
 
-  Future<void> _showAddItemDialog(BuildContext context) async {
+  Future<void> _showAddItemDialog() async {
     TextEditingController nameController = TextEditingController();
     TextEditingController descriptionController = TextEditingController();
 
@@ -109,48 +193,68 @@ class _projectCreateStep3State extends State<projectCreateStep3> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Add Item', style: TextStyle(fontFamily: 'MontMed'),),
-          content: Column(
-            children: [
-              TextField(
-                controller: nameController,
-                decoration: InputDecoration(labelText: 'Name',),
-                style: TextStyle(
-                  color: Colors.black,
-                  fontFamily: 'MontMed',
+          title: const Text(
+            'Add Item',
+            style: TextStyle(fontFamily: 'MontMed'),
+          ),
+          content: Container(
+            height: 200,
+            child: Column(
+              children: [
+                TextField(
+                  controller: nameController,
+                  decoration: const InputDecoration(
+                    labelText: 'Name',
+                  ),
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontFamily: 'MontMed',
+                  ),
                 ),
-              ),
-              TextField(
-                controller: descriptionController,
-                maxLines: null,
-                decoration: InputDecoration(labelText: 'Description'),
-                style: TextStyle(
-                  color: Colors.black,
-                  fontFamily: 'MontMed',
+                TextField(
+                  controller: descriptionController,
+                  maxLines: 4,
+                  decoration: const InputDecoration(labelText: 'Description'),
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontFamily: 'MontMed',
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: Text('Cancel', style: TextStyle(fontFamily: 'MontMed'),),
+              child: const Text(
+                'Cancel',
+                style: TextStyle(fontFamily: 'MontMed'),
+              ),
             ),
             TextButton(
               onPressed: () {
                 // Update the list with the new item
                 setState(() {
-                  developmentPhrases.add(nameController.text);
+                  currentPhrases.add(nameController.text);
                 });
                 Navigator.pop(context);
               },
-              child: Text('Add', style: TextStyle(fontFamily: 'MontMed'),),
+              child: const Text(
+                'Add',
+                style: TextStyle(fontFamily: 'MontMed'),
+              ),
             ),
           ],
         );
       },
     );
+  }
+
+  void _removeProcess(String member) {
+    setState(() {
+      currentPhrases.remove(member);
+    });
   }
 }

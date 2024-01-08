@@ -64,8 +64,9 @@ class _dashboard_screenState extends State<dashboard_screen> {
             },
             backgroundColor: Colors.deepOrangeAccent,
             tooltip: 'Add Project', // Optional tooltip text shown on long-press
-            child: Icon(Icons.create_new_folder), // Updated icon for the FAB
+            child: Icon(Icons.create_new_folder, color: Colors.white,), // Updated icon for the FAB
           ),
-        ));
+        )
+    );
   }
 }

@@ -1,9 +1,12 @@
+import 'package:capstone2_project_management_app/models/project_model.dart';
 import 'package:capstone2_project_management_app/models/user_model.dart';
+import 'package:capstone2_project_management_app/views/list_of_project_screen.dart';
 import 'package:capstone2_project_management_app/views/stats/stats.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class Dashboard_main_v1 extends StatefulWidget {
   const Dashboard_main_v1({Key? key}) : super(key: key);
@@ -17,30 +20,46 @@ class _Dashboard_main_v1State extends State<Dashboard_main_v1> {
   UserModel? currentUserModel;
   DatabaseReference? userRef;
   DatabaseReference? projectRef;
-  List<Project> projects = [
-    Project(name: 'Project A', numOfPeople: 5, color: Colors.blue),
-    Project(name: 'Project B', numOfPeople: 3, color: Colors.green),
-    Project(name: 'Project C', numOfPeople: 7, color: Colors.yellow),
-    Project(name: 'Project D', numOfPeople: 7, color: Colors.redAccent),
-  ];
-
+  Map<String, dynamic> projectMap = {};
+  List<ProjectModel> projects = [];
+  int count_overduo = 0;
   _getUserDetails() async {
-    DatabaseEvent snapshot = await userRef!.once();
-
+    DatabaseEvent event1 = await userRef!.once();
+    DatabaseEvent event2 = await projectRef!.once();
     currentUserModel = UserModel.fromMap(
-        Map<String, dynamic>.from(snapshot.snapshot.value as dynamic));
-
+        Map<String, dynamic>.from(event1.snapshot.value as dynamic));
+    projectRef?.onValue.listen((event) {
+      event = event2;
+      setState(() {
+        projectMap = Map.from(event.snapshot.value as dynamic);
+        for (var project in projectMap.values) {
+          ProjectModel projectModel =
+              ProjectModel.fromMap(Map<String, dynamic>.from(project));
+          if (projectModel.leaderId == user?.uid) {
+            projects.add(projectModel);
+          }
+          if (projectModel.startDate != "" && projectModel.endDate != "") {
+            DateFormat format = DateFormat('yyyy-MM-dd');
+            DateTime getEndDate = format.parse(projectModel.endDate);
+            if (DateTime.now().isAfter(getEndDate)) {
+              count_overduo++;
+            }
+          }
+        }
+      });
+    });
     setState(() {});
   }
 
   @override
-  void initState() {
+  initState() {
     super.initState();
     user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       userRef = FirebaseDatabase.instance.ref().child('users').child(user!.uid);
       projectRef = FirebaseDatabase.instance.ref().child('projects');
     }
+
     _getUserDetails();
   }
 
@@ -48,14 +67,14 @@ class _Dashboard_main_v1State extends State<Dashboard_main_v1> {
   Widget build(BuildContext context) {
     return SafeArea(
         child: SingleChildScrollView(
-      padding: EdgeInsets.all(defaultPadding),
+      padding: const EdgeInsets.all(defaultPadding),
       child: Column(
         children: [
           Row(
             children: [
               Text(
                 'WELCOME BACK, ${currentUserModel?.userFirstName.toUpperCase()}',
-                style: TextStyle(
+                style: const TextStyle(
                   fontFamily: 'MontMed',
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
@@ -63,14 +82,14 @@ class _Dashboard_main_v1State extends State<Dashboard_main_v1> {
               ),
             ],
           ),
-          Divider(),
-          SizedBox(height: 10),
+          const Divider(),
+          const SizedBox(height: 10),
           Align(
             child: Container(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Expanded(
+                  const Expanded(
                     child: TextField(
                       style: TextStyle(
                         color: Colors.black,
@@ -97,44 +116,53 @@ class _Dashboard_main_v1State extends State<Dashboard_main_v1> {
                       ),
                     ),
                   ),
-                  SizedBox(width: 10),
+                  const SizedBox(width: 10),
                   Container(
                     height: 50,
                     child: ElevatedButton(
-                        onPressed: () {}, child: Icon(Icons.search_rounded)),
+                        onPressed: () {},
+                        child: const Icon(Icons.search_rounded)),
                   ),
                 ],
               ),
             ),
           ),
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Expanded(
                 child: Container(
-                    color: Color(0xFFD9D9D9),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: Colors.grey,
+                        width: 1.0,
+                      ),
+                      borderRadius:
+                          BorderRadius.circular(5.0), // Set the border radius
+                    ),
                     child: Padding(
-                      padding: EdgeInsets.all(15),
+                      padding: const EdgeInsets.all(15),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          SizedBox(height: 5),
+                          const SizedBox(height: 5),
                           Row(
                             children: <Widget>[
-                              Container(
-                                child: Icon(
+                              IconButton(
+                                onPressed: () {},
+                                icon: const Icon(
                                   Icons.layers,
                                   color: Colors.blueAccent,
                                 ),
                               ),
                             ],
                           ),
-                          SizedBox(height: 5),
+                          const SizedBox(height: 5),
                           Row(
                             children: <Widget>[
                               Container(
-                                child: Text(
+                                child: const Text(
                                   'TASKS',
                                   style: TextStyle(
                                       fontFamily: 'MontMed',
@@ -143,53 +171,59 @@ class _Dashboard_main_v1State extends State<Dashboard_main_v1> {
                               ),
                             ],
                           ),
-                          Divider(),
-                          Row(
+                          const Divider(),
+                          const Row(
                             children: <Widget>[
-                              TextButton(
-                                onPressed: () {},
-                                child: Text(
-                                  '14 In Progress',
-                                  style: TextStyle(
-                                    fontFamily: 'MontMed',
-                                    fontWeight: FontWeight.normal,
-                                    color: Colors.black,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ),
+                              Text(
+                                '4 Task in Progress',
+                                style: TextStyle(
+                                    fontSize: 12, fontFamily: 'MontMed'),
+                              )
                             ],
                           ),
                         ],
                       ),
                     )),
               ),
-              SizedBox(width: 10),
+              const SizedBox(width: 10),
               Expanded(
                 child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: Colors.grey,
+                      width: 1.0,
+                    ),
+                    borderRadius:
+                        BorderRadius.circular(5.0), // Set the border radius
+                  ),
                   //height: 125,
-                  color: Color(0xFFD9D9D9),
                   child: Padding(
-                    padding: EdgeInsets.all(15),
+                    padding: const EdgeInsets.all(15),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        SizedBox(height: 5),
+                        const SizedBox(height: 5),
                         Row(
                           children: <Widget>[
-                            Container(
-                              child: Icon(
+                            IconButton(
+                              onPressed: () {
+                                Navigator.of(context)
+                                    .push(MaterialPageRoute(builder: (context) {
+                                  return const listOfProjects();
+                                }));
+                              },
+                              icon: const Icon(
                                 Icons.folder,
                                 color: Colors.deepOrangeAccent,
                               ),
                             ),
                           ],
                         ),
-                        SizedBox(height: 5),
+                        const SizedBox(height: 5),
                         Row(
                           children: <Widget>[
                             Container(
-                              child: Text(
+                              child: const Text(
                                 'PROJECTS',
                                 style: TextStyle(
                                     fontFamily: 'MontMed',
@@ -198,21 +232,14 @@ class _Dashboard_main_v1State extends State<Dashboard_main_v1> {
                             ),
                           ],
                         ),
-                        Divider(),
+                        const Divider(),
                         Row(
                           children: <Widget>[
-                            TextButton(
-                              onPressed: () {},
-                              child: Text(
-                                '2 Ongoing',
-                                style: TextStyle(
-                                  fontFamily: 'MontMed',
-                                  fontWeight: FontWeight.normal,
-                                  color: Colors.black,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ),
+                            Text(
+                              '${projects.length.toString()} on going',
+                              style: const TextStyle(
+                                  fontSize: 12, fontFamily: 'MontMed'),
+                            )
                           ],
                         ),
                       ],
@@ -222,29 +249,36 @@ class _Dashboard_main_v1State extends State<Dashboard_main_v1> {
               ),
             ],
           ),
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Expanded(
                 child: Container(
-                    color: Color(0xFFD9D9D9),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: Colors.grey,
+                        width: 1.0,
+                      ),
+                      borderRadius:
+                          BorderRadius.circular(5.0), // Set the border radius
+                    ),
                     child: Padding(
-                      padding: EdgeInsets.all(15),
+                      padding: const EdgeInsets.all(15),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          SizedBox(height: 5),
+                          const SizedBox(height: 5),
                           Row(
                             children: <Widget>[
                               Container(
-                                child: Icon(
-                                  Icons.gpp_maybe,
+                                child: const Icon(
+                                  Icons.mood_bad,
                                   color: Colors.red,
                                 ),
                               ),
-                              SizedBox(width: 10),
-                              Text(
+                              const SizedBox(width: 10),
+                              const Text(
                                 'CAUTION',
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
@@ -253,15 +287,15 @@ class _Dashboard_main_v1State extends State<Dashboard_main_v1> {
                               ),
                             ],
                           ),
-                          SizedBox(height: 5),
-                          Divider(),
+                          const SizedBox(height: 5),
+                          const Divider(),
                           Row(
                             children: <Widget>[
                               TextButton(
                                 onPressed: () {
                                   // Add the action you want to perform when the TextButton is pressed
                                 },
-                                child: Text(
+                                child: const Text(
                                   '12 Tasks Overdue',
                                   style: TextStyle(
                                     fontFamily: 'MontMed',
@@ -273,7 +307,7 @@ class _Dashboard_main_v1State extends State<Dashboard_main_v1> {
                               ),
                             ],
                           ),
-                          Divider(),
+                          const Divider(),
                           Row(
                             children: <Widget>[
                               TextButton(
@@ -281,7 +315,90 @@ class _Dashboard_main_v1State extends State<Dashboard_main_v1> {
                                   // Add the action you want to perform when the TextButton is pressed
                                 },
                                 child: Text(
-                                  '2 Projects Overdue',
+                                  '$count_overduo Project(s) Overdue',
+                                  style: const TextStyle(
+                                    fontFamily: 'MontMed',
+                                    fontWeight: FontWeight.normal,
+                                    color: Colors.black,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    )),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Expanded(
+                child: Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: Colors.grey,
+                        width: 1.0,
+                      ),
+                      borderRadius:
+                          BorderRadius.circular(5.0), // Set the border radius
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(15),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          const SizedBox(height: 5),
+                          Row(
+                            children: <Widget>[
+                              Container(
+                                child: const Icon(
+                                  Icons.mood,
+                                  color: Colors.green,
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              const Text(
+                                'FINALIZED',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'MontMed',
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 5),
+                          const Divider(),
+                          Row(
+                            children: <Widget>[
+                              TextButton(
+                                onPressed: () {
+                                  // Add the action you want to perform when the TextButton is pressed
+                                },
+                                child: const Text(
+                                  '12 Tasks Finalized',
+                                  style: TextStyle(
+                                    fontFamily: 'MontMed',
+                                    fontWeight: FontWeight.normal,
+                                    color: Colors.black,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const Divider(),
+                          Row(
+                            children: <Widget>[
+                              TextButton(
+                                onPressed: () {
+                                  // Add the action you want to perform when the TextButton is pressed
+                                },
+                                child: const Text(
+                                  '2 Projects Finalized',
                                   style: TextStyle(
                                     fontFamily: 'MontMed',
                                     fontWeight: FontWeight.normal,
@@ -298,33 +415,40 @@ class _Dashboard_main_v1State extends State<Dashboard_main_v1> {
               ),
             ],
           ),
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Expanded(
                 child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: Colors.grey,
+                      width: 1.0,
+                    ),
+                    borderRadius:
+                        BorderRadius.circular(5.0), // Set the border radius
+                  ),
                   height: 200,
-                  color: Color(0xFFD9D9D9),
-                  child: Dashboard_chart(),
+                  child: const Dashboard_chart(),
                 ),
               ),
+              const SizedBox(width: 12),
               Container(
                 width: 150,
                 height: 200,
-                color: Color(0xFFD9D9D9),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(height: 45),
-                    Text(
+                    const SizedBox(height: 45),
+                    const Text(
                       'THIS WEEK TASKS',
                       style: TextStyle(
                         fontFamily: 'MontMed',
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(height: 15),
+                    const SizedBox(height: 15),
                     Row(
                       children: [
                         Container(
@@ -332,14 +456,14 @@ class _Dashboard_main_v1State extends State<Dashboard_main_v1> {
                           height: 14,
                           color: Colors.redAccent,
                         ),
-                        SizedBox(width: 10),
-                        Text(
+                        const SizedBox(width: 10),
+                        const Text(
                           'Overdue',
                           style: TextStyle(fontFamily: 'MontMed', fontSize: 12),
                         ),
                       ],
                     ),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     Row(
                       children: [
                         Container(
@@ -347,14 +471,14 @@ class _Dashboard_main_v1State extends State<Dashboard_main_v1> {
                           height: 14,
                           color: Colors.blueAccent,
                         ),
-                        SizedBox(width: 10),
-                        Text(
+                        const SizedBox(width: 10),
+                        const Text(
                           'In Progress',
                           style: TextStyle(fontFamily: 'MontMed', fontSize: 12),
                         ),
                       ],
                     ),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     Row(
                       children: [
                         Container(
@@ -362,8 +486,8 @@ class _Dashboard_main_v1State extends State<Dashboard_main_v1> {
                           height: 14,
                           color: Colors.green,
                         ),
-                        SizedBox(width: 10),
-                        Text(
+                        const SizedBox(width: 10),
+                        const Text(
                           'Done',
                           style: TextStyle(fontFamily: 'MontMed', fontSize: 12),
                         ),
@@ -374,85 +498,76 @@ class _Dashboard_main_v1State extends State<Dashboard_main_v1> {
               ),
             ],
           ),
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
           Container(
-            height: 340,
-            decoration: BoxDecoration(
-              color: Color(0xFFD9D9D9),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: EdgeInsets.fromLTRB(20, 20, 8, 0),
-                  child: Row(
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: Colors.grey,
+                  width: 1.0,
+                ),
+                borderRadius:
+                    BorderRadius.circular(5.0), // Set the border radius
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 15),
+                  const Row(
                     children: [
-                      Icon(
-                        Icons.folder,
-                        size: 20,
-                      ),
-                      SizedBox(
-                          width:
-                              8), // Add a small space between the icon and text
-                      Text(
-                        'PROJECTS',
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontFamily: 'MontMed',
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                      SizedBox(width: 20),
+                      Text('RECENT PROJECTS',
+                          style: TextStyle(
+                              fontFamily: 'MontMed',
+                              fontWeight: FontWeight.bold))
                     ],
                   ),
-                ),
-                Divider(),
-                SizedBox(height: 10),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: projects.length,
-                    itemBuilder: (context, index) {
-                      final project = projects[index];
-                      return ListTile(
-                        leading: Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: project.color,
-                          ),
-                          child: Icon(
-                            Icons.list,
-                            color: Colors.white,
-                          ),
-                        ),
-                        title: Text(
-                          project.name,
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontFamily: 'MontMed',
-                            color: Colors.black,
-                          ),
-                        ),
-                        subtitle: Text(
-                          '${project.numOfPeople} Members',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontFamily: 'Consolas',
-                            color: Colors.black54,
-                          ),
-                        ),
-                        onTap: () {
-                          // Handle project item tap
-                        },
-                      );
-                    },
+                  const SizedBox(height: 5),
+                  const Padding(
+                    padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                    child: Divider(),
                   ),
-                ),
-              ],
+                  Column(
+                    children: projects.map((project) {
+                      return ListTile(
+                        leading: const CircleAvatar(
+                          backgroundColor: Colors.black12,
+                          child: Icon(
+                            Icons.folder,
+                            color: Colors.orange,
+                          ),
+                        ),
+                        title: Text(project.projectName,
+                            style: const TextStyle(
+                                fontFamily: 'MontMed', fontSize: 13)),
+                        subtitle: Text(
+                          '${project.projectMembers.length.toString()} participant(s)',
+                          style: const TextStyle(
+                              fontFamily: 'MontMed', fontSize: 12),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 15),
+                ],
+              ),
             ),
           ),
         ],
       ),
     ));
+  }
+
+  DateTime? stringToDateTime(
+    String dateString,
+  ) {
+    try {
+      String format = "yyyy-MM-dd";
+      return DateFormat(format).parse(dateString);
+    } catch (e) {
+      print("Error parsing date: $e");
+      return null; // or throw an exception, depending on your needs
+    }
   }
 }
 
@@ -491,16 +606,4 @@ class _Dashboard_chartState extends State<Dashboard_chart> {
       ),
     );
   }
-}
-
-class Project {
-  final String name;
-  final int numOfPeople;
-  final Color color;
-
-  Project({
-    required this.name,
-    required this.numOfPeople,
-    required this.color,
-  });
 }

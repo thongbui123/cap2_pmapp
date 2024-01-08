@@ -8,21 +8,21 @@ class ProjectModel {
   String projectName;
   String projecctDescription;
   String startDate;
-  String startEnd;
-  String status;
+  String endDate;
+  String projectStatus;
   String managerId;
+  String leaderId;
   List<String> projectMembers;
-  List<String> memberId;
   ProjectModel({
     required this.projectId,
     required this.projectName,
     required this.projecctDescription,
     required this.startDate,
-    required this.startEnd,
-    required this.status,
+    required this.endDate,
+    required this.projectStatus,
     required this.managerId,
+    required this.leaderId,
     required this.projectMembers,
-    required this.memberId,
   });
 
   ProjectModel copyWith({
@@ -30,22 +30,22 @@ class ProjectModel {
     String? projectName,
     String? projecctDescription,
     String? startDate,
-    String? startEnd,
-    String? status,
+    String? endDate,
+    String? projectStatus,
     String? managerId,
+    String? leaderId,
     List<String>? projectMembers,
-    List<String>? memberId,
   }) {
     return ProjectModel(
       projectId: projectId ?? this.projectId,
       projectName: projectName ?? this.projectName,
       projecctDescription: projecctDescription ?? this.projecctDescription,
       startDate: startDate ?? this.startDate,
-      startEnd: startEnd ?? this.startEnd,
-      status: status ?? this.status,
+      endDate: endDate ?? this.endDate,
+      projectStatus: projectStatus ?? this.projectStatus,
       managerId: managerId ?? this.managerId,
+      leaderId: leaderId ?? this.leaderId,
       projectMembers: projectMembers ?? this.projectMembers,
-      memberId: memberId ?? this.memberId,
     );
   }
 
@@ -55,27 +55,27 @@ class ProjectModel {
       'projectName': projectName,
       'projecctDescription': projecctDescription,
       'startDate': startDate,
-      'startEnd': startEnd,
-      'status': status,
+      'endDate': endDate,
+      'projectStatus': projectStatus,
       'managerId': managerId,
+      'leaderId': leaderId,
       'projectMembers': projectMembers,
-      'memberId': memberId,
     };
   }
 
   factory ProjectModel.fromMap(Map<String, dynamic> map) {
     return ProjectModel(
-      projectId: map['projectId'] as String,
-      projectName: map['projectName'] as String,
-      projecctDescription: map['projecctDescription'] as String,
-      startDate: map['startDate'] as String,
-      startEnd: map['startEnd'] as String,
-      status: map['status'] as String,
-      managerId: map['managerId'] as String,
-      projectMembers:
-          List<String>.from((map['projectMembers'] as List<String>)),
-      memberId: List<String>.from((map['memberId'] as List<String>)),
-    );
+        projectId: map['projectId'] as String,
+        projectName: map['projectName'] as String,
+        projecctDescription: map['projecctDescription'] as String,
+        startDate: map['startDate'] as String,
+        endDate: map['endDate'] as String,
+        projectStatus: map['projectStatus'] as String,
+        managerId: map['managerId'] as String,
+        leaderId: map['leaderId'] as String,
+        projectMembers: List<String>.from(
+          (map['projectMembers']),
+        ));
   }
 
   String toJson() => json.encode(toMap());
@@ -85,7 +85,7 @@ class ProjectModel {
 
   @override
   String toString() {
-    return 'ProjectModel(projectId: $projectId, projectName: $projectName, projecctDescription: $projecctDescription, startDate: $startDate, startEnd: $startEnd, status: $status, managerId: $managerId, projectMembers: $projectMembers, memberId: $memberId)';
+    return 'ProjectModel(projectId: $projectId, projectName: $projectName, projecctDescription: $projecctDescription, startDate: $startDate, endDate: $endDate, projectStatus: $projectStatus, managerId: $managerId, leaderId: $leaderId, projectMembers: $projectMembers)';
   }
 
   @override
@@ -96,11 +96,11 @@ class ProjectModel {
         other.projectName == projectName &&
         other.projecctDescription == projecctDescription &&
         other.startDate == startDate &&
-        other.startEnd == startEnd &&
-        other.status == status &&
+        other.endDate == endDate &&
+        other.projectStatus == projectStatus &&
         other.managerId == managerId &&
-        listEquals(other.projectMembers, projectMembers) &&
-        listEquals(other.memberId, memberId);
+        other.leaderId == leaderId &&
+        listEquals(other.projectMembers, projectMembers);
   }
 
   @override
@@ -109,10 +109,10 @@ class ProjectModel {
         projectName.hashCode ^
         projecctDescription.hashCode ^
         startDate.hashCode ^
-        startEnd.hashCode ^
-        status.hashCode ^
+        endDate.hashCode ^
+        projectStatus.hashCode ^
         managerId.hashCode ^
-        projectMembers.hashCode ^
-        memberId.hashCode;
+        leaderId.hashCode ^
+        projectMembers.hashCode;
   }
 }

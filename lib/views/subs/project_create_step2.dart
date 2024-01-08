@@ -1,3 +1,4 @@
+import 'package:capstone2_project_management_app/views/subs/project_create_step1.dart';
 import 'package:capstone2_project_management_app/views/subs/project_create_step3.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -104,7 +105,7 @@ class _projectCreateStep2State extends State<projectCreateStep2> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => projectCreateStep3()),
+                              builder: (context) => projectCreateStep1()),
                         );
                       },
                       child: Container(
