@@ -10,7 +10,7 @@ class db_side_menu extends StatelessWidget {
   Widget build(BuildContext context) {
     return Drawer(
       backgroundColor: Colors.black87,
-      width: 60,
+      width: 65,
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
