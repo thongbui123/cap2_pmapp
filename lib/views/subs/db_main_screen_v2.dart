@@ -225,7 +225,7 @@ class _Dashboard_main_v2State extends State<Dashboard_main_v2> {
               ]),
           SizedBox(height: 10),
           Container(
-            height: 188 * tasks.length.toDouble(),
+            height: 220 * tasks.length.toDouble(),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -249,21 +249,15 @@ class _Dashboard_main_v2State extends State<Dashboard_main_v2> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Row(
-                              children: [
-                                Icon(Icons.layers),
-                                TextButton(
-                                  onPressed: () {},
-                                  child: Text(
-                                    'Task Name: ${task.name}',
-                                    style: TextStyle(
-                                      fontFamily: 'MontMed',
-                                      color: Colors.black,
-                                      fontSize: 13,
-                                    ),
-                                  ),
+                            ListTile(
+                              leading: CircleAvatar(
+                                child: Icon(
+                                  Icons.layers,
+                                  color: Colors.black,
                                 ),
-                              ],
+                              ),
+                              title: Text('Task name: ', style: TextStyle(fontFamily: 'MontMed', fontSize: 12, color: Colors.black54)),
+                              subtitle: Text(task.name, style: TextStyle(fontFamily: 'MontMed', fontSize: 14)),
                             ),
                             Divider(),
                             Text(
@@ -318,7 +312,7 @@ class _Dashboard_main_v2State extends State<Dashboard_main_v2> {
               ]),
           SizedBox(height: 10),
           Container(
-            height: 188 * tasks.length.toDouble(),
+            height: 215 * tasks.length.toDouble(),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -342,21 +336,15 @@ class _Dashboard_main_v2State extends State<Dashboard_main_v2> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Row(
-                              children: [
-                                Icon(Icons.layers),
-                                TextButton(
-                                  onPressed: () {},
-                                  child: Text(
-                                    'Task Name: ${task.name}',
-                                    style: TextStyle(
-                                      fontFamily: 'MontMed',
-                                      color: Colors.black,
-                                      fontSize: 13,
-                                    ),
-                                  ),
+                            ListTile(
+                              leading: CircleAvatar(
+                                child: Icon(
+                                  Icons.layers,
+                                  color: Colors.black,
                                 ),
-                              ],
+                              ),
+                              title: Text('Task name: ', style: TextStyle(fontFamily: 'MontMed', fontSize: 12, color: Colors.black54)),
+                              subtitle: Text(task.name, style: TextStyle(fontFamily: 'MontMed', fontSize: 14)),
                             ),
                             Divider(),
                             Text(
