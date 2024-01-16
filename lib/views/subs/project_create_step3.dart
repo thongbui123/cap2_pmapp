@@ -1,5 +1,8 @@
 import 'package:capstone2_project_management_app/models/process_model.dart';
+import 'package:capstone2_project_management_app/models/user_model.dart';
+import 'package:capstone2_project_management_app/services/phrase_services.dart';
 import 'package:capstone2_project_management_app/services/project_services.dart';
+import 'package:capstone2_project_management_app/views/subs/project_create_step2.dart';
 import 'package:flutter/material.dart';
 
 class projectCreateStep3 extends StatefulWidget {
@@ -8,13 +11,14 @@ class projectCreateStep3 extends StatefulWidget {
   final TextEditingController startDateController;
   final TextEditingController endDateController;
   final String teamLeaderId;
+  final UserModel currentUserModel;
   const projectCreateStep3(
       {Key? key,
       required this.projectNameController,
       required this.projectDescriptionController,
       required this.startDateController,
       required this.endDateController,
-      required this.teamLeaderId})
+      required this.teamLeaderId, required this.currentUserModel})
       : super(key: key);
 
   @override
@@ -162,7 +166,10 @@ class _projectCreateStep3State extends State<projectCreateStep3> {
                 Container(
                     height: 50,
                     child: TextButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        ProjectServices().addProject(projectNameController.text.trim(), projectDescriptionController.text.trim(), startDateController.text.trim(), endDateController.text.trim(), teamLeaderIdController.text.trim(), [], phrases, currentUserModel);
+
+                      },
                       child: Container(
                         child: const Row(
                           mainAxisAlignment: MainAxisAlignment.end,

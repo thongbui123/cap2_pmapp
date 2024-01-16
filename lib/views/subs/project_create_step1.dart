@@ -418,7 +418,8 @@ class _projectCreateStep1State extends State<projectCreateStep1> {
                                         startDateController:
                                             startDateController,
                                         endDateController: endDateController,
-                                        teamLeaderId: selectedMember)),
+                                        teamLeaderId: selectedMember,
+                                        currentUserModel: currentUserModel!)),
                               );
                             },
                             child: Container(
@@ -530,6 +531,7 @@ class _projectCreateStep1State extends State<projectCreateStep1> {
   void _changeTeamLeader(String member) {
     setState(() {
       selectedMember = member;
+      teamLeaderIdController.text = selectedMember;
     });
   }
 

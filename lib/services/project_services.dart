@@ -32,7 +32,7 @@ class ProjectServices {
 
   Future<void> addProject(
       String projectName,
-      String projecctDescription,
+      String projectDescription,
       String startDate,
       String endDate,
       String teamLeaderId,
@@ -41,7 +41,7 @@ class ProjectServices {
       UserModel? currentUserModel) async {
     List<String> teamMembers = [];
     if (projectName.isEmpty) {
-      Fluttertoast.showToast(msg: 'Please provide team name');
+      Fluttertoast.showToast(msg: 'Please provide project name');
     }
     User? user = FirebaseAuth.instance.currentUser;
     if (user != null) {
@@ -57,7 +57,7 @@ class ProjectServices {
       await projectRef.child(projectId).set({
         'projectId': projectId,
         'projectName': projectName,
-        'projecctDescription': projecctDescription,
+        'projecctDescription': projectDescription,
         'projectManager':
             "${currentUserModel!.userFirstName} ${currentUserModel!.userLastName}",
         'managerId': currentUserModel.userId,
