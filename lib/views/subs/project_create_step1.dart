@@ -1,16 +1,13 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:capstone2_project_management_app/models/project_model.dart';
 import 'package:capstone2_project_management_app/services/image_services.dart';
-import 'package:capstone2_project_management_app/views/subs/project_create_step2.dart';
+import 'package:capstone2_project_management_app/views/stats/stats.dart';
 import 'package:capstone2_project_management_app/views/subs/project_create_step3.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-import 'package:capstone2_project_management_app/views/stats/stats.dart';
-import 'package:get/get.dart';
 
 import '../../models/user_model.dart';
 import '../../services/project_services.dart';
@@ -419,7 +416,7 @@ class _projectCreateStep1State extends State<projectCreateStep1> {
                                             startDateController,
                                         endDateController: endDateController,
                                         teamLeaderId: selectedMember,
-                                        currentUserModel: currentUserModel!)),
+                                        currentUserModel: currentUserModel)),
                               );
                             },
                             child: Container(

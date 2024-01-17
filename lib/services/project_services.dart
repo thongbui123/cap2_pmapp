@@ -1,9 +1,7 @@
 import 'package:capstone2_project_management_app/models/project_model.dart';
-import 'package:flutter/material.dart';
 import 'package:capstone2_project_management_app/models/user_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class ProjectServices {
@@ -59,7 +57,7 @@ class ProjectServices {
         'projectName': projectName,
         'projecctDescription': projectDescription,
         'projectManager':
-            "${currentUserModel!.userFirstName} ${currentUserModel!.userLastName}",
+            "${currentUserModel!.userFirstName} ${currentUserModel.userLastName}",
         'managerId': currentUserModel.userId,
         'leaderId': teamLeaderId,
         'startDate': startDate,
