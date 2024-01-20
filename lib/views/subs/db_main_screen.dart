@@ -1,6 +1,7 @@
 import 'package:capstone2_project_management_app/models/project_model.dart';
 import 'package:capstone2_project_management_app/models/user_model.dart';
 import 'package:capstone2_project_management_app/views/list_of_project_screen.dart';
+import 'package:capstone2_project_management_app/views/list_of_tasks_screen.dart';
 import 'package:capstone2_project_management_app/views/stats/stats.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -48,7 +49,6 @@ class _Dashboard_main_v1State extends State<Dashboard_main_v1> {
         }
       });
     });
-    setState(() {});
   }
 
   @override
@@ -150,7 +150,12 @@ class _Dashboard_main_v1State extends State<Dashboard_main_v1> {
                           Row(
                             children: <Widget>[
                               IconButton(
-                                onPressed: () {},
+                                onPressed: () {
+                                  Navigator.of(context).push(
+                                      MaterialPageRoute(builder: (context) {
+                                    return const listOfTasks();
+                                  }));
+                                },
                                 icon: const Icon(
                                   Icons.layers,
                                   color: Colors.blueAccent,
