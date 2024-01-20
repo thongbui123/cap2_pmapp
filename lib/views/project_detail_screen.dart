@@ -75,6 +75,7 @@ class _projectScreenState extends State<projectScreen> {
                       Text('Description: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.'
                         , style: TextStyle(fontFamily: 'MontMed', color: Colors.black87, fontSize: 12),),
                       SizedBox(height: 10),
+                      Divider(),
                       ListTile(
                         leading: CircleAvatar(
                             child: Text(
@@ -82,8 +83,33 @@ class _projectScreenState extends State<projectScreen> {
                               style: TextStyle(fontFamily: 'MontMed'),
                             )
                         ),
-                        title: Text('Assigned by:', style: TextStyle(fontFamily: 'MontMed', fontSize: 12, color: Colors.black54)),
+                        title: Text('Assigned by: ', style: TextStyle(fontFamily: 'MontMed', fontSize: 12, color: Colors.black54)),
                         subtitle: Text('THONG B', style: TextStyle(fontFamily: 'MontMed', fontSize: 14)),
+                      ),
+                      Divider(),
+                      ListTile(
+                        leading: CircleAvatar(
+                          child: Icon(Icons.calendar_month),
+                        ),
+                        title: Text('Start Date: ', style: TextStyle(fontFamily: 'MontMed', fontSize: 12, color: Colors.black54)),
+                        subtitle: Text('22/10/2023', style: TextStyle(fontFamily: 'MontMed', fontSize: 14)),
+                        trailing: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SizedBox(height: 8),
+                              Text('End Date: ', style: TextStyle(fontFamily: 'MontMed', fontSize: 12, color: Colors.black54)),
+                              Text('22/10/2077', style: TextStyle(fontFamily: 'MontMed', fontSize: 14))
+                            ]
+                        ),
+                      ),
+                      Divider(),
+                      ListTile(
+                          leading: CircleAvatar(
+                            child: Icon(Icons.account_tree_outlined),
+                          ),
+                          title: Text('Current Phrase: ', style: TextStyle(fontFamily: 'MontMed', fontSize: 12, color: Colors.black54)),
+                          subtitle: Text('Requirement Gathering', style: TextStyle(fontFamily: 'MontMed', fontSize: 14)),
+                          trailing: TextButton(onPressed: (){_showStateDrawer(context);}, child: Text('Alter', style: TextStyle(fontFamily: 'MontMed', fontSize: 14)))
                       ),
                       Divider(),
                       SizedBox(height: 5),
@@ -140,102 +166,6 @@ class _projectScreenState extends State<projectScreen> {
                                   style: TextStyle(fontFamily: 'MontMed', color: Colors.blueAccent),
                                 ),
                               ],
-                            ),
-                          )
-                      ),
-                      SizedBox(height: 10),
-                      Divider(),
-                      SizedBox(height: 5),
-                      Row(
-                        children: [
-                          Icon(Icons.calendar_today, size: 19, color: Colors.black87,),
-                          SizedBox(width: 10),
-                          Container(width: 1, height: 36, color: Colors.grey,),
-                          SizedBox(width: 15),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('Start Date:', style: TextStyle(fontFamily: 'MontMed', fontSize: 12),),
-                              SizedBox(height: 5),
-                              Text('01/01/2024', style: TextStyle(fontFamily: 'MontMed', fontSize: 13, color: Colors.green),)
-                            ],
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 5),
-                      Row(
-                        children: [
-                          Icon(Icons.calendar_today, size: 19, color: Colors.black87,),
-                          SizedBox(width: 10),
-                          Container(width: 1, height: 36, color: Colors.grey,),
-                          SizedBox(width: 15),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('Estimated End Date:', style: TextStyle(fontFamily: 'MontMed', fontSize: 12),),
-                              SizedBox(height: 5),
-                              Text('01/01/2024', style: TextStyle(fontFamily: 'MontMed', fontSize: 13, color: Colors.redAccent),)
-                            ],
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 5),
-                      Row(
-                        children: [
-                          Icon(Icons.account_tree_outlined, color: Colors.black87,),
-                          SizedBox(width: 5),
-                          Container(width: 1, height: 36, color: Colors.grey,),
-                          SizedBox(width: 15),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('Current Phrase:', style: TextStyle(fontFamily: 'MontMed', fontSize: 12),),
-                              SizedBox(height: 5),
-                              Text('Requirements Gathering', style: TextStyle(fontFamily: 'MontMed', fontSize: 13, color: Colors.black),)
-                            ],
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 10),
-                      Divider(),
-                      Container(
-                          height: 50,
-                          width: 200,
-                          child: TextButton(
-                            onPressed: () {},
-                            child: Container(
-                              child: const Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  Icon(Icons.arrow_forward_ios, size: 13),
-                                  SizedBox(width: 10),
-                                  Text(
-                                    'Conclude Phrase',
-                                    style: TextStyle(fontFamily: 'MontMed', fontSize: 13),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          )
-                      ),
-                      Divider(),
-                      Container(
-                          height: 50,
-                          width: 200,
-                          child: TextButton(
-                            onPressed: () {},
-                            child: Container(
-                              child: const Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  Icon(Icons.arrow_back_ios, size: 13),
-                                  SizedBox(width: 10),
-                                  Text(
-                                    'Reverse Phrase',
-                                    style: TextStyle(fontFamily: 'MontMed', fontSize: 13),
-                                  ),
-                                ],
-                              ),
                             ),
                           )
                       ),
@@ -303,6 +233,46 @@ class _projectScreenState extends State<projectScreen> {
     );
   }
 
+  void _showStateDrawer(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          // Your bottom drawer content goes here
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              SizedBox(height: 20),
+              Row(
+                children: [
+                  SizedBox(width: 25),
+                  Text('State:', style: TextStyle(fontFamily: 'MontMed', fontSize: 16)),
+                ],
+              ),
+              SizedBox(height: 5),
+              Divider(),
+              ListTile(
+                leading: Icon(Icons.arrow_back),
+                title: Text('Reverse Phrase', style: TextStyle(fontFamily: 'MontMed', fontSize: 14)),
+                onTap: () {
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.arrow_forward),
+                title: Text('Conclude Phrase', style: TextStyle(fontFamily: 'MontMed', fontSize: 14)),
+                onTap: () {
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   void _removeMember(String member) {
     setState(() {
       currentList.remove(member);
@@ -315,3 +285,5 @@ class _projectScreenState extends State<projectScreen> {
     });
   }
 }
+
+
