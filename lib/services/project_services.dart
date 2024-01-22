@@ -37,7 +37,6 @@ class ProjectServices {
       List<String> memberList,
       List<String> phrases,
       UserModel? currentUserModel) async {
-    List<String> teamMembers = [];
     if (projectName.isEmpty) {
       Fluttertoast.showToast(msg: 'Please provide project name');
     }

@@ -1,23 +1,21 @@
-import 'dart:ui';
-
 import 'package:capstone2_project_management_app/models/user_model.dart';
+import 'package:capstone2_project_management_app/views/stats/stats.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:capstone2_project_management_app/views/stats/stats.dart';
 import 'package:intl/intl.dart';
 
-class Dashboard_main_v2 extends StatefulWidget {
-  const Dashboard_main_v2({Key? key}) : super(key: key);
+class DashboardMainV2 extends StatefulWidget {
+  const DashboardMainV2({Key? key}) : super(key: key);
 
   @override
-  State<Dashboard_main_v2> createState() => _Dashboard_main_v2State();
+  State<DashboardMainV2> createState() => _DashboardMainV2State();
 }
 
-class _Dashboard_main_v2State extends State<Dashboard_main_v2> {
+class _DashboardMainV2State extends State<DashboardMainV2> {
   User? user;
-  UserModel? currentUserModel;
+  UserModel? userModel;
   DatabaseReference? userRef;
 
   List<Project> projects = [
@@ -44,397 +42,465 @@ class _Dashboard_main_v2State extends State<Dashboard_main_v2> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      userRef = FirebaseDatabase.instance.ref().child('users').child(user!.uid);
+    }
+    _getUserDetail();
+  }
+
+  _getUserDetail() async {
+    DatabaseEvent snapshot = await userRef!.once();
+    userModel = UserModel.fromMap(
+        Map<String, dynamic>.from(snapshot.snapshot.value as dynamic));
+    setState(() {});
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return SafeArea(
-        child: SingleChildScrollView(
-      padding: EdgeInsets.all(defaultPadding),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Text(
-                'WELCOME BACK, ${currentUserModel?.userFirstName.toUpperCase()}',
-                style: TextStyle(
-                  fontFamily: 'MontMed',
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
-              ),
-            ],
-          ),
-          Divider(),
-          SizedBox(height: 10),
-          Align(
-            child: Container(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Expanded(
-                    child: TextField(
+    return userModel == null
+        ? const Center(child: CircularProgressIndicator())
+        : SafeArea(
+            child: SingleChildScrollView(
+            padding: EdgeInsets.all(defaultPadding),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      'WELCOME BACK, ${userModel?.userFirstName.toUpperCase()}',
                       style: TextStyle(
-                        color: Colors.black,
                         fontFamily: 'MontMed',
-                        fontWeight: FontWeight.normal,
+                        fontWeight: FontWeight.bold,
                         fontSize: 16,
                       ),
-                      decoration: InputDecoration(
-                        enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Color(0xFFD9D9D9)),
-                        ),
-                        focusedBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.black54),
-                        ),
-                        labelText: 'Search here...',
-                        labelStyle: TextStyle(
-                          color: Colors.black,
-                          fontFamily: 'MontMed',
-                          fontWeight: FontWeight.normal,
-                          fontSize: 14,
-                        ),
-                        filled: true,
-                        fillColor: Color(0xFFD9D9D9),
-                      ),
                     ),
-                  ),
-                  SizedBox(width: 10),
-                  Container(
-                    height: 50,
-                    child: ElevatedButton(
-                        onPressed: () {}, child: Icon(Icons.search_rounded)),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Expanded(
-                child: Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: Colors.grey,
-                        width: 1.0,
-                      ),
-                      borderRadius: BorderRadius.circular(5.0),  // Set the border radius
-                    ),
-                    child: Padding(
-                      padding: EdgeInsets.all(15),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          SizedBox(height: 5),
-                          Row(
-                            children: <Widget>[
-                              IconButton(
-                                onPressed: (){},
-                                icon: Icon(
-                                  Icons.layers,
-                                  color: Colors.blueAccent,
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 5),
-                          Row(
-                            children: <Widget>[
-                              Container(
-                                child: Text(
-                                  'TASKS',
-                                  style: TextStyle(
-                                      fontFamily: 'MontMed',
-                                      fontWeight: FontWeight.w900),
-                                ),
-                              ),
-                            ],
-                          ),
-                          Divider(),
-                          Row(
-                            children: <Widget>[
-                              Text('4 Task in Progress', style: TextStyle(fontSize: 12, fontFamily: 'MontMed'),)
-                            ],
-                          ),
-                        ],
-                      ),
-                    )
+                  ],
                 ),
-              ),
-              SizedBox(width: 10),
-              Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: Colors.grey,
-                      width: 1.0,
-                    ),
-                    borderRadius: BorderRadius.circular(5.0),  // Set the border radius
-                  ),
-                  //height: 125,
-                  child: Padding(
-                    padding: EdgeInsets.all(15),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        SizedBox(height: 5),
-                        Row(
-                          children: <Widget>[
-                            IconButton(
-                              onPressed: (){},
-                              icon: Icon(
-                                Icons.folder,
-                                color: Colors.deepOrangeAccent,
-                              ),
+                Divider(),
+                SizedBox(height: 10),
+                Align(
+                  child: Container(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontFamily: 'MontMed',
+                              fontWeight: FontWeight.normal,
+                              fontSize: 16,
                             ),
-                          ],
-                        ),
-                        SizedBox(height: 5),
-                        Row(
-                          children: <Widget>[
-                            Container(
-                              child: Text(
-                                'PROJECTS',
-                                style: TextStyle(
-                                    fontFamily: 'MontMed',
-                                    fontWeight: FontWeight.w900),
+                            decoration: InputDecoration(
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: Color(0xFFD9D9D9)),
                               ),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(color: Colors.black54),
+                              ),
+                              labelText: 'Search here...',
+                              labelStyle: TextStyle(
+                                color: Colors.black,
+                                fontFamily: 'MontMed',
+                                fontWeight: FontWeight.normal,
+                                fontSize: 14,
+                              ),
+                              filled: true,
+                              fillColor: Color(0xFFD9D9D9),
                             ),
-                          ],
+                          ),
                         ),
-                        Divider(),
-                        Row(
-                          children: <Widget>[
-                            Text('2 Projects Joined', style: TextStyle(fontSize: 12, fontFamily: 'MontMed'),)
-                          ],
+                        SizedBox(width: 10),
+                        Container(
+                          height: 50,
+                          child: ElevatedButton(
+                              onPressed: () {},
+                              child: Icon(Icons.search_rounded)),
                         ),
                       ],
                     ),
                   ),
                 ),
-              ),
-            ],
-          ),
-          SizedBox(height: 5),
-          Divider(),
-          SizedBox(height: 5),
-          Row(
-              children: [
-                Icon(Icons.sentiment_dissatisfied, color: Colors.redAccent,),
-                SizedBox(width: 10),
-                Text('OVERDUE TASKS (2)', style: TextStyle(fontFamily: 'MontMed'),)
-              ]),
-          SizedBox(height: 10),
-          Container(
-            height: 220 * tasks.length.toDouble(),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: ListView.separated(
-                    shrinkWrap: true,
-                    itemCount: tasks.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      final task = tasks[index];
-                      String message = DateFormat('yyyy-MM-dd').format(task.date);
-                      message += ' ('+calculateDeadlineStatus(task.date, DateTime.now())+')';
-                      return Container(
-                        padding: EdgeInsets.all(20),
+                SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Expanded(
+                      child: Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: Colors.grey,
+                              width: 1.0,
+                            ),
+                            borderRadius: BorderRadius.circular(
+                                5.0), // Set the border radius
+                          ),
+                          child: Padding(
+                            padding: EdgeInsets.all(15),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                SizedBox(height: 5),
+                                Row(
+                                  children: <Widget>[
+                                    IconButton(
+                                      onPressed: () {},
+                                      icon: Icon(
+                                        Icons.layers,
+                                        color: Colors.blueAccent,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 5),
+                                Row(
+                                  children: <Widget>[
+                                    Container(
+                                      child: Text(
+                                        'TASKS',
+                                        style: TextStyle(
+                                            fontFamily: 'MontMed',
+                                            fontWeight: FontWeight.w900),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Divider(),
+                                Row(
+                                  children: <Widget>[
+                                    Text(
+                                      '4 Task in Progress',
+                                      style: TextStyle(
+                                          fontSize: 12, fontFamily: 'MontMed'),
+                                    )
+                                  ],
+                                ),
+                              ],
+                            ),
+                          )),
+                    ),
+                    SizedBox(width: 10),
+                    Expanded(
+                      child: Container(
                         decoration: BoxDecoration(
                           border: Border.all(
                             color: Colors.grey,
                             width: 1.0,
                           ),
-                          borderRadius: BorderRadius.circular(5.0),  // Set the border radius
+                          borderRadius: BorderRadius.circular(
+                              5.0), // Set the border radius
                         ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            ListTile(
-                              leading: CircleAvatar(
-                                child: Icon(
-                                  Icons.layers,
-                                  color: Colors.black,
-                                ),
+                        //height: 125,
+                        child: Padding(
+                          padding: EdgeInsets.all(15),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              SizedBox(height: 5),
+                              Row(
+                                children: <Widget>[
+                                  IconButton(
+                                    onPressed: () {},
+                                    icon: Icon(
+                                      Icons.folder,
+                                      color: Colors.deepOrangeAccent,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              title: Text('Task name: ', style: TextStyle(fontFamily: 'MontMed', fontSize: 12, color: Colors.black54)),
-                              subtitle: Text(task.name, style: TextStyle(fontFamily: 'MontMed', fontSize: 14)),
-                            ),
-                            Divider(),
-                            Text(
-                              task.description.length > 50
-                                  ? '${task.description.substring(0, 50)}...'
-                                  : task.description,
-                              style: TextStyle(
-                                  fontFamily: 'MontMed', fontSize: 12),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 2,
-                            ),
-                            SizedBox(height: 10),
-                            Row(
-                              children: [
-                                Container(
-                                    width: 15, height: 15, color: task.level),
-                                SizedBox(width: 10),
-                                Text(
-                                    '${task.priority} PRIORITY',
+                              SizedBox(height: 5),
+                              Row(
+                                children: <Widget>[
+                                  Container(
+                                    child: Text(
+                                      'PROJECTS',
+                                      style: TextStyle(
+                                          fontFamily: 'MontMed',
+                                          fontWeight: FontWeight.w900),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Divider(),
+                              Row(
+                                children: <Widget>[
+                                  Text(
+                                    '2 Projects Joined',
                                     style: TextStyle(
-                                      fontFamily: 'MontMed',
-                                      color: task.level,
-                                    )
-                                )
-                              ],
-                            ),
-                            SizedBox(height: 10),
-                            Text(
-                              'Deadline: ${message}',
-                              style: TextStyle(
-                                  fontFamily: 'MontMed',
-                                  fontSize: 12
+                                        fontSize: 12, fontFamily: 'MontMed'),
+                                  )
+                                ],
                               ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                    separatorBuilder: (BuildContext context, int index) =>
-                    const SizedBox(height: 10),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(height: 10),
-          Row(
-              children: [
-                Icon(Icons.sentiment_neutral, color: Colors.orange,),
-                SizedBox(width: 10),
-                Text('RECENT TASKS (2)', style: TextStyle(fontFamily: 'MontMed'))
-              ]),
-          SizedBox(height: 10),
-          Container(
-            height: 215 * tasks.length.toDouble(),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: ListView.separated(
-                    shrinkWrap: true,
-                    itemCount: tasks.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      final task = tasks[index];
-                      String message = DateFormat('yyyy-MM-dd').format(task.date);
-                      message += ' ('+calculateDeadlineStatus(task.date, DateTime.now())+')';
-                      return Container(
-                        padding: EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: Colors.grey,
-                            width: 1.0,
+                            ],
                           ),
-                          borderRadius: BorderRadius.circular(5.0),  // Set the border radius
                         ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            ListTile(
-                              leading: CircleAvatar(
-                                child: Icon(
-                                  Icons.layers,
-                                  color: Colors.black,
-                                ),
-                              ),
-                              title: Text('Task name: ', style: TextStyle(fontFamily: 'MontMed', fontSize: 12, color: Colors.black54)),
-                              subtitle: Text(task.name, style: TextStyle(fontFamily: 'MontMed', fontSize: 14)),
-                            ),
-                            Divider(),
-                            Text(
-                              task.description.length > 50
-                                  ? '${task.description.substring(0, 50)}...'
-                                  : task.description,
-                              style: TextStyle(
-                                  fontFamily: 'MontMed', fontSize: 12),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 2,
-                            ),
-                            SizedBox(height: 10),
-                            Row(
-                              children: [
-                                Container(
-                                    width: 15, height: 15, color: task.level),
-                                SizedBox(width: 10),
-                                Text(
-                                    '${task.priority} PRIORITY',
-                                    style: TextStyle(
-                                      fontFamily: 'MontMed',
-                                      color: task.level,
-                                    )
-                                )
-                              ],
-                            ),
-                            SizedBox(height: 10),
-                            Text(
-                              'Deadline: ${message}',
-                              style: TextStyle(
-                                  fontFamily: 'MontMed',
-                                  fontSize: 12
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                    separatorBuilder: (BuildContext context, int index) =>
-                    const SizedBox(height: 10),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 5),
+                Divider(),
+                SizedBox(height: 5),
+                Row(children: [
+                  Icon(
+                    Icons.sentiment_dissatisfied,
+                    color: Colors.redAccent,
                   ),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(height: 5),
-          Container(
-            child: Container(
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: Colors.grey,
-                  width: 1.0,
-                ),
-                borderRadius: BorderRadius.circular(5.0),  // Set the border radius
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(height: 15),
-                  Row(
+                  SizedBox(width: 10),
+                  Text(
+                    'OVERDUE TASKS (2)',
+                    style: TextStyle(fontFamily: 'MontMed'),
+                  )
+                ]),
+                SizedBox(height: 10),
+                Container(
+                  height: 220 * tasks.length.toDouble(),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      SizedBox(width: 20),
-                      Text('RECENT PROJECTS', style: TextStyle(fontFamily: 'MontMed', fontWeight: FontWeight.bold))
+                      Expanded(
+                        child: ListView.separated(
+                          shrinkWrap: true,
+                          itemCount: tasks.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            final task = tasks[index];
+                            String message =
+                                DateFormat('yyyy-MM-dd').format(task.date);
+                            message += ' (' +
+                                calculateDeadlineStatus(
+                                    task.date, DateTime.now()) +
+                                ')';
+                            return Container(
+                              padding: EdgeInsets.all(20),
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: Colors.grey,
+                                  width: 1.0,
+                                ),
+                                borderRadius: BorderRadius.circular(
+                                    5.0), // Set the border radius
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  ListTile(
+                                    leading: CircleAvatar(
+                                      child: Icon(
+                                        Icons.layers,
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                    title: Text('Task name: ',
+                                        style: TextStyle(
+                                            fontFamily: 'MontMed',
+                                            fontSize: 12,
+                                            color: Colors.black54)),
+                                    subtitle: Text(task.name,
+                                        style: TextStyle(
+                                            fontFamily: 'MontMed',
+                                            fontSize: 14)),
+                                  ),
+                                  Divider(),
+                                  Text(
+                                    task.description.length > 50
+                                        ? '${task.description.substring(0, 50)}...'
+                                        : task.description,
+                                    style: TextStyle(
+                                        fontFamily: 'MontMed', fontSize: 12),
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 2,
+                                  ),
+                                  SizedBox(height: 10),
+                                  Row(
+                                    children: [
+                                      Container(
+                                          width: 15,
+                                          height: 15,
+                                          color: task.level),
+                                      SizedBox(width: 10),
+                                      Text('${task.priority} PRIORITY',
+                                          style: TextStyle(
+                                            fontFamily: 'MontMed',
+                                            color: task.level,
+                                          ))
+                                    ],
+                                  ),
+                                  SizedBox(height: 10),
+                                  Text(
+                                    'Deadline: ${message}',
+                                    style: TextStyle(
+                                        fontFamily: 'MontMed', fontSize: 12),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                          separatorBuilder: (BuildContext context, int index) =>
+                              const SizedBox(height: 10),
+                        ),
+                      ),
                     ],
                   ),
-                  SizedBox(height: 5),
-                  Padding(padding: EdgeInsets.fromLTRB(10, 0, 10, 0), child: Divider(),),
-                  Column(
-                    children: projects.map((project) {
-                      return ListTile(
-                        leading: const CircleAvatar(
-                          backgroundColor: Colors.black12,
-                          child: Icon(Icons.folder, color: Colors.orange),
-                        ),
-                        title: Text(project.name, style: TextStyle(fontFamily: 'MontMed', fontSize: 13)),
-                        subtitle: Text(
-                          '2 Participants',
-                          style: const TextStyle(fontFamily: 'MontMed', fontSize: 12),
-                        ),
-                      );
-                    }).toList(),
+                ),
+                SizedBox(height: 10),
+                Row(children: [
+                  Icon(
+                    Icons.sentiment_neutral,
+                    color: Colors.orange,
                   ),
-                  SizedBox(height: 15),
-                ],
-              ),
+                  SizedBox(width: 10),
+                  Text('RECENT TASKS (2)',
+                      style: TextStyle(fontFamily: 'MontMed'))
+                ]),
+                SizedBox(height: 10),
+                Container(
+                  height: 215 * tasks.length.toDouble(),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: ListView.separated(
+                          shrinkWrap: true,
+                          itemCount: tasks.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            final task = tasks[index];
+                            String message =
+                                DateFormat('yyyy-MM-dd').format(task.date);
+                            message += ' (' +
+                                calculateDeadlineStatus(
+                                    task.date, DateTime.now()) +
+                                ')';
+                            return Container(
+                              padding: EdgeInsets.all(20),
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: Colors.grey,
+                                  width: 1.0,
+                                ),
+                                borderRadius: BorderRadius.circular(
+                                    5.0), // Set the border radius
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  ListTile(
+                                    leading: CircleAvatar(
+                                      child: Icon(
+                                        Icons.layers,
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                    title: Text('Task name: ',
+                                        style: TextStyle(
+                                            fontFamily: 'MontMed',
+                                            fontSize: 12,
+                                            color: Colors.black54)),
+                                    subtitle: Text(task.name,
+                                        style: TextStyle(
+                                            fontFamily: 'MontMed',
+                                            fontSize: 14)),
+                                  ),
+                                  Divider(),
+                                  Text(
+                                    task.description.length > 50
+                                        ? '${task.description.substring(0, 50)}...'
+                                        : task.description,
+                                    style: TextStyle(
+                                        fontFamily: 'MontMed', fontSize: 12),
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 2,
+                                  ),
+                                  SizedBox(height: 10),
+                                  Row(
+                                    children: [
+                                      Container(
+                                          width: 15,
+                                          height: 15,
+                                          color: task.level),
+                                      SizedBox(width: 10),
+                                      Text('${task.priority} PRIORITY',
+                                          style: TextStyle(
+                                            fontFamily: 'MontMed',
+                                            color: task.level,
+                                          ))
+                                    ],
+                                  ),
+                                  SizedBox(height: 10),
+                                  Text(
+                                    'Deadline: ${message}',
+                                    style: TextStyle(
+                                        fontFamily: 'MontMed', fontSize: 12),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                          separatorBuilder: (BuildContext context, int index) =>
+                              const SizedBox(height: 10),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 5),
+                Container(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: Colors.grey,
+                        width: 1.0,
+                      ),
+                      borderRadius:
+                          BorderRadius.circular(5.0), // Set the border radius
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(height: 15),
+                        Row(
+                          children: [
+                            SizedBox(width: 20),
+                            Text('RECENT PROJECTS',
+                                style: TextStyle(
+                                    fontFamily: 'MontMed',
+                                    fontWeight: FontWeight.bold))
+                          ],
+                        ),
+                        SizedBox(height: 5),
+                        Padding(
+                          padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                          child: Divider(),
+                        ),
+                        Column(
+                          children: projects.map((project) {
+                            return ListTile(
+                              leading: const CircleAvatar(
+                                backgroundColor: Colors.black12,
+                                child: Icon(Icons.folder, color: Colors.orange),
+                              ),
+                              title: Text(project.name,
+                                  style: TextStyle(
+                                      fontFamily: 'MontMed', fontSize: 13)),
+                              subtitle: Text(
+                                '2 Participants',
+                                style: const TextStyle(
+                                    fontFamily: 'MontMed', fontSize: 12),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                        SizedBox(height: 15),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
-    ));
+          ));
   }
 }
 

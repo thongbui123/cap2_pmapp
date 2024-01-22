@@ -1,5 +1,4 @@
 import 'package:capstone2_project_management_app/models/user_model.dart';
-import 'package:capstone2_project_management_app/views/subs/add_project_screen.dart';
 import 'package:capstone2_project_management_app/views/subs/db_main_screen.dart';
 import 'package:capstone2_project_management_app/views/subs/db_main_screen_v2.dart';
 import 'package:capstone2_project_management_app/views/subs/db_side_menu.dart';
@@ -41,19 +40,21 @@ class _dashboard_screenState extends State<dashboard_screen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: SafeArea(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              db_side_menu(),
-              Expanded(
-                child: userModel?.userRole == "User"
-                    ? Dashboard_main_v2()
-                    : Dashboard_main_v1(),
+        body: userModel == null
+            ? const Center(child: CircularProgressIndicator())
+            : SafeArea(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    db_side_menu(),
+                    Expanded(
+                      child: userModel?.userRole == "User"
+                          ? const DashboardMainV2()
+                          : const DashboardMainV1(),
+                    ),
+                  ],
+                ),
               ),
-            ],
-          ),
-        ),
         floatingActionButton: Visibility(
           visible: userModel?.userRole == "User" ? false : true,
           child: FloatingActionButton(
@@ -64,9 +65,11 @@ class _dashboard_screenState extends State<dashboard_screen> {
             },
             backgroundColor: Colors.deepOrangeAccent,
             tooltip: 'Add Project', // Optional tooltip text shown on long-press
-            child: Icon(Icons.create_new_folder, color: Colors.white,), // Updated icon for the FAB
+            child: Icon(
+              Icons.create_new_folder,
+              color: Colors.white,
+            ), // Updated icon for the FAB
           ),
-        )
-    );
+        ));
   }
 }
