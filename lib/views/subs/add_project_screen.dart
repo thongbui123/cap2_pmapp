@@ -1,5 +1,3 @@
-import 'dart:collection';
-
 import 'package:capstone2_project_management_app/models/user_model.dart';
 import 'package:capstone2_project_management_app/services/project_services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -255,7 +253,6 @@ class _AddProjectScreenState extends State<AddProjectScreen> {
                       startDateController.text,
                       endDateController.text,
                       teamLeaderIdController.text,
-                      memberIdList,
                       phraseList,
                       currentUserModel);
                   Navigator.pop(context);

@@ -1,5 +1,7 @@
 import 'package:capstone2_project_management_app/models/user_model.dart';
 import 'package:capstone2_project_management_app/services/project_services.dart';
+import 'package:capstone2_project_management_app/views/subs/db_main_screen.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 
 class projectCreateStep3 extends StatefulWidget {
@@ -9,6 +11,7 @@ class projectCreateStep3 extends StatefulWidget {
   final TextEditingController endDateController;
   final String teamLeaderId;
   final UserModel? currentUserModel;
+  final Map<String, dynamic> projectMap;
   const projectCreateStep3(
       {Key? key,
       required this.projectNameController,
@@ -16,7 +19,8 @@ class projectCreateStep3 extends StatefulWidget {
       required this.startDateController,
       required this.endDateController,
       required this.teamLeaderId,
-      required this.currentUserModel})
+      required this.currentUserModel,
+      required this.projectMap})
       : super(key: key);
 
   @override
@@ -32,6 +36,7 @@ class _projectCreateStep3State extends State<projectCreateStep3> {
   var endDateController = TextEditingController();
   UserModel? currentUserModel;
   String teamLeaderIdController = "";
+  Map<String, dynamic> projectMap = {};
 
   List<String> phrases = [
     "Requirement and Gathering",
@@ -46,6 +51,14 @@ class _projectCreateStep3State extends State<projectCreateStep3> {
   List<String> currentPhrases = [
     "Distribution",
   ];
+
+  Future<void> _getProjectValues() async {
+    DatabaseEvent databaseEvent =
+        await FirebaseDatabase.instance.ref().child('projects').once();
+    projectMap = Map.from(databaseEvent.snapshot.value as dynamic);
+    setState(() {});
+  }
+
   @override
   void initState() {
     projectNameController = widget.projectNameController;
@@ -54,6 +67,7 @@ class _projectCreateStep3State extends State<projectCreateStep3> {
     endDateController = widget.endDateController;
     teamLeaderIdController = widget.teamLeaderId;
     currentUserModel = widget.currentUserModel;
+    projectMap = widget.projectMap;
     super.initState();
   }
 
@@ -183,9 +197,14 @@ class _projectCreateStep3State extends State<projectCreateStep3> {
                             startDateController.text,
                             endDateController.text,
                             teamLeaderIdController,
-                            [],
                             phrases,
                             currentUserModel);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => DashboardMainV1(
+                                  currentUserModel: currentUserModel)),
+                        );
                       },
                       child: Container(
                         child: const Row(

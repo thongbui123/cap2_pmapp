@@ -5,27 +5,13 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class ProjectServices {
-  getUserDetailFromProjects(
-      DatabaseReference? usersRef,
-      Map<dynamic, dynamic> userMap,
-      Map<String, String> userAvatarMap,
-      Map<String, int> countProjectMap,
-      List<String> allLeaders,
-      Map<String, String> leaderIdMap) {
-    usersRef?.onValue.listen((event) {
-      userMap = Map.from(event.snapshot.value as dynamic);
-      for (var leader in userMap.values) {
-        UserModel userModel =
-            UserModel.fromMap(Map<String, dynamic>.from(leader));
-        userAvatarMap[userModel.userId] = userModel.profileImage;
-        countProjectMap[userModel.userId] = 0;
-        if (userModel.userRole == 'Team Leader') {
-          allLeaders.add(userModel.userId);
-          leaderIdMap[userModel.userId] =
-              "${userModel.userFirstName} ${userModel.userLastName}";
-        }
-      }
-    });
+  final DatabaseReference reference =
+      FirebaseDatabase.instance.ref().child('projects');
+  Map<dynamic, dynamic> projectMap = {};
+  Future<void> getProjectMap() async {
+    DatabaseEvent databaseEvent = await reference.once();
+    projectMap = Map.from(databaseEvent.snapshot.value as dynamic);
+//    _getProjectDetails();
   }
 
   Future<void> addProject(
@@ -34,7 +20,6 @@ class ProjectServices {
       String startDate,
       String endDate,
       String teamLeaderId,
-      List<String> memberList,
       List<String> phrases,
       UserModel? currentUserModel) async {
     if (projectName.isEmpty) {
@@ -43,7 +28,7 @@ class ProjectServices {
     User? user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       String uid = user.uid;
-      List<String> members = memberList;
+      List<String> members = [uid];
       int dt = DateTime.now().microsecondsSinceEpoch;
       DatabaseReference projectRef =
           FirebaseDatabase.instance.ref().child('projects');
@@ -69,19 +54,16 @@ class ProjectServices {
     }
   }
 
-  Future<ProjectModel?> fetchProjectModelFromFirebase(String projectId) async {
-    DatabaseReference reference = FirebaseDatabase.instance
-        .reference()
-        .child('projects')
-        .child(projectId);
-
-    DatabaseEvent snapshot = await reference.once();
-
-    if (snapshot.snapshot.value != null) {
-      return ProjectModel.fromMap(
-          snapshot.snapshot.value as Map<String, dynamic>);
-    } else {
-      return null;
+  Future<List<ProjectModel>> getJoinedProjectNumber(
+      Map<dynamic, dynamic> projectMap, UserModel? currentUserModel) async {
+    List<ProjectModel> joinedProjects = [];
+    for (var project in projectMap.values) {
+      ProjectModel projectModel =
+          ProjectModel.fromMap(Map<String, dynamic>.from(project));
+      if (projectModel.leaderId == currentUserModel?.userId) {
+        joinedProjects.add(projectModel);
+      }
     }
+    return joinedProjects;
   }
 }

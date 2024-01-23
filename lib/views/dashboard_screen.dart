@@ -18,6 +18,7 @@ class _dashboard_screenState extends State<dashboard_screen> {
   User? user;
   UserModel? userModel;
   DatabaseReference? userRef;
+  DatabaseReference? projectRef;
   Map<String, dynamic> projectMap = {};
   final databaseReference = FirebaseDatabase.instance.ref();
   _getUserDetails() async {
@@ -27,21 +28,16 @@ class _dashboard_screenState extends State<dashboard_screen> {
     setState(() {});
   }
 
-  Future<void> _getProjectValues() async {
-    DatabaseEvent databaseEvent =
-        await databaseReference.child('projects').once();
-    projectMap = Map.from(databaseEvent.snapshot.value as dynamic);
-  }
-
   @override
   void initState() {
     super.initState();
     user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       userRef = databaseReference.child('users').child(user!.uid);
+      //projectRef = databaseReference.child('projects');
     }
     _getUserDetails();
-    _getProjectValues();
+    //_getProjectValues();
   }
 
   @override
@@ -59,7 +55,7 @@ class _dashboard_screenState extends State<dashboard_screen> {
                           ? const DashboardMainV2()
                           : DashboardMainV1(
                               currentUserModel: userModel,
-                              projectMap: projectMap),
+                            ),
                     ),
                   ],
                 ),
@@ -69,7 +65,10 @@ class _dashboard_screenState extends State<dashboard_screen> {
           child: FloatingActionButton(
             onPressed: () {
               Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-                return projectCreateStep1(currentUserModel: userModel);
+                return projectCreateStep1(
+                  currentUserModel: userModel,
+                  projectMap: projectMap,
+                );
               }));
             },
             backgroundColor: Colors.deepOrangeAccent,

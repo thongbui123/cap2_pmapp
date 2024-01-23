@@ -1,9 +1,8 @@
+import 'package:capstone2_project_management_app/views/stats/stats.dart';
 import 'package:capstone2_project_management_app/views/subs/project_create_step1.dart';
-import 'package:capstone2_project_management_app/views/subs/project_create_step3.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-import 'package:capstone2_project_management_app/views/stats/stats.dart';
 
 import '../../models/user_model.dart';
 
@@ -16,6 +15,7 @@ class projectCreateStep2 extends StatefulWidget {
 
 User? user;
 UserModel? currentUserModel;
+Map<dynamic, dynamic> projectMap = {};
 DatabaseReference? userRef;
 DatabaseReference? usersRef;
 List<String> list = <String>['Member', 'Leader'];
@@ -105,7 +105,10 @@ class _projectCreateStep2State extends State<projectCreateStep2> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => projectCreateStep1()),
+                              builder: (context) => projectCreateStep1(
+                                    currentUserModel: currentUserModel,
+                                    projectMap: projectMap,
+                                  )),
                         );
                       },
                       child: Container(

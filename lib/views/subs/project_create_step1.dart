@@ -14,27 +14,24 @@ import '../../services/project_services.dart';
 
 class projectCreateStep1 extends StatefulWidget {
   final UserModel? currentUserModel;
-
-  const projectCreateStep1({Key? key, this.currentUserModel}) : super(key: key);
+  final Map<dynamic, dynamic> projectMap;
+  const projectCreateStep1(
+      {Key? key, this.currentUserModel, required this.projectMap})
+      : super(key: key);
 
   @override
   State<projectCreateStep1> createState() => _projectCreateStep1State();
 }
 
 class _projectCreateStep1State extends State<projectCreateStep1> {
-  ProjectServices projectServices = ProjectServices();
-  //User? user;
-  UserModel? currentUserModel;
-  ProjectModel? projectModelTest;
-  //DatabaseReference? userRef;
-  DatabaseReference? usersRef;
-  DatabaseReference? projectsRef;
-  DatabaseReference? listProjectsRef;
   var projectNameController = TextEditingController();
   var projectDescriptionController = TextEditingController();
   var startDateController = TextEditingController();
   var endDateController = TextEditingController();
   var teamLeaderIdController = TextEditingController();
+  ProjectServices projectServices = ProjectServices();
+  UserModel? currentUserModel;
+  DatabaseReference? usersRef;
   List<String> currentList = [];
   Map<dynamic, dynamic> userMap = {};
   List<String> allLeaders = [];
@@ -65,45 +62,33 @@ class _projectCreateStep1State extends State<projectCreateStep1> {
           }
         }
       });
-      //_getProjectDetail();
+      _getProjectDetail();
     });
   }
 
   _getProjectDetail() {
-    projectsRef?.onValue.listen((event) {
-      setState(() {
-        projectMap = Map.from(event.snapshot.value as dynamic);
-        for (var project in projectMap.values) {
-          ProjectModel projectModel =
-              ProjectModel.fromMap(Map<String, dynamic>.from(project));
-          for (var leaderId in allLeaders) {
-            if (projectModel.leaderId == leaderId) {
-              countProjectMap[projectModel.leaderId] =
-                  (countProjectMap[projectModel.leaderId]! + 1);
-              print(countProjectMap[leaderId]);
-            }
-          }
+    for (var project in projectMap.values) {
+      ProjectModel projectModel =
+          ProjectModel.fromMap(Map<String, dynamic>.from(project));
+      for (var leaderId in allLeaders) {
+        if (projectModel.leaderId == leaderId) {
+          countProjectMap[projectModel.leaderId] =
+              (countProjectMap[projectModel.leaderId]! + 1);
+          print(countProjectMap[leaderId]);
         }
-      });
-    });
+      }
+    }
   }
 
   @override
   void initState() {
+    super.initState();
     currentUserModel = widget.currentUserModel;
+    projectMap = widget.projectMap;
     if (FirebaseAuth.instance.currentUser != null) {
-      projectsRef = FirebaseDatabase.instance.ref().child('projects');
       usersRef = FirebaseDatabase.instance.ref().child('users');
     }
     _getUserDetails();
-    // user = FirebaseAuth.instance.currentUser;
-    // if (user != null) {
-    //   userRef = FirebaseDatabase.instance.ref().child('users').child(user!.uid);
-    //   usersRef = FirebaseDatabase.instance.ref().child('users');
-    //   projectsRef = FirebaseDatabase.instance.ref().child('projects');
-    //   _getUserDetails();
-    // }
-    super.initState();
   }
 
   @override
@@ -413,15 +398,18 @@ class _projectCreateStep1State extends State<projectCreateStep1> {
                                 context,
                                 MaterialPageRoute(
                                     builder: (context) => projectCreateStep3(
-                                        projectNameController:
-                                            projectNameController,
-                                        projectDescriptionController:
-                                            projectDescriptionController,
-                                        startDateController:
-                                            startDateController,
-                                        endDateController: endDateController,
-                                        teamLeaderId: selectedMember,
-                                        currentUserModel: currentUserModel)),
+                                          projectNameController:
+                                              projectNameController,
+                                          projectDescriptionController:
+                                              projectDescriptionController,
+                                          startDateController:
+                                              startDateController,
+                                          endDateController: endDateController,
+                                          teamLeaderId: selectedMember,
+                                          currentUserModel: currentUserModel,
+                                          projectMap: projectMap
+                                              as Map<String, dynamic>,
+                                        )),
                               );
                             },
                             child: Container(
