@@ -10,7 +10,9 @@ import 'package:intl/intl.dart';
 
 class DashboardMainV1 extends StatefulWidget {
   final UserModel? currentUserModel;
-  const DashboardMainV1({Key? key, required this.currentUserModel})
+  final Map<String, dynamic> projectMap;
+  const DashboardMainV1(
+      {Key? key, required this.currentUserModel, required this.projectMap})
       : super(key: key);
 
   @override
@@ -19,19 +21,12 @@ class DashboardMainV1 extends StatefulWidget {
 
 class _DashboardMainV1State extends State<DashboardMainV1> {
   UserModel? currentUserModel;
-  final databaseReference = FirebaseDatabase.instance.ref();
+
   DatabaseReference? projectRef;
   Map<String, dynamic> projectMap = {};
   List<ProjectModel> allProjects = [];
   List<ProjectModel> joinedProjects = [];
   int count_overduo = 0;
-
-  Future<void> _getProjectValues() async {
-    DatabaseEvent databaseEvent =
-        await databaseReference.child('projects').once();
-    projectMap = Map.from(databaseEvent.snapshot.value as dynamic);
-    _getProjectDetails();
-  }
 
   Future<void> _getProjectDetails() async {
     // projectRef = databaseReference.child('projects');
@@ -73,9 +68,9 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
   @override
   initState() {
     currentUserModel = widget.currentUserModel;
+    projectMap = widget.projectMap;
     //projectRef = databaseReference.child('projects');
-    _getProjectValues();
-    //_getProjectDetails();
+    _getProjectDetails();
 
     super.initState();
   }

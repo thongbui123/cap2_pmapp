@@ -18,6 +18,8 @@ class _dashboard_screenState extends State<dashboard_screen> {
   User? user;
   UserModel? userModel;
   DatabaseReference? userRef;
+  Map<String, dynamic> projectMap = {};
+  final databaseReference = FirebaseDatabase.instance.ref();
   _getUserDetails() async {
     DatabaseEvent snapshot = await userRef!.once();
     userModel = UserModel.fromMap(
@@ -25,14 +27,21 @@ class _dashboard_screenState extends State<dashboard_screen> {
     setState(() {});
   }
 
+  Future<void> _getProjectValues() async {
+    DatabaseEvent databaseEvent =
+        await databaseReference.child('projects').once();
+    projectMap = Map.from(databaseEvent.snapshot.value as dynamic);
+  }
+
   @override
   void initState() {
     super.initState();
     user = FirebaseAuth.instance.currentUser;
     if (user != null) {
-      userRef = FirebaseDatabase.instance.ref().child('users').child(user!.uid);
+      userRef = databaseReference.child('users').child(user!.uid);
     }
     _getUserDetails();
+    _getProjectValues();
   }
 
   @override
@@ -48,7 +57,9 @@ class _dashboard_screenState extends State<dashboard_screen> {
                     Expanded(
                       child: userModel?.userRole == "User"
                           ? const DashboardMainV2()
-                          : DashboardMainV1(currentUserModel: userModel),
+                          : DashboardMainV1(
+                              currentUserModel: userModel,
+                              projectMap: projectMap),
                     ),
                   ],
                 ),
