@@ -21,6 +21,7 @@ class _projectScreenState extends State<projectScreen> {
 
   ];
 
+  bool _customTileExpanded = false;
 
   @override
   void initState() {
@@ -112,16 +113,34 @@ class _projectScreenState extends State<projectScreen> {
                           trailing: TextButton(onPressed: (){_showStateDrawer(context);}, child: Text('Alter', style: TextStyle(fontFamily: 'MontMed', fontSize: 14)))
                       ),
                       Divider(),
-                      SizedBox(height: 5),
-                      Row(
-                        children: [
-                          Icon(Icons.people_alt_outlined, color: Colors.black87,),
-                          SizedBox(width: 15),
-                          Text('Participants:', style: TextStyle(fontFamily: 'MontMed', fontSize: 12),),
-                        ],
+                      ListTile(
+                        leading: CircleAvatar(
+                          child: Icon(Icons.people),
+                        ),
+                        title: Text('Participants: ', style: TextStyle(fontFamily: 'MontMed', fontSize: 12, color: Colors.black54)),
+                        subtitle: Text('4 participants ', style: TextStyle(fontFamily: 'MontMed', fontSize: 14)),
                       ),
+                      Divider(),
                       SizedBox(height: 5),
                       Container(
+                          margin: EdgeInsets.fromLTRB(30, 0, 0, 0),
+                          child: TextButton(
+                            onPressed: _showMemberSelectionDialog,
+                            child: const Row(
+                              children: [
+                                Icon(Icons.add, color: Colors.blueAccent,),
+                                SizedBox(width: 10),
+                                Text(
+                                  'Add New Participant',
+                                  style: TextStyle(fontFamily: 'MontMed', color: Colors.blueAccent),
+                                ),
+                              ],
+                            ),
+                          )
+                      ),
+                      Divider(),
+                      Container(
+                        padding: EdgeInsets.fromLTRB(18, 0, 0, 0),
                         child: Column(
                           children: currentList.map((member) {
                             return ListTile(
@@ -130,44 +149,26 @@ class _projectScreenState extends State<projectScreen> {
                                     'A',
                                     style: TextStyle(fontFamily: 'MontMed'),
                                   )),
-                              title: Text(member, style: TextStyle(fontFamily: 'MontMed', fontSize: 13)),
+                              title: Text(member, style: TextStyle(fontFamily: 'MontMed', fontSize: 14)),
                               subtitle: Text(
-                                '2 Projects',
+                                'Member',
                                 style: const TextStyle(fontFamily: 'MontMed', fontSize: 12),
                               ),
-                              trailing: Ink(
-                                decoration: const ShapeDecoration(
-                                  color: Colors.transparent,
-                                  shape: CircleBorder(),
-                                ),
-                                child: IconButton(
-                                  icon: const Icon(Icons.remove_circle),
-                                  color: Colors.redAccent,
-                                  onPressed: () {
-                                    _removeMember(member);
-                                  },
-                                ),
+                              trailing: TextButton(
+                                onPressed: () { },
+                                child: Text('Remove', style: TextStyle(fontFamily: 'MontMed'),),
                               ),
                             );
                           }).toList(),
                         ),
                       ),
-                      SizedBox(height: 5),
-                      Container(
-                          margin: EdgeInsets.fromLTRB(10, 0, 0, 0),
-                          child: TextButton(
-                            onPressed: _showMemberSelectionDialog,
-                            child: const Row(
-                              children: [
-                                Icon(Icons.add, color: Colors.blueAccent,),
-                                SizedBox(width: 10),
-                                Text(
-                                  'Add New Member',
-                                  style: TextStyle(fontFamily: 'MontMed', color: Colors.blueAccent),
-                                ),
-                              ],
-                            ),
-                          )
+                      Divider(),
+                      ListTile(
+                          leading: CircleAvatar(
+                            child: Icon(Icons.settings),
+                          ),
+                          title: Text('Advanced Options', style: TextStyle(fontFamily: 'MontMed', fontSize: 14)),
+                          trailing: TextButton(onPressed: (){_showStateDrawer2(context);}, child: Text('View', style: TextStyle(fontFamily: 'MontMed', fontSize: 14)))
                       ),
                       Divider(),
                     ],
@@ -262,6 +263,53 @@ class _projectScreenState extends State<projectScreen> {
               ListTile(
                 leading: Icon(Icons.arrow_forward),
                 title: Text('Conclude Phrase', style: TextStyle(fontFamily: 'MontMed', fontSize: 14)),
+                onTap: () {
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showStateDrawer2(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          // Your bottom drawer content goes here
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              SizedBox(height: 20),
+              Row(
+                children: [
+                  SizedBox(width: 25),
+                  Text('Advanced Settings:', style: TextStyle(fontFamily: 'MontMed', fontSize: 16)),
+                ],
+              ),
+              SizedBox(height: 5),
+              Divider(),
+              ListTile(
+                leading: Icon(Icons.stop_screen_share_outlined),
+                title: Text('Halt Project', style: TextStyle(fontFamily: 'MontMed', fontSize: 14)),
+                onTap: () {
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.cancel_presentation_outlined),
+                title: Text('Cancel Project', style: TextStyle(fontFamily: 'MontMed', fontSize: 14)),
+                onTap: () {
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.screen_rotation_alt),
+                title: Text('Relaunch Project', style: TextStyle(fontFamily: 'MontMed', fontSize: 14)),
                 onTap: () {
                   Navigator.pop(context);
                 },
