@@ -13,7 +13,9 @@ import '../../models/user_model.dart';
 import '../../services/project_services.dart';
 
 class projectCreateStep1 extends StatefulWidget {
-  const projectCreateStep1({Key? key}) : super(key: key);
+  final UserModel? currentUserModel;
+
+  const projectCreateStep1({Key? key, this.currentUserModel}) : super(key: key);
 
   @override
   State<projectCreateStep1> createState() => _projectCreateStep1State();
@@ -21,10 +23,10 @@ class projectCreateStep1 extends StatefulWidget {
 
 class _projectCreateStep1State extends State<projectCreateStep1> {
   ProjectServices projectServices = ProjectServices();
-  User? user;
+  //User? user;
   UserModel? currentUserModel;
   ProjectModel? projectModelTest;
-  DatabaseReference? userRef;
+  //DatabaseReference? userRef;
   DatabaseReference? usersRef;
   DatabaseReference? projectsRef;
   DatabaseReference? listProjectsRef;
@@ -48,9 +50,6 @@ class _projectCreateStep1State extends State<projectCreateStep1> {
   // Sample list of members
   String selectedMember = "";
   _getUserDetails() async {
-    DatabaseEvent snapshot = await userRef!.once();
-    currentUserModel = UserModel.fromMap(
-        Map<String, dynamic>.from(snapshot.snapshot.value as dynamic));
     usersRef?.onValue.listen((event) {
       setState(() {
         userMap = Map.from(event.snapshot.value as dynamic);
@@ -66,7 +65,7 @@ class _projectCreateStep1State extends State<projectCreateStep1> {
           }
         }
       });
-      _getProjectDetail();
+      //_getProjectDetail();
     });
   }
 
@@ -91,13 +90,19 @@ class _projectCreateStep1State extends State<projectCreateStep1> {
 
   @override
   void initState() {
-    user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      userRef = FirebaseDatabase.instance.ref().child('users').child(user!.uid);
-      usersRef = FirebaseDatabase.instance.ref().child('users');
+    currentUserModel = widget.currentUserModel;
+    if (FirebaseAuth.instance.currentUser != null) {
       projectsRef = FirebaseDatabase.instance.ref().child('projects');
-      _getUserDetails();
+      usersRef = FirebaseDatabase.instance.ref().child('users');
     }
+    _getUserDetails();
+    // user = FirebaseAuth.instance.currentUser;
+    // if (user != null) {
+    //   userRef = FirebaseDatabase.instance.ref().child('users').child(user!.uid);
+    //   usersRef = FirebaseDatabase.instance.ref().child('users');
+    //   projectsRef = FirebaseDatabase.instance.ref().child('projects');
+    //   _getUserDetails();
+    // }
     super.initState();
   }
 

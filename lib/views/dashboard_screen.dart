@@ -20,10 +20,8 @@ class _dashboard_screenState extends State<dashboard_screen> {
   DatabaseReference? userRef;
   _getUserDetails() async {
     DatabaseEvent snapshot = await userRef!.once();
-
     userModel = UserModel.fromMap(
         Map<String, dynamic>.from(snapshot.snapshot.value as dynamic));
-
     setState(() {});
   }
 
@@ -50,7 +48,7 @@ class _dashboard_screenState extends State<dashboard_screen> {
                     Expanded(
                       child: userModel?.userRole == "User"
                           ? const DashboardMainV2()
-                          : const DashboardMainV1(),
+                          : DashboardMainV1(currentUserModel: userModel),
                     ),
                   ],
                 ),
@@ -60,7 +58,7 @@ class _dashboard_screenState extends State<dashboard_screen> {
           child: FloatingActionButton(
             onPressed: () {
               Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-                return const projectCreateStep1();
+                return projectCreateStep1(currentUserModel: userModel);
               }));
             },
             backgroundColor: Colors.deepOrangeAccent,
