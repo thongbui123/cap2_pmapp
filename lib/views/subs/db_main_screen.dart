@@ -30,6 +30,15 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
   List<ProjectModel> joinedProjects = [];
   int count_overduo = 0;
 
+  Future<void> getProjectMap() async {
+    DatabaseEvent databaseEvent =
+        await databaseReference.child('projects').once();
+    if (databaseEvent.snapshot.value != null) {
+      projectMap = Map.from(databaseEvent.snapshot.value as dynamic);
+      _getProjectDetails();
+    }
+  }
+
   Future<void> _getProjectDetails() async {
     for (var project in projectMap.values) {
       ProjectModel projectModel =
@@ -53,7 +62,7 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
     super.initState();
     currentUserModel = widget.currentUserModel;
     projectMap = widget.projectMap;
-    _getData();
+    getProjectMap();
     //_getProjectDetails();
   }
 
@@ -65,7 +74,7 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
 
   @override
   Widget build(BuildContext context) {
-    return projectMap.isEmpty
+    return projectMap.values.isEmpty
         ? const Center(child: CircularProgressIndicator())
         : SafeArea(
             child: SingleChildScrollView(

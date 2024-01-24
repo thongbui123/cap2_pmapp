@@ -1,6 +1,6 @@
 import 'package:capstone2_project_management_app/models/user_model.dart';
 import 'package:capstone2_project_management_app/services/project_services.dart';
-import 'package:capstone2_project_management_app/views/subs/db_main_screen.dart';
+import 'package:capstone2_project_management_app/views/dashboard_screen.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 
@@ -205,9 +205,7 @@ class _projectCreateStep3State extends State<projectCreateStep3> {
                             context,
                             MaterialPageRoute<void>(
                                 builder: (BuildContext context) =>
-                                    DashboardMainV1(
-                                        currentUserModel: currentUserModel,
-                                        projectMap: projectMap)));
+                                    dashboard_screen()));
                       },
                       child: Container(
                         child: const Row(

@@ -20,7 +20,7 @@ class ProjectServices {
     return projectMap;
   }
 
-  Future<List<ProjectModel>> getJoinedProjectNumber(
+  Future<List<ProjectModel>> getJoinedProjectList(
       Map<dynamic, dynamic> projectMap, UserModel? currentUserModel) async {
     List<ProjectModel> joinedProjects = [];
     for (var project in projectMap.values) {

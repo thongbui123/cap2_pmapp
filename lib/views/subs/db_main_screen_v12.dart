@@ -52,14 +52,19 @@ class _DashboardMainV12State extends State<DashboardMainV12> {
     super.initState();
     currentUserModel = widget.currentUserModel;
     //projectMap = widget.projectMap;
-    //_getData();
+    getProjectMap();
     //_getProjectDetails();
   }
 
-  _getData() async {
-    await _getProjectDetails();
+  Future<void> getProjectMap() async {
+    DatabaseEvent databaseEvent =
+        await databaseReference.child('projects').once();
+    projectMap = Map.from(databaseEvent.snapshot.value as dynamic);
+  }
 
-    //projectMap = await projectServices.getProjectMap();
+  _getData() async {
+    //await _getProjectDetails();
+    projectMap = await projectServices.getProjectMap();
   }
 
   @override
@@ -535,8 +540,9 @@ class _DashboardMainV12State extends State<DashboardMainV12> {
                   ),
                   Column(
                     children: [
-                      FutureBuilder<Map>(
-                          future: projectServices.getProjectMap(),
+                      FutureBuilder<List<ProjectModel>>(
+                          future: projectServices.getJoinedProjectList(
+                              projectMap, currentUserModel),
                           builder: (context, snapshot) {
                             if (snapshot.connectionState ==
                                 ConnectionState.waiting) {
@@ -544,13 +550,10 @@ class _DashboardMainV12State extends State<DashboardMainV12> {
                             } else if (snapshot.hasError) {
                               return Text('Error: ${snapshot.error}');
                             } else {
-                              projectMap = snapshot.data!;
+                              joinedProjects = snapshot.data!;
                               return ListView.builder(
-                                  itemCount: projectMap.length,
+                                  itemCount: joinedProjects.length,
                                   itemBuilder: (context, index) {
-                                    String key =
-                                        projectMap.keys.elementAt(index);
-                                    ProjectModel value = projectMap[key];
                                     return ListTile(
                                       leading: const CircleAvatar(
                                         backgroundColor: Colors.black12,
@@ -559,12 +562,13 @@ class _DashboardMainV12State extends State<DashboardMainV12> {
                                           color: Colors.orange,
                                         ),
                                       ),
-                                      title: Text(value.projectName,
+                                      title: Text(
+                                          joinedProjects[index].projectName,
                                           style: const TextStyle(
                                               fontFamily: 'MontMed',
                                               fontSize: 13)),
                                       subtitle: Text(
-                                        '${value.projectMembers.length.toString()} participant(s)',
+                                        '${joinedProjects[index].projectMembers.length.toString()} participant(s)',
                                         style: const TextStyle(
                                             fontFamily: 'MontMed',
                                             fontSize: 12),

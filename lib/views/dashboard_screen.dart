@@ -1,5 +1,5 @@
 import 'package:capstone2_project_management_app/models/user_model.dart';
-import 'package:capstone2_project_management_app/views/subs/db_main_screen_v12.dart';
+import 'package:capstone2_project_management_app/views/subs/db_main_screen.dart';
 import 'package:capstone2_project_management_app/views/subs/db_main_screen_v2.dart';
 import 'package:capstone2_project_management_app/views/subs/db_side_menu.dart';
 import 'package:capstone2_project_management_app/views/subs/project_create_step1.dart';
@@ -33,7 +33,10 @@ class _dashboard_screenState extends State<dashboard_screen> {
   Future<void> _getProjectValues() async {
     DatabaseEvent databaseEvent =
         await databaseReference.child('projects').once();
-    projectMap = Map.from(databaseEvent.snapshot.value as dynamic);
+    if (databaseEvent.snapshot.value != null) {
+      projectMap = Map.from(databaseEvent.snapshot.value as dynamic);
+    }
+
     setState(() {});
   }
 
@@ -66,8 +69,9 @@ class _dashboard_screenState extends State<dashboard_screen> {
                     Expanded(
                       child: userModel?.userRole == "User"
                           ? const DashboardMainV2()
-                          : DashboardMainV12(
+                          : DashboardMainV1(
                               currentUserModel: userModel,
+                              projectMap: projectMap,
                             ),
                     ),
                   ],
