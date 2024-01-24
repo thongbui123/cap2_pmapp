@@ -199,12 +199,15 @@ class _projectCreateStep3State extends State<projectCreateStep3> {
                             teamLeaderIdController,
                             phrases,
                             currentUserModel);
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => DashboardMainV1(
-                                  currentUserModel: currentUserModel)),
-                        );
+                        //Navigator.popUntil(context, ModalRoute.withName('/'));
+
+                        Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute<void>(
+                                builder: (BuildContext context) =>
+                                    DashboardMainV1(
+                                        currentUserModel: currentUserModel,
+                                        projectMap: projectMap)));
                       },
                       child: Container(
                         child: const Row(

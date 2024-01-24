@@ -1,5 +1,5 @@
 import 'package:capstone2_project_management_app/models/user_model.dart';
-import 'package:capstone2_project_management_app/views/subs/db_main_screen.dart';
+import 'package:capstone2_project_management_app/views/subs/db_main_screen_v12.dart';
 import 'package:capstone2_project_management_app/views/subs/db_main_screen_v2.dart';
 import 'package:capstone2_project_management_app/views/subs/db_side_menu.dart';
 import 'package:capstone2_project_management_app/views/subs/project_create_step1.dart';
@@ -25,6 +25,15 @@ class _dashboard_screenState extends State<dashboard_screen> {
     DatabaseEvent snapshot = await userRef!.once();
     userModel = UserModel.fromMap(
         Map<String, dynamic>.from(snapshot.snapshot.value as dynamic));
+    setState(() {
+      _getProjectValues();
+    });
+  }
+
+  Future<void> _getProjectValues() async {
+    DatabaseEvent databaseEvent =
+        await databaseReference.child('projects').once();
+    projectMap = Map.from(databaseEvent.snapshot.value as dynamic);
     setState(() {});
   }
 
@@ -37,7 +46,11 @@ class _dashboard_screenState extends State<dashboard_screen> {
       //projectRef = databaseReference.child('projects');
     }
     _getUserDetails();
-    //_getProjectValues();
+  }
+
+  _waitUntilHasData() async {
+    await _getUserDetails();
+    // await _getProjectValues();
   }
 
   @override
@@ -53,7 +66,7 @@ class _dashboard_screenState extends State<dashboard_screen> {
                     Expanded(
                       child: userModel?.userRole == "User"
                           ? const DashboardMainV2()
-                          : DashboardMainV1(
+                          : DashboardMainV12(
                               currentUserModel: userModel,
                             ),
                     ),

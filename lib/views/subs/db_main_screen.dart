@@ -11,8 +11,9 @@ import 'package:intl/intl.dart';
 
 class DashboardMainV1 extends StatefulWidget {
   final UserModel? currentUserModel;
-
-  const DashboardMainV1({Key? key, required this.currentUserModel})
+  final Map<dynamic, dynamic> projectMap;
+  const DashboardMainV1(
+      {Key? key, required this.currentUserModel, required this.projectMap})
       : super(key: key);
 
   @override
@@ -24,559 +25,551 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
   UserModel? currentUserModel;
   final databaseReference = FirebaseDatabase.instance.ref();
   DatabaseReference? projectRef;
-  late Future<Map<dynamic, dynamic>> projectMap;
+  Map<dynamic, dynamic> projectMap = {};
   List<ProjectModel> allProjects = [];
   List<ProjectModel> joinedProjects = [];
   int count_overduo = 0;
-  // Future<void> _getProjectValues() async {
-  //   DatabaseEvent databaseEvent =
-  //       await databaseReference.child('projects').once();
-  //   projectMap = Map.from(databaseEvent.snapshot.value as dynamic);
-  // }
 
-  // Future<void> _getProjectDetails() async {
-  //   for (var project in projectMap.values) {
-  //     ProjectModel projectModel =
-  //         ProjectModel.fromMap(Map<String, dynamic>.from(project));
-  //     allProjects.add(projectModel);
-  //     if (projectModel.leaderId == currentUserModel?.userId) {
-  //       joinedProjects.add(projectModel);
-  //     }
-  //     if (projectModel.startDate != "" && projectModel.endDate != "") {
-  //       DateFormat format = DateFormat('yyyy-MM-dd');
-  //       DateTime getEndDate = format.parse(projectModel.endDate);
-  //       if (DateTime.now().isAfter(getEndDate)) {
-  //         count_overduo++;
-  //       }
-  //     }
-  //   }
-  // }
+  Future<void> _getProjectDetails() async {
+    for (var project in projectMap.values) {
+      ProjectModel projectModel =
+          ProjectModel.fromMap(Map<String, dynamic>.from(project));
+      allProjects.add(projectModel);
+      if (projectModel.leaderId == currentUserModel?.userId) {
+        joinedProjects.add(projectModel);
+      }
+      if (projectModel.startDate != "" && projectModel.endDate != "") {
+        DateFormat format = DateFormat('yyyy-MM-dd');
+        DateTime getEndDate = format.parse(projectModel.endDate);
+        if (DateTime.now().isAfter(getEndDate)) {
+          count_overduo++;
+        }
+      }
+    }
+  }
 
   @override
   initState() {
-    currentUserModel = widget.currentUserModel;
-    projectServices.getProjectMap();
-    //_getProjectDetails();
-
     super.initState();
+    currentUserModel = widget.currentUserModel;
+    projectMap = widget.projectMap;
+    _getData();
+    //_getProjectDetails();
+  }
+
+  _getData() async {
+    _getProjectDetails();
+
+    //projectMap = await projectServices.getProjectMap();
   }
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-        child: SingleChildScrollView(
-      padding: const EdgeInsets.all(defaultPadding),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Text(
-                'WELCOME BACK, ${currentUserModel?.userFirstName.toUpperCase()}',
-                style: const TextStyle(
-                  fontFamily: 'MontMed',
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
-              ),
-            ],
-          ),
-          const Divider(),
-          const SizedBox(height: 10),
-          Align(
-            child: Container(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Expanded(
-                    child: TextField(
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontFamily: 'MontMed',
-                        fontWeight: FontWeight.normal,
-                        fontSize: 16,
-                      ),
-                      decoration: InputDecoration(
-                        enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Color(0xFFD9D9D9)),
-                        ),
-                        focusedBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.black54),
-                        ),
-                        labelText: 'Search here...',
-                        labelStyle: TextStyle(
-                          color: Colors.black,
-                          fontFamily: 'MontMed',
-                          fontWeight: FontWeight.normal,
-                          fontSize: 14,
-                        ),
-                        filled: true,
-                        fillColor: Color(0xFFD9D9D9),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Container(
-                    height: 50,
-                    child: ElevatedButton(
-                        onPressed: () {},
-                        child: const Icon(Icons.search_rounded)),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Expanded(
-                child: Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: Colors.grey,
-                        width: 1.0,
-                      ),
-                      borderRadius:
-                          BorderRadius.circular(5.0), // Set the border radius
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(15),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          const SizedBox(height: 5),
-                          Row(
-                            children: <Widget>[
-                              IconButton(
-                                onPressed: () {
-                                  Navigator.of(context).push(
-                                      MaterialPageRoute(builder: (context) {
-                                    return const listOfTasks();
-                                  }));
-                                },
-                                icon: const Icon(
-                                  Icons.layers,
-                                  color: Colors.blueAccent,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 5),
-                          Row(
-                            children: <Widget>[
-                              Container(
-                                child: const Text(
-                                  'TASKS',
-                                  style: TextStyle(
-                                      fontFamily: 'MontMed',
-                                      fontWeight: FontWeight.w900),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const Divider(),
-                          const Row(
-                            children: <Widget>[
-                              Text(
-                                '4 Task in Progress',
-                                style: TextStyle(
-                                    fontSize: 12, fontFamily: 'MontMed'),
-                              )
-                            ],
-                          ),
-                        ],
-                      ),
-                    )),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: Colors.grey,
-                      width: 1.0,
-                    ),
-                    borderRadius:
-                        BorderRadius.circular(5.0), // Set the border radius
-                  ),
-                  //height: 125,
-                  child: Padding(
-                    padding: const EdgeInsets.all(15),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        const SizedBox(height: 5),
-                        Row(
-                          children: <Widget>[
-                            IconButton(
-                              onPressed: () {
-                                Navigator.of(context)
-                                    .push(MaterialPageRoute(builder: (context) {
-                                  return const listOfProjects();
-                                }));
-                              },
-                              icon: const Icon(
-                                Icons.folder,
-                                color: Colors.deepOrangeAccent,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 5),
-                        Row(
-                          children: <Widget>[
-                            Container(
-                              child: const Text(
-                                'PROJECTS',
-                                style: TextStyle(
-                                    fontFamily: 'MontMed',
-                                    fontWeight: FontWeight.w900),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const Divider(),
-                        Row(
-                          children: <Widget>[
-                            Text(
-                              '${joinedProjects.length.toString()} on going',
-                              style: const TextStyle(
-                                  fontSize: 12, fontFamily: 'MontMed'),
-                            )
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Expanded(
-                child: Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: Colors.grey,
-                        width: 1.0,
-                      ),
-                      borderRadius:
-                          BorderRadius.circular(5.0), // Set the border radius
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(15),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          const SizedBox(height: 5),
-                          Row(
-                            children: <Widget>[
-                              Container(
-                                child: const Icon(
-                                  Icons.mood_bad,
-                                  color: Colors.red,
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              const Text(
-                                'CAUTION',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: 'MontMed',
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 5),
-                          const Divider(),
-                          Row(
-                            children: <Widget>[
-                              TextButton(
-                                onPressed: () {
-                                  // Add the action you want to perform when the TextButton is pressed
-                                },
-                                child: const Text(
-                                  '12 Tasks Overdue',
-                                  style: TextStyle(
-                                    fontFamily: 'MontMed',
-                                    fontWeight: FontWeight.normal,
-                                    color: Colors.black,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const Divider(),
-                          Row(
-                            children: <Widget>[
-                              TextButton(
-                                onPressed: () {
-                                  // Add the action you want to perform when the TextButton is pressed
-                                },
-                                child: Text(
-                                  '$count_overduo Project(s) Overdue',
-                                  style: const TextStyle(
-                                    fontFamily: 'MontMed',
-                                    fontWeight: FontWeight.normal,
-                                    color: Colors.black,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    )),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Expanded(
-                child: Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: Colors.grey,
-                        width: 1.0,
-                      ),
-                      borderRadius:
-                          BorderRadius.circular(5.0), // Set the border radius
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(15),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          const SizedBox(height: 5),
-                          Row(
-                            children: <Widget>[
-                              Container(
-                                child: const Icon(
-                                  Icons.mood,
-                                  color: Colors.green,
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              const Text(
-                                'FINALIZED',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: 'MontMed',
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 5),
-                          const Divider(),
-                          Row(
-                            children: <Widget>[
-                              TextButton(
-                                onPressed: () {
-                                  // Add the action you want to perform when the TextButton is pressed
-                                },
-                                child: const Text(
-                                  '12 Tasks Finalized',
-                                  style: TextStyle(
-                                    fontFamily: 'MontMed',
-                                    fontWeight: FontWeight.normal,
-                                    color: Colors.black,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const Divider(),
-                          Row(
-                            children: <Widget>[
-                              TextButton(
-                                onPressed: () {
-                                  // Add the action you want to perform when the TextButton is pressed
-                                },
-                                child: const Text(
-                                  '2 Projects Finalized',
-                                  style: TextStyle(
-                                    fontFamily: 'MontMed',
-                                    fontWeight: FontWeight.normal,
-                                    color: Colors.black,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    )),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: Colors.grey,
-                      width: 1.0,
-                    ),
-                    borderRadius:
-                        BorderRadius.circular(5.0), // Set the border radius
-                  ),
-                  height: 200,
-                  child: const Dashboard_chart(),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Container(
-                width: 150,
-                height: 200,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+    return projectMap.isEmpty
+        ? const Center(child: CircularProgressIndicator())
+        : SafeArea(
+            child: SingleChildScrollView(
+            padding: const EdgeInsets.all(defaultPadding),
+            child: Column(
+              children: [
+                Row(
                   children: [
-                    const SizedBox(height: 45),
-                    const Text(
-                      'THIS WEEK TASKS',
-                      style: TextStyle(
+                    Text(
+                      'WELCOME BACK, ${currentUserModel?.userFirstName.toUpperCase()}',
+                      style: const TextStyle(
                         fontFamily: 'MontMed',
                         fontWeight: FontWeight.bold,
+                        fontSize: 16,
                       ),
-                    ),
-                    const SizedBox(height: 15),
-                    Row(
-                      children: [
-                        Container(
-                          width: 14,
-                          height: 14,
-                          color: Colors.redAccent,
-                        ),
-                        const SizedBox(width: 10),
-                        const Text(
-                          'Overdue',
-                          style: TextStyle(fontFamily: 'MontMed', fontSize: 12),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    Row(
-                      children: [
-                        Container(
-                          width: 14,
-                          height: 14,
-                          color: Colors.blueAccent,
-                        ),
-                        const SizedBox(width: 10),
-                        const Text(
-                          'In Progress',
-                          style: TextStyle(fontFamily: 'MontMed', fontSize: 12),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    Row(
-                      children: [
-                        Container(
-                          width: 14,
-                          height: 14,
-                          color: Colors.green,
-                        ),
-                        const SizedBox(width: 10),
-                        const Text(
-                          'Done',
-                          style: TextStyle(fontFamily: 'MontMed', fontSize: 12),
-                        ),
-                      ],
                     ),
                   ],
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Container(
-            child: Container(
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: Colors.grey,
-                  width: 1.0,
-                ),
-                borderRadius:
-                    BorderRadius.circular(5.0), // Set the border radius
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 15),
-                  const Row(
-                    children: [
-                      SizedBox(width: 20),
-                      Text('RECENT PROJECTS',
-                          style: TextStyle(
+                const Divider(),
+                const SizedBox(height: 10),
+                Align(
+                  child: Container(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Expanded(
+                          child: TextField(
+                            style: TextStyle(
+                              color: Colors.black,
                               fontFamily: 'MontMed',
-                              fontWeight: FontWeight.bold))
-                    ],
+                              fontWeight: FontWeight.normal,
+                              fontSize: 16,
+                            ),
+                            decoration: InputDecoration(
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: Color(0xFFD9D9D9)),
+                              ),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(color: Colors.black54),
+                              ),
+                              labelText: 'Search here...',
+                              labelStyle: TextStyle(
+                                color: Colors.black,
+                                fontFamily: 'MontMed',
+                                fontWeight: FontWeight.normal,
+                                fontSize: 14,
+                              ),
+                              filled: true,
+                              fillColor: Color(0xFFD9D9D9),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Container(
+                          height: 50,
+                          child: ElevatedButton(
+                              onPressed: () {},
+                              child: const Icon(Icons.search_rounded)),
+                        ),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 5),
-                  const Padding(
-                    padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-                    child: Divider(),
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Expanded(
+                      child: Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: Colors.grey,
+                              width: 1.0,
+                            ),
+                            borderRadius: BorderRadius.circular(
+                                5.0), // Set the border radius
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(15),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                const SizedBox(height: 5),
+                                Row(
+                                  children: <Widget>[
+                                    IconButton(
+                                      onPressed: () {
+                                        Navigator.of(context).push(
+                                            MaterialPageRoute(
+                                                builder: (context) {
+                                          return const listOfTasks();
+                                        }));
+                                      },
+                                      icon: const Icon(
+                                        Icons.layers,
+                                        color: Colors.blueAccent,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 5),
+                                Row(
+                                  children: <Widget>[
+                                    Container(
+                                      child: const Text(
+                                        'TASKS',
+                                        style: TextStyle(
+                                            fontFamily: 'MontMed',
+                                            fontWeight: FontWeight.w900),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const Divider(),
+                                const Row(
+                                  children: <Widget>[
+                                    Text(
+                                      '4 Task in Progress',
+                                      style: TextStyle(
+                                          fontSize: 12, fontFamily: 'MontMed'),
+                                    )
+                                  ],
+                                ),
+                              ],
+                            ),
+                          )),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: Colors.grey,
+                            width: 1.0,
+                          ),
+                          borderRadius: BorderRadius.circular(
+                              5.0), // Set the border radius
+                        ),
+                        //height: 125,
+                        child: Padding(
+                          padding: const EdgeInsets.all(15),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              const SizedBox(height: 5),
+                              Row(
+                                children: <Widget>[
+                                  IconButton(
+                                    onPressed: () {
+                                      Navigator.of(context).push(
+                                          MaterialPageRoute(builder: (context) {
+                                        return listOfProjects(
+                                          projectMap: projectMap,
+                                        );
+                                      }));
+                                    },
+                                    icon: const Icon(
+                                      Icons.folder,
+                                      color: Colors.deepOrangeAccent,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 5),
+                              Row(
+                                children: <Widget>[
+                                  Container(
+                                    child: const Text(
+                                      'PROJECTS',
+                                      style: TextStyle(
+                                          fontFamily: 'MontMed',
+                                          fontWeight: FontWeight.w900),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const Divider(),
+                              Row(
+                                children: <Widget>[
+                                  Text(
+                                    '${joinedProjects.length.toString()} on going',
+                                    style: const TextStyle(
+                                        fontSize: 12, fontFamily: 'MontMed'),
+                                  )
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Expanded(
+                      child: Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: Colors.grey,
+                              width: 1.0,
+                            ),
+                            borderRadius: BorderRadius.circular(
+                                5.0), // Set the border radius
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(15),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                const SizedBox(height: 5),
+                                Row(
+                                  children: <Widget>[
+                                    Container(
+                                      child: const Icon(
+                                        Icons.mood_bad,
+                                        color: Colors.red,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 10),
+                                    const Text(
+                                      'CAUTION',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontFamily: 'MontMed',
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 5),
+                                const Divider(),
+                                Row(
+                                  children: <Widget>[
+                                    TextButton(
+                                      onPressed: () {
+                                        // Add the action you want to perform when the TextButton is pressed
+                                      },
+                                      child: const Text(
+                                        '12 Tasks Overdue',
+                                        style: TextStyle(
+                                          fontFamily: 'MontMed',
+                                          fontWeight: FontWeight.normal,
+                                          color: Colors.black,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const Divider(),
+                                Row(
+                                  children: <Widget>[
+                                    TextButton(
+                                      onPressed: () {
+                                        // Add the action you want to perform when the TextButton is pressed
+                                      },
+                                      child: Text(
+                                        '$count_overduo Project(s) Overdue',
+                                        style: const TextStyle(
+                                          fontFamily: 'MontMed',
+                                          fontWeight: FontWeight.normal,
+                                          color: Colors.black,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          )),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Expanded(
+                      child: Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: Colors.grey,
+                              width: 1.0,
+                            ),
+                            borderRadius: BorderRadius.circular(
+                                5.0), // Set the border radius
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(15),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                const SizedBox(height: 5),
+                                Row(
+                                  children: <Widget>[
+                                    Container(
+                                      child: const Icon(
+                                        Icons.mood,
+                                        color: Colors.green,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 10),
+                                    const Text(
+                                      'FINALIZED',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontFamily: 'MontMed',
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 5),
+                                const Divider(),
+                                Row(
+                                  children: <Widget>[
+                                    TextButton(
+                                      onPressed: () {
+                                        // Add the action you want to perform when the TextButton is pressed
+                                      },
+                                      child: const Text(
+                                        '12 Tasks Finalized',
+                                        style: TextStyle(
+                                          fontFamily: 'MontMed',
+                                          fontWeight: FontWeight.normal,
+                                          color: Colors.black,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const Divider(),
+                                Row(
+                                  children: <Widget>[
+                                    TextButton(
+                                      onPressed: () {
+                                        // Add the action you want to perform when the TextButton is pressed
+                                      },
+                                      child: const Text(
+                                        '2 Projects Finalized',
+                                        style: TextStyle(
+                                          fontFamily: 'MontMed',
+                                          fontWeight: FontWeight.normal,
+                                          color: Colors.black,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          )),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: Colors.grey,
+                            width: 1.0,
+                          ),
+                          borderRadius: BorderRadius.circular(
+                              5.0), // Set the border radius
+                        ),
+                        height: 200,
+                        child: const Dashboard_chart(),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Container(
+                      width: 150,
+                      height: 200,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 45),
+                          const Text(
+                            'THIS WEEK TASKS',
+                            style: TextStyle(
+                              fontFamily: 'MontMed',
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 15),
+                          Row(
+                            children: [
+                              Container(
+                                width: 14,
+                                height: 14,
+                                color: Colors.redAccent,
+                              ),
+                              const SizedBox(width: 10),
+                              const Text(
+                                'Overdue',
+                                style: TextStyle(
+                                    fontFamily: 'MontMed', fontSize: 12),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                          Row(
+                            children: [
+                              Container(
+                                width: 14,
+                                height: 14,
+                                color: Colors.blueAccent,
+                              ),
+                              const SizedBox(width: 10),
+                              const Text(
+                                'In Progress',
+                                style: TextStyle(
+                                    fontFamily: 'MontMed', fontSize: 12),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                          Row(
+                            children: [
+                              Container(
+                                width: 14,
+                                height: 14,
+                                color: Colors.green,
+                              ),
+                              const SizedBox(width: 10),
+                              const Text(
+                                'Done',
+                                style: TextStyle(
+                                    fontFamily: 'MontMed', fontSize: 12),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Container(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: Colors.grey,
+                        width: 1.0,
+                      ),
+                      borderRadius:
+                          BorderRadius.circular(5.0), // Set the border radius
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 15),
+                        const Row(
+                          children: [
+                            SizedBox(width: 20),
+                            Text('RECENT PROJECTS',
+                                style: TextStyle(
+                                    fontFamily: 'MontMed',
+                                    fontWeight: FontWeight.bold))
+                          ],
+                        ),
+                        const SizedBox(height: 5),
+                        const Padding(
+                          padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                          child: Divider(),
+                        ),
+                        Column(
+                          children: joinedProjects.map((project) {
+                            return ListTile(
+                              leading: const CircleAvatar(
+                                backgroundColor: Colors.black12,
+                                child: Icon(
+                                  Icons.folder,
+                                  color: Colors.orange,
+                                ),
+                              ),
+                              title: Text(project.projectName,
+                                  style: const TextStyle(
+                                      fontFamily: 'MontMed', fontSize: 13)),
+                              subtitle: Text(
+                                '${project.projectMembers.length.toString()} participant(s)',
+                                style: const TextStyle(
+                                    fontFamily: 'MontMed', fontSize: 12),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                        const SizedBox(height: 15),
+                      ],
+                    ),
                   ),
-                  Column(
-                    children: [
-                      FutureBuilder(
-                          future: projectServices.getJoinedProjectNumber(
-                              projectMap as Map, currentUserModel),
-                          builder: (context, snapshot) {
-                            if (snapshot.connectionState ==
-                                ConnectionState.waiting) {
-                              return CircularProgressIndicator();
-                            } else if (snapshot.hasError) {
-                              return Text('Error: ${snapshot.error}');
-                            } else {
-                              return Center(
-                                child: Text(
-                                    'Data from Firebase: ${snapshot.data}'),
-                              );
-                            }
-                          })
-                    ],
-                    // children: joinedProjects.map((project) {
-                    //   return ListTile(
-                    //     leading: const CircleAvatar(
-                    //       backgroundColor: Colors.black12,
-                    //       child: Icon(
-                    //         Icons.folder,
-                    //         color: Colors.orange,
-                    //       ),
-                    //     ),
-                    //     title: Text(project.projectName,
-                    //         style: const TextStyle(
-                    //             fontFamily: 'MontMed', fontSize: 13)),
-                    //     subtitle: Text(
-                    //       '${project.projectMembers.length.toString()} participant(s)',
-                    //       style: const TextStyle(
-                    //           fontFamily: 'MontMed', fontSize: 12),
-                    //     ),
-                    //   );
-                    // }).toList(),
-                  ),
-                  const SizedBox(height: 15),
-                ],
-              ),
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
-    ));
+          ));
   }
 
   DateTime? stringToDateTime(

@@ -1,3 +1,4 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:capstone2_project_management_app/models/project_model.dart';
 import 'package:capstone2_project_management_app/models/user_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -7,11 +8,29 @@ import 'package:fluttertoast/fluttertoast.dart';
 class ProjectServices {
   final DatabaseReference reference =
       FirebaseDatabase.instance.ref().child('projects');
-  Map<dynamic, dynamic> projectMap = {};
-  Future<void> getProjectMap() async {
+  //late Map<dynamic, dynamic> projectMap;
+
+  Future<Map> getProjectMap() async {
     DatabaseEvent databaseEvent = await reference.once();
-    projectMap = Map.from(databaseEvent.snapshot.value as dynamic);
+    Map<dynamic, dynamic> projectMap = {};
+    if (databaseEvent.snapshot.value != null) {
+      projectMap = Map.from(databaseEvent.snapshot.value as dynamic);
+    }
 //    _getProjectDetails();
+    return projectMap;
+  }
+
+  Future<List<ProjectModel>> getJoinedProjectNumber(
+      Map<dynamic, dynamic> projectMap, UserModel? currentUserModel) async {
+    List<ProjectModel> joinedProjects = [];
+    for (var project in projectMap.values) {
+      ProjectModel projectModel =
+          ProjectModel.fromMap(Map<String, dynamic>.from(project));
+      if (projectModel.leaderId == currentUserModel?.userId) {
+        joinedProjects.add(projectModel);
+      }
+    }
+    return joinedProjects;
   }
 
   Future<void> addProject(
@@ -52,18 +71,5 @@ class ProjectServices {
       });
       Fluttertoast.showToast(msg: 'New project has been created successfully');
     }
-  }
-
-  Future<List<ProjectModel>> getJoinedProjectNumber(
-      Map<dynamic, dynamic> projectMap, UserModel? currentUserModel) async {
-    List<ProjectModel> joinedProjects = [];
-    for (var project in projectMap.values) {
-      ProjectModel projectModel =
-          ProjectModel.fromMap(Map<String, dynamic>.from(project));
-      if (projectModel.leaderId == currentUserModel?.userId) {
-        joinedProjects.add(projectModel);
-      }
-    }
-    return joinedProjects;
   }
 }

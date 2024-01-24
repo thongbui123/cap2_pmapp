@@ -4,7 +4,8 @@ import 'package:capstone2_project_management_app/views/subs/db_side_menu.dart';
 import 'package:flutter/material.dart';
 
 class listOfProjects extends StatefulWidget {
-  const listOfProjects({Key? key}) : super(key: key);
+  final Map<dynamic, dynamic> projectMap;
+  const listOfProjects({Key? key, required this.projectMap}) : super(key: key);
 
   @override
   State<listOfProjects> createState() => _listOfProjectsState();
@@ -13,7 +14,7 @@ class listOfProjects extends StatefulWidget {
 class _listOfProjectsState extends State<listOfProjects>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-
+  late Map<dynamic, dynamic> projectMap;
   List<String> allProjects = [
     'Project A01',
     'Project B02',
@@ -23,6 +24,7 @@ class _listOfProjectsState extends State<listOfProjects>
   @override
   void initState() {
     super.initState();
+    projectMap = widget.projectMap;
     _tabController = TabController(length: 2, vsync: this);
   }
 
