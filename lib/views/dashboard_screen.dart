@@ -19,7 +19,7 @@ class _dashboard_screenState extends State<dashboard_screen> {
   UserModel? userModel;
   DatabaseReference? userRef;
   DatabaseReference? projectRef;
-  Map<String, dynamic> projectMap = {};
+  late Map<String, dynamic> projectMap;
   final databaseReference = FirebaseDatabase.instance.ref();
   _getUserDetails() async {
     DatabaseEvent snapshot = await userRef!.once();
@@ -30,14 +30,13 @@ class _dashboard_screenState extends State<dashboard_screen> {
     });
   }
 
-  Future<void> _getProjectValues() async {
+  Future<Map<String, dynamic>> _getProjectValues() async {
     DatabaseEvent databaseEvent =
         await databaseReference.child('projects').once();
     if (databaseEvent.snapshot.value != null) {
-      projectMap = Map.from(databaseEvent.snapshot.value as dynamic);
+      return projectMap = Map.from(databaseEvent.snapshot.value as dynamic);
     }
-
-    setState(() {});
+    return {};
   }
 
   @override
@@ -46,9 +45,9 @@ class _dashboard_screenState extends State<dashboard_screen> {
     user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       userRef = databaseReference.child('users').child(user!.uid);
+      _waitUntilHasData();
       //projectRef = databaseReference.child('projects');
     }
-    _getUserDetails();
   }
 
   _waitUntilHasData() async {
@@ -66,14 +65,34 @@ class _dashboard_screenState extends State<dashboard_screen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     db_side_menu(),
-                    Expanded(
-                      child: userModel?.userRole == "User"
-                          ? const DashboardMainV2()
-                          : DashboardMainV1(
-                              currentUserModel: userModel,
-                              projectMap: projectMap,
-                            ),
-                    ),
+                    FutureBuilder(
+                        future: _getProjectValues(),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Center(
+                                child: CircularProgressIndicator());
+                          } else if (snapshot.hasError) {
+                            return Center(
+                                child: Text('Error: ${snapshot.error}'));
+                          } else {
+                            projectMap = snapshot.data ?? {};
+                            return Expanded(
+                              child: userModel?.userRole == "User"
+                                  ? const DashboardMainV2()
+                                  : DashboardMainV1(
+                                      currentUserModel: userModel,
+                                      projectMap: projectMap),
+                            );
+                          }
+                        }),
+                    // Expanded(
+                    //   child: userModel?.userRole == "User"
+                    //       ? const DashboardMainV2()
+                    //       : DashboardMainV1(
+                    //           currentUserModel: userModel,
+                    //           projectMap: projectMap),
+                    // ),
                   ],
                 ),
               ),

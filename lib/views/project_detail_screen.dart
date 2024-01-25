@@ -1,15 +1,19 @@
+import 'package:capstone2_project_management_app/models/project_model.dart';
 import 'package:capstone2_project_management_app/views/stats/stats.dart';
 import 'package:capstone2_project_management_app/views/subs/db_side_menu.dart';
 import 'package:flutter/material.dart';
 
 class projectDetailScreen extends StatefulWidget {
-  const projectDetailScreen({Key? key}) : super(key: key);
+  final ProjectModel projectModel;
+  const projectDetailScreen({Key? key, required this.projectModel})
+      : super(key: key);
 
   @override
   State<projectDetailScreen> createState() => _projectDetailScreenState();
 }
 
 class _projectDetailScreenState extends State<projectDetailScreen> {
+  late ProjectModel projectModel;
   List<String> allMembers = [
     'User 1',
     'User 2',
@@ -23,6 +27,8 @@ class _projectDetailScreenState extends State<projectDetailScreen> {
   @override
   void initState() {
     super.initState();
+    projectModel = widget.projectModel;
+    allMembers = projectModel.projectMembers;
   }
 
   @override
@@ -60,13 +66,13 @@ class _projectDetailScreenState extends State<projectDetailScreen> {
                       ListTile(
                         leading: CircleAvatar(
                             child: Icon(Icons.folder, color: Colors.orange)),
-                        title: Text('Project Name: PMS',
+                        title: Text('Project Name: ${projectModel.projectName}',
                             style: TextStyle(
                                 fontFamily: 'MontMed',
                                 color: Colors.black,
                                 fontSize: 13)),
                         subtitle: Text(
-                          'Current State: In Development',
+                          'Current State: ${projectModel.projectStatus}',
                           style: TextStyle(fontFamily: 'MontMed', fontSize: 12),
                         ),
                       ),
@@ -78,7 +84,7 @@ class _projectDetailScreenState extends State<projectDetailScreen> {
                       ),
                       SizedBox(height: 5),
                       Text(
-                        'Description: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
+                        'Description: ${projectModel.projecctDescription}',
                         style: TextStyle(
                             fontFamily: 'MontMed',
                             color: Colors.black87,
@@ -97,7 +103,7 @@ class _projectDetailScreenState extends State<projectDetailScreen> {
                                 fontFamily: 'MontMed',
                                 fontSize: 12,
                                 color: Colors.black54)),
-                        subtitle: Text('THONG B',
+                        subtitle: Text('${projectModel.managerId}',
                             style:
                                 TextStyle(fontFamily: 'MontMed', fontSize: 14)),
                       ),
@@ -111,7 +117,7 @@ class _projectDetailScreenState extends State<projectDetailScreen> {
                                 fontFamily: 'MontMed',
                                 fontSize: 12,
                                 color: Colors.black54)),
-                        subtitle: Text('22/10/2023',
+                        subtitle: Text('${projectModel.startDate}',
                             style:
                                 TextStyle(fontFamily: 'MontMed', fontSize: 14)),
                         trailing: Column(
@@ -123,7 +129,7 @@ class _projectDetailScreenState extends State<projectDetailScreen> {
                                       fontFamily: 'MontMed',
                                       fontSize: 12,
                                       color: Colors.black54)),
-                              Text('22/10/2077',
+                              Text('${projectModel.endDate}',
                                   style: TextStyle(
                                       fontFamily: 'MontMed', fontSize: 14))
                             ]),
@@ -158,7 +164,8 @@ class _projectDetailScreenState extends State<projectDetailScreen> {
                                 fontFamily: 'MontMed',
                                 fontSize: 12,
                                 color: Colors.black54)),
-                        subtitle: Text('4 participants ',
+                        subtitle: Text(
+                            '${projectModel.projectMembers.length} participant(s) ',
                             style:
                                 TextStyle(fontFamily: 'MontMed', fontSize: 14)),
                       ),

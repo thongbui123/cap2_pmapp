@@ -1,3 +1,4 @@
+import 'package:capstone2_project_management_app/models/project_model.dart';
 import 'package:capstone2_project_management_app/views/project_detail_screen.dart';
 import 'package:capstone2_project_management_app/views/stats/stats.dart';
 import 'package:capstone2_project_management_app/views/subs/db_side_menu.dart';
@@ -15,17 +16,38 @@ class _listOfProjectsState extends State<listOfProjects>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   late Map<dynamic, dynamic> projectMap;
-  List<String> allProjects = [
-    'Project A01',
-    'Project B02',
-    'Project B01',
-  ];
+  List<ProjectModel> allProjects = [];
 
   @override
   void initState() {
     super.initState();
     projectMap = widget.projectMap;
+    allProjects = _getData();
     _tabController = TabController(length: 2, vsync: this);
+  }
+
+  List<ProjectModel> _getData() {
+    List<ProjectModel> allProjects = [];
+    for (var project in projectMap.values) {
+      ProjectModel projectModel =
+          ProjectModel.fromMap(Map<String, dynamic>.from(project));
+      allProjects.add(projectModel);
+    }
+    return allProjects;
+  }
+
+  sortDecending<T>(List<ProjectModel> list,
+      Comparable<T> Function(ProjectModel obj) getAttribute) {
+    setState(() {
+      list.sort((a, b) => getAttribute(b).compareTo(getAttribute(a) as T));
+    });
+  }
+
+  sortAscending<T>(List<ProjectModel> list,
+      Comparable<T> Function(ProjectModel obj) getAttribute) {
+    setState(() {
+      list.sort((a, b) => getAttribute(a).compareTo(getAttribute(b) as T));
+    });
   }
 
   @override
@@ -146,37 +168,54 @@ class _listOfProjectsState extends State<listOfProjects>
                           controller: _tabController,
                           children: [
                             // Content for Tab 1
-                            Container(
+                            SingleChildScrollView(
                               child: Column(
                                 children: ListTile.divideTiles(
                                   context:
                                       context, // Make sure to provide the BuildContext if this code is inside a widget build method
-                                  tiles: allProjects.map((project) {
-                                    return ListTile(
-                                      onTap: () {
-                                        Navigator.of(context).push(
-                                            MaterialPageRoute(
-                                                builder: (context) =>
-                                                    const projectDetailScreen()));
-                                      },
-                                      leading: const CircleAvatar(
-                                        child: Icon(
-                                          Icons.folder,
-                                          color: Colors.orange,
+                                  tiles: allProjects.map(
+                                    (project) {
+                                      return ListTile(
+                                        onTap: () {
+                                          Navigator.of(context).push(
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      projectDetailScreen(
+                                                        projectModel: project,
+                                                      )));
+                                        },
+                                        leading: const CircleAvatar(
+                                          child: Icon(
+                                            Icons.folder,
+                                            color: Colors.orange,
+                                          ),
                                         ),
-                                      ),
-                                      title: Text(project,
-                                          style: TextStyle(
-                                              fontFamily: 'MontMed',
-                                              fontSize: 13)),
-                                      subtitle: Text(
-                                        'Participants: 3',
-                                        style: const TextStyle(
-                                            fontFamily: 'MontMed',
-                                            fontSize: 12),
-                                      ),
-                                    );
-                                  }),
+                                        title: Text(
+                                            project.projectName.toString(),
+                                            style: TextStyle(
+                                                fontFamily: 'MontMed',
+                                                fontSize: 13)),
+                                        subtitle: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              'Started Date: ${project.startDate}',
+                                              style: const TextStyle(
+                                                  fontFamily: 'MontMed',
+                                                  fontSize: 12),
+                                            ),
+                                            Text(
+                                              'Participant(s): ${project.projectMembers.length}',
+                                              style: const TextStyle(
+                                                  fontFamily: 'MontMed',
+                                                  fontSize: 12),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    },
+                                  ),
                                 ).toList(),
                               ),
                             ),
@@ -194,7 +233,7 @@ class _listOfProjectsState extends State<listOfProjects>
                                           color: Colors.orange,
                                         ),
                                       ),
-                                      title: Text(project,
+                                      title: Text(project.projectId,
                                           style: TextStyle(
                                               fontFamily: 'MontMed',
                                               fontSize: 13)),
@@ -254,7 +293,10 @@ class _listOfProjectsState extends State<listOfProjects>
                     dateVisibility = true;
                     numberVisibility = false;
                     nameVisibility = false;
-                    Navigator.pop(context);
+                    setState(() {
+                      sortAscending(allProjects, (obj) => obj.startDate);
+                      Navigator.pop(context);
+                    });
                   },
                   trailing: Container(
                       child: Visibility(
@@ -269,6 +311,8 @@ class _listOfProjectsState extends State<listOfProjects>
                     dateVisibility = false;
                     numberVisibility = true;
                     nameVisibility = false;
+                    sortAscending(allProjects = allProjects,
+                        (obj) => obj.projectMembers.length);
                     Navigator.pop(context);
                   },
                   trailing: Container(
@@ -284,6 +328,8 @@ class _listOfProjectsState extends State<listOfProjects>
                     dateVisibility = false;
                     numberVisibility = false;
                     nameVisibility = true;
+
+                    sortAscending(allProjects, (obj) => obj.projectName);
                     Navigator.pop(context);
                   },
                   trailing: Container(
@@ -327,6 +373,7 @@ class _listOfProjectsState extends State<listOfProjects>
                   onTap: () {
                     ascendingVisibility = true;
                     descendingVisibility = false;
+                    sortAscending(allProjects, (obj) => obj.projectName);
                     Navigator.pop(context);
                   },
                   trailing: Container(
@@ -341,6 +388,7 @@ class _listOfProjectsState extends State<listOfProjects>
                   onTap: () {
                     ascendingVisibility = false;
                     descendingVisibility = true;
+                    sortDecending(allProjects, (obj) => obj.projectName);
                     Navigator.pop(context);
                   },
                   trailing: Container(
@@ -384,6 +432,7 @@ class _listOfProjectsState extends State<listOfProjects>
                   onTap: () {
                     completedVisibility = true;
                     incompletedVisibility = false;
+
                     Navigator.pop(context);
                   },
                   trailing: Container(

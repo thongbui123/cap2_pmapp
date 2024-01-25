@@ -452,8 +452,8 @@ class _projectCreateStep1State extends State<projectCreateStep1> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text(
-            'Select Members',
-            style: TextStyle(fontFamily: 'MontMed'),
+            'SELECT MEMBERS',
+            style: TextStyle(fontFamily: 'Anurati'),
           ),
           content: SingleChildScrollView(
             child: allLeaders.isNotEmpty

@@ -62,19 +62,19 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
     super.initState();
     currentUserModel = widget.currentUserModel;
     projectMap = widget.projectMap;
-    getProjectMap();
+    _getData();
     //_getProjectDetails();
   }
 
   _getData() async {
-    _getProjectDetails();
-
+    //await getProjectMap();
+    await _getProjectDetails();
     //projectMap = await projectServices.getProjectMap();
   }
 
   @override
   Widget build(BuildContext context) {
-    return projectMap.values.isEmpty
+    return projectMap == null
         ? const Center(child: CircularProgressIndicator())
         : SafeArea(
             child: SingleChildScrollView(
