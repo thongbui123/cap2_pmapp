@@ -2,7 +2,7 @@ import 'package:capstone2_project_management_app/models/project_model.dart';
 import 'package:capstone2_project_management_app/models/user_model.dart';
 import 'package:capstone2_project_management_app/services/project_services.dart';
 import 'package:capstone2_project_management_app/views/list_of_project_screen.dart';
-import 'package:capstone2_project_management_app/views/list_of_tasks_screen.dart';
+import 'package:capstone2_project_management_app/views/my_tasks_screen.dart';
 import 'package:capstone2_project_management_app/views/stats/stats.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -166,7 +166,7 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
                                         Navigator.of(context).push(
                                             MaterialPageRoute(
                                                 builder: (context) {
-                                          return const listOfTasks();
+                                          return const MyTaskScreen();
                                         }));
                                       },
                                       icon: const Icon(

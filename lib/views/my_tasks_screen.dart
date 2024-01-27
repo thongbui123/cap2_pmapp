@@ -6,12 +6,11 @@ import 'package:capstone2_project_management_app/views/subs/db_side_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 
-class listOfTasks extends StatefulWidget {
-  final ProjectModel projectModel;
-  const listOfTasks({super.key, required this.projectModel});
+class MyTaskScreen extends StatefulWidget {
+  const MyTaskScreen({super.key});
 
   @override
-  State<listOfTasks> createState() => _listOfTasksState();
+  State<MyTaskScreen> createState() => _MyTaskScreenState();
 }
 
 List<String> allTasks = [
@@ -26,13 +25,12 @@ List<String> allProjects = [
   'Project B01',
 ];
 
-class _listOfTasksState extends State<listOfTasks> {
+class _MyTaskScreenState extends State<MyTaskScreen> {
   late ProjectModel projectModel;
   late Map<String, dynamic> userMap;
   @override
   void initState() {
     super.initState();
-    projectModel = widget.projectModel;
   }
 
   @override

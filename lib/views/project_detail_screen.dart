@@ -1,11 +1,15 @@
 import 'package:capstone2_project_management_app/models/project_model.dart';
+import 'package:capstone2_project_management_app/models/user_model.dart';
+import 'package:capstone2_project_management_app/services/user_services.dart';
 import 'package:capstone2_project_management_app/views/stats/stats.dart';
 import 'package:capstone2_project_management_app/views/subs/db_side_menu.dart';
 import 'package:flutter/material.dart';
 
 class projectDetailScreen extends StatefulWidget {
   final ProjectModel projectModel;
-  const projectDetailScreen({Key? key, required this.projectModel})
+  final Map<String, dynamic> userMap;
+  const projectDetailScreen(
+      {Key? key, required this.projectModel, required this.userMap})
       : super(key: key);
 
   @override
@@ -14,12 +18,9 @@ class projectDetailScreen extends StatefulWidget {
 
 class _projectDetailScreenState extends State<projectDetailScreen> {
   late ProjectModel projectModel;
-  List<String> allMembers = [
-    'User 1',
-    'User 2',
-    'User 3',
-  ];
-
+  UserServices userServices = UserServices();
+  List<UserModel> allMembers = [];
+  late Map<String, dynamic> userMap;
   List<String> currentList = [];
 
   bool _customTileExpanded = false;
@@ -28,7 +29,8 @@ class _projectDetailScreenState extends State<projectDetailScreen> {
   void initState() {
     super.initState();
     projectModel = widget.projectModel;
-    allMembers = projectModel.projectMembers;
+    userMap = widget.userMap;
+    allMembers = userServices.getUserDataList(userMap).cast<UserModel>();
   }
 
   @override
@@ -268,13 +270,13 @@ class _projectDetailScreenState extends State<projectDetailScreen> {
                         'A',
                         style: TextStyle(fontFamily: 'MontMed'),
                       )),
-                      title: Text(user),
+                      title: Text(user.userId),
                       subtitle: Text(
                         '2 Projects Involved',
                         style: TextStyle(fontFamily: 'MontMed'),
                       ),
                       onTap: () {
-                        _addMember(user);
+                        _addMember(user.userId);
                         Navigator.of(context).pop(); // Close the dialog
                       },
                     ),

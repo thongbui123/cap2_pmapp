@@ -1,5 +1,5 @@
 import 'package:capstone2_project_management_app/models/project_model.dart';
-import 'package:capstone2_project_management_app/views/project_detail_screen.dart';
+import 'package:capstone2_project_management_app/views/list_of_tasks_screen.dart';
 import 'package:capstone2_project_management_app/views/stats/stats.dart';
 import 'package:capstone2_project_management_app/views/subs/db_side_menu.dart';
 import 'package:flutter/material.dart';
@@ -16,6 +16,7 @@ class _listOfProjectsState extends State<listOfProjects>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   late Map<dynamic, dynamic> projectMap;
+  late Map<String, dynamic> userMap;
   List<ProjectModel> allProjects = [];
 
   @override
@@ -179,10 +180,10 @@ class _listOfProjectsState extends State<listOfProjects>
                                         onTap: () {
                                           Navigator.of(context).push(
                                               MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      projectDetailScreen(
-                                                        projectModel: project,
-                                                      )));
+                                                  builder: (context) {
+                                            return listOfTasks(
+                                                projectModel: project);
+                                          }));
                                         },
                                         leading: const CircleAvatar(
                                           child: Icon(
