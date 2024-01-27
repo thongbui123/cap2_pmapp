@@ -16,6 +16,16 @@ class projectDetailScreen extends StatefulWidget {
   State<projectDetailScreen> createState() => _projectDetailScreenState();
 }
 
+List<String> allMembers = [
+  'User 1',
+  'User 2',
+  'User 3',
+];
+
+List<String> currentList = [
+
+];
+
 class _projectDetailScreenState extends State<projectDetailScreen> {
   late ProjectModel projectModel;
   UserServices userServices = UserServices();
@@ -192,7 +202,16 @@ class _projectDetailScreenState extends State<projectDetailScreen> {
                                 ),
                               ],
                             ),
-                          )),
+                          )
+                      ),
+                      ListTile(
+                        leading: CircleAvatar(
+                          child: Icon(Icons.people),
+                        ),
+                        title: Text('Participants: ', style: TextStyle(fontFamily: 'MontMed', fontSize: 12, color: Colors.black54)),
+                        subtitle: Text('4 participants ', style: TextStyle(fontFamily: 'MontMed', fontSize: 14)),
+                        trailing: TextButton(onPressed: (){_showStateBottomSheet(context);}, child: Text('View All ', style: TextStyle(fontFamily: 'MontMed', fontSize: 14))),
+                      ),
                       Divider(),
                       Container(
                         padding: EdgeInsets.fromLTRB(18, 0, 0, 0),
@@ -396,6 +415,15 @@ class _projectDetailScreenState extends State<projectDetailScreen> {
     );
   }
 
+  void _showStateBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBottomSheetWidget(message: 'Hello');
+      },
+    );
+  }
+
   void _removeMember(String member) {
     setState(() {
       currentList.remove(member);
@@ -408,3 +436,119 @@ class _projectDetailScreenState extends State<projectDetailScreen> {
     });
   }
 }
+
+class StatefulBottomSheetWidget extends StatefulWidget {
+  final String message;
+
+  StatefulBottomSheetWidget({required this.message});
+
+  @override
+  _StatefulBottomSheetWidgetState createState() =>
+      _StatefulBottomSheetWidgetState();
+}
+
+class _StatefulBottomSheetWidgetState extends State<StatefulBottomSheetWidget> {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(10),
+      child: Column(
+        children: [
+          SizedBox(height: 10),
+          Container(
+              child: TextButton(
+                onPressed: _showMemberSelectionDialog,
+                child: const Row(
+                  children: [
+                    Icon(Icons.add, color: Colors.blueAccent,),
+                    SizedBox(width: 10),
+                    Text(
+                      'Add New Participant',
+                      style: TextStyle(fontFamily: 'MontMed', color: Colors.blueAccent),
+                    ),
+                  ],
+                ),
+              )
+          ),
+          SizedBox(height: 10),
+          Expanded(
+            child: Column(
+              children: ListTile.divideTiles(
+                context: context,  // Make sure to provide the BuildContext if this code is inside a widget build method
+                tiles: currentList.map((member) {
+                  return ListTile(
+                    leading: const CircleAvatar(
+                      child: Icon(
+                        Icons.person,
+                      ),
+                    ),
+                    title: Text(member, style: TextStyle(fontFamily: 'MontMed', fontSize: 13)),
+                    subtitle: Text(
+                      'Participants: 3',
+                      style: const TextStyle(fontFamily: 'MontMed', fontSize: 12),
+                    ),
+                  );
+                }),
+              ).toList(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showMemberSelectionDialog() async {
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text(
+            'MEMBERS',
+            style: TextStyle(fontFamily: 'Anurati'),
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              children: allMembers.map((user) {
+                return Column(
+                  children: <Widget>[
+                    ListTile(
+                      leading: const CircleAvatar(
+                          child: Text(
+                            'A',
+                            style: TextStyle(fontFamily: 'MontMed'),
+                          )),
+                      title: Text(user),
+                      subtitle: Text(
+                        '2 Projects Involved',
+                        style: TextStyle(fontFamily: 'MontMed'),
+                      ),
+                      onTap: () {
+                        setState(() {
+                          currentList.add(user);
+                        });
+                        Navigator.of(context).pop(); // Close the dialog
+                      },
+                    ),
+                    const Divider(height: 0),
+                  ],
+                );
+              }).toList(),
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text(
+                'Cancel',
+                style: TextStyle(fontFamily: 'MontMed'),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
