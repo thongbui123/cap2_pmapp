@@ -463,21 +463,22 @@ class _projectCreateStep1State extends State<projectCreateStep1> {
                         children: <Widget>[
                           ListTile(
                             leading: CircleAvatar(
-                                child: userAvatarMap[user] == ''
-                                    ? Text(
-                                        getFirstLetter(
-                                            leaderIdMap[user].toString()),
-                                        style: const TextStyle(
-                                            fontFamily: 'MontMed'),
-                                      )
-                                    : CircleAvatar(
-                                        radius: 66,
-                                        backgroundColor: Colors.white,
-                                        backgroundImage: showLocalFile
-                                            ? FileImage(imageFile!)
-                                                as ImageProvider
-                                            : NetworkImage(
-                                                userAvatarMap[user]!))),
+                              child: userAvatarMap[user] == ''
+                                  ? Text(
+                                      getFirstLetter(
+                                          leaderIdMap[user].toString()),
+                                      style: const TextStyle(
+                                          fontFamily: 'MontMed'),
+                                    )
+                                  : CircleAvatar(
+                                      radius: 66,
+                                      backgroundColor: Colors.white,
+                                      backgroundImage: showLocalFile
+                                          ? FileImage(imageFile!)
+                                              as ImageProvider
+                                          : NetworkImage(userAvatarMap[user]!),
+                                    ),
+                            ),
                             title: Text(leaderIdMap[user]!),
                             subtitle: Text(
                               "Handling: ${countProjectMap[user].toString()} project(s)",
