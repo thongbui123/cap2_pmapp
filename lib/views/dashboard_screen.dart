@@ -34,7 +34,7 @@ class _dashboard_screenState extends State<dashboard_screen> {
     DatabaseEvent databaseEvent =
         await databaseReference.child('projects').once();
     if (databaseEvent.snapshot.value != null) {
-      return projectMap = Map.from(databaseEvent.snapshot.value as dynamic);
+      return Map.from(databaseEvent.snapshot.value as dynamic);
     }
     return {};
   }
