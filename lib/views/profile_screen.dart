@@ -1,5 +1,8 @@
-import 'package:flutter/material.dart';
 import 'dart:io';
+
+import 'package:capstone2_project_management_app/views/stats/stats.dart';
+import 'package:capstone2_project_management_app/views/subs/db_side_menu.dart';
+import 'package:capstone2_project_management_app/views/subs/sub_widgets.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -10,8 +13,6 @@ import 'package:ndialog/ndialog.dart';
 
 import '../models/user_model.dart';
 import '../services/image_services.dart';
-import 'package:capstone2_project_management_app/views/stats/stats.dart';
-import 'package:capstone2_project_management_app/views/subs/db_side_menu.dart';
 
 class profile_screen extends StatefulWidget {
   const profile_screen({Key? key}) : super(key: key);
@@ -53,7 +54,7 @@ class _profile_screenState extends State<profile_screen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: userModel == null
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(child: loader())
           : SafeArea(
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,

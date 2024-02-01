@@ -75,7 +75,10 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
   @override
   Widget build(BuildContext context) {
     return projectMap.isEmpty
-        ? const Center(child: CircularProgressIndicator())
+        ? const Center(
+            child: Column(
+            children: [CircularProgressIndicator(), Text('Please')],
+          ))
         : SafeArea(
             child: SingleChildScrollView(
             padding: const EdgeInsets.all(defaultPadding),

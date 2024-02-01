@@ -2,6 +2,7 @@ import 'package:capstone2_project_management_app/models/project_model.dart';
 import 'package:capstone2_project_management_app/models/user_model.dart';
 import 'package:capstone2_project_management_app/services/user_services.dart';
 import 'package:capstone2_project_management_app/views/stats/stats.dart';
+import 'package:capstone2_project_management_app/views/subs/bottom_sheet_widget.dart';
 import 'package:capstone2_project_management_app/views/subs/db_side_menu.dart';
 import 'package:flutter/material.dart';
 
@@ -29,8 +30,7 @@ class _projectDetailScreenState extends State<projectDetailScreen> {
   UserServices userServices = UserServices();
   List<UserModel> allMembers = [];
   late Map<String, dynamic> userMap;
-  List<String> currentList = [];
-
+  List<UserModel> currentList = [];
   bool _customTileExpanded = false;
 
   @override
@@ -185,57 +185,65 @@ class _projectDetailScreenState extends State<projectDetailScreen> {
                                   style: TextStyle(
                                       fontFamily: 'MontMed', fontSize: 14)))),
                       const Divider(),
-                      ListTile(
-                        leading: const CircleAvatar(
-                          child: Icon(Icons.people),
-                        ),
-                        title: const Text('Participants: ',
-                            style: TextStyle(
-                                fontFamily: 'MontMed',
-                                fontSize: 12,
-                                color: Colors.black54)),
-                        subtitle: Text(
-                            '${projectModel.projectMembers.length} participant(s) ',
-                            style: const TextStyle(
-                                fontFamily: 'MontMed', fontSize: 14)),
-                      ),
-                      const Divider(),
+                      // ListTile(
+                      //   leading: const CircleAvatar(
+                      //     child: Icon(Icons.people),
+                      //   ),
+                      //   title: const Text('Participants: ',
+                      //       style: TextStyle(
+                      //           fontFamily: 'MontMed',
+                      //           fontSize: 12,
+                      //           color: Colors.black54)),
+                      //   subtitle: Text(
+                      //       '${projectModel.projectMembers.length} participant(s)',
+                      //       style: const TextStyle(
+                      //           fontFamily: 'MontMed', fontSize: 14)),
+                      // ),
+                      // const Divider(),
                       const SizedBox(height: 5),
-                      Container(
-                          margin: const EdgeInsets.fromLTRB(30, 0, 0, 0),
-                          child: TextButton(
-                            onPressed: _showMemberSelectionDialog,
-                            child: const Row(
-                              children: [
-                                Icon(
-                                  Icons.add,
-                                  color: Colors.blueAccent,
-                                ),
-                                SizedBox(width: 10),
-                                Text(
-                                  'Add New Participant',
-                                  style: TextStyle(
-                                      fontFamily: 'MontMed',
-                                      color: Colors.blueAccent),
-                                ),
-                              ],
-                            ),
-                          )),
+                      // Container(
+                      //   margin: const EdgeInsets.fromLTRB(30, 0, 0, 0),
+                      //   child: TextButton(
+                      //     onPressed: _showMemberSelectionDialog,
+                      //     child: const Row(
+                      //       children: [
+                      //         Icon(
+                      //           Icons.add,
+                      //           color: Colors.blueAccent,
+                      //         ),
+                      //         SizedBox(width: 10),
+                      //         Text(
+                      //           'Add New Participant',
+                      //           style: TextStyle(
+                      //               fontFamily: 'MontMed',
+                      //               color: Colors.blueAccent),
+                      //         ),
+                      //       ],
+                      //     ),
+                      //   ),
+                      // ),
                       ListTile(
                         leading: const CircleAvatar(
                           child: Icon(Icons.people),
                         ),
-                        title: const Text('Participants: ',
-                            style: TextStyle(
-                                fontFamily: 'MontMed',
-                                fontSize: 12,
-                                color: Colors.black54)),
-                        subtitle: const Text('4 participants ',
-                            style:
-                                TextStyle(fontFamily: 'MontMed', fontSize: 14)),
+                        title: const Text(
+                          'Participants: ',
+                          style: TextStyle(
+                              fontFamily: 'MontMed',
+                              fontSize: 12,
+                              color: Colors.black54),
+                        ),
+                        subtitle: Text(
+                          '${projectModel.projectMembers.length} member(s)',
+                          style: const TextStyle(
+                            fontFamily: 'MontMed',
+                            fontSize: 14,
+                          ),
+                        ),
                         trailing: TextButton(
                             onPressed: () {
-                              _showStateBottomSheet(context);
+                              _showStateBottomSheet(
+                                  context, projectModel.projectMembers);
                             },
                             child: const Text('View All ',
                                 style: TextStyle(
@@ -252,7 +260,7 @@ class _projectDetailScreenState extends State<projectDetailScreen> {
                                 'A',
                                 style: TextStyle(fontFamily: 'MontMed'),
                               )),
-                              title: Text(member,
+                              title: Text(member.userFirstName,
                                   style: const TextStyle(
                                       fontFamily: 'MontMed', fontSize: 14)),
                               subtitle: const Text(
@@ -324,7 +332,7 @@ class _projectDetailScreenState extends State<projectDetailScreen> {
                         style: TextStyle(fontFamily: 'MontMed'),
                       ),
                       onTap: () {
-                        _addMember(user.userId);
+                        _addMember(user);
                         Navigator.of(context).pop(); // Close the dialog
                       },
                     ),
@@ -444,145 +452,29 @@ class _projectDetailScreenState extends State<projectDetailScreen> {
     );
   }
 
-  void _showStateBottomSheet(BuildContext context) {
+  void _showStateBottomSheet(
+      BuildContext context, List<String> currentStringList) {
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
-        return StatefulBottomSheetWidget(message: 'Hello');
+        return StatefulBottomSheetWidget(
+          message: 'Hello',
+          allMembers: allMembers,
+          currentList: currentStringList,
+        );
       },
     );
   }
 
-  void _removeMember(String member) {
+  void _removeMember(UserModel member) {
     setState(() {
       currentList.remove(member);
     });
   }
 
-  void _addMember(String member) {
+  void _addMember(UserModel member) {
     setState(() {
       currentList.add(member);
     });
-  }
-}
-
-class StatefulBottomSheetWidget extends StatefulWidget {
-  final String message;
-
-  StatefulBottomSheetWidget({required this.message});
-
-  @override
-  _StatefulBottomSheetWidgetState createState() =>
-      _StatefulBottomSheetWidgetState();
-}
-
-class _StatefulBottomSheetWidgetState extends State<StatefulBottomSheetWidget> {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(10),
-      child: Column(
-        children: [
-          const SizedBox(height: 10),
-          Container(
-              child: TextButton(
-            onPressed: _showMemberSelectionDialog,
-            child: const Row(
-              children: [
-                Icon(
-                  Icons.add,
-                  color: Colors.blueAccent,
-                ),
-                SizedBox(width: 10),
-                Text(
-                  'Add New Participant',
-                  style: TextStyle(
-                      fontFamily: 'MontMed', color: Colors.blueAccent),
-                ),
-              ],
-            ),
-          )),
-          const SizedBox(height: 10),
-          Expanded(
-            child: Column(
-              children: ListTile.divideTiles(
-                context:
-                    context, // Make sure to provide the BuildContext if this code is inside a widget build method
-                tiles: currentList.map((member) {
-                  return ListTile(
-                    leading: const CircleAvatar(
-                      child: Icon(
-                        Icons.person,
-                      ),
-                    ),
-                    title: Text(member,
-                        style: const TextStyle(
-                            fontFamily: 'MontMed', fontSize: 13)),
-                    subtitle: const Text(
-                      'Participants: 3',
-                      style: TextStyle(fontFamily: 'MontMed', fontSize: 12),
-                    ),
-                  );
-                }),
-              ).toList(),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _showMemberSelectionDialog() async {
-    await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text(
-            'MEMBERS',
-            style: TextStyle(fontFamily: 'Anurati'),
-          ),
-          content: SingleChildScrollView(
-            child: Column(
-              children: allMembers.map((user) {
-                return Column(
-                  children: <Widget>[
-                    ListTile(
-                      leading: const CircleAvatar(
-                          child: Text(
-                        'A',
-                        style: TextStyle(fontFamily: 'MontMed'),
-                      )),
-                      title: Text(user),
-                      subtitle: const Text(
-                        '2 Projects Involved',
-                        style: TextStyle(fontFamily: 'MontMed'),
-                      ),
-                      onTap: () {
-                        setState(() {
-                          currentList.add(user);
-                        });
-                        Navigator.of(context).pop(); // Close the dialog
-                      },
-                    ),
-                    const Divider(height: 0),
-                  ],
-                );
-              }).toList(),
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text(
-                'Cancel',
-                style: TextStyle(fontFamily: 'MontMed'),
-              ),
-            ),
-          ],
-        );
-      },
-    );
   }
 }

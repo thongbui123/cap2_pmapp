@@ -41,7 +41,7 @@ class _MyTaskScreenState extends State<MyTaskScreen> {
           onPressed: () {},
           backgroundColor: Colors.blueAccent,
           tooltip: 'Add Project', // Optional tooltip text shown on long-press
-          child: Icon(
+          child: const Icon(
             Icons.playlist_add,
             color: Colors.white,
           ), // Updated icon for the FAB
@@ -54,12 +54,12 @@ class _MyTaskScreenState extends State<MyTaskScreen> {
             db_side_menu(),
             Expanded(
                 child: Padding(
-                    padding: EdgeInsets.all(defaultPadding),
+                    padding: const EdgeInsets.all(defaultPadding),
                     child: SingleChildScrollView(
                         child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
+                        const Row(
                           children: [
                             Text(
                               'TASKS',
@@ -70,9 +70,9 @@ class _MyTaskScreenState extends State<MyTaskScreen> {
                             ),
                           ],
                         ),
-                        Divider(),
+                        const Divider(),
                         ListTile(
-                          leading: CircleAvatar(
+                          leading: const CircleAvatar(
                               child:
                                   Icon(Icons.folder, color: Colors.blueAccent)),
                           onTap: () {
@@ -101,26 +101,26 @@ class _MyTaskScreenState extends State<MyTaskScreen> {
                                   });
                             }));
                           },
-                          title: Text('${projectModel.projectName}',
-                              style: TextStyle(
+                          title: Text(projectModel.projectName,
+                              style: const TextStyle(
                                   fontFamily: 'MontMed', fontSize: 13)),
-                          subtitle: Text(
+                          subtitle: const Text(
                             '2 Tasks',
-                            style: const TextStyle(
-                                fontFamily: 'MontMed', fontSize: 12),
+                            style:
+                                TextStyle(fontFamily: 'MontMed', fontSize: 12),
                           ),
                           trailing: TextButton(
                             onPressed: () {
                               _showProjectSelectionDialog();
                             },
-                            child: Text('Switch',
+                            child: const Text('Switch',
                                 style: TextStyle(
                                     fontFamily: 'MontMed', fontSize: 12)),
                           ),
                         ),
-                        SizedBox(height: 5),
-                        Divider(),
-                        SizedBox(height: 5),
+                        const SizedBox(height: 5),
+                        const Divider(),
+                        const SizedBox(height: 5),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -128,7 +128,7 @@ class _MyTaskScreenState extends State<MyTaskScreen> {
                               onPressed: () {
                                 _showFilterDrawer(context);
                               },
-                              child: Row(
+                              child: const Row(
                                 children: [
                                   Icon(Icons.filter_list, size: 15),
                                   SizedBox(width: 10),
@@ -140,14 +140,14 @@ class _MyTaskScreenState extends State<MyTaskScreen> {
                                 ],
                               ),
                             ),
-                            SizedBox(width: 5),
+                            const SizedBox(width: 5),
                             Container(width: 1, height: 25, color: Colors.grey),
-                            SizedBox(width: 5),
+                            const SizedBox(width: 5),
                             TextButton(
                               onPressed: () {
                                 _showOrderDrawer(context);
                               },
-                              child: Row(
+                              child: const Row(
                                 children: [
                                   Icon(Icons.import_export, size: 15),
                                   SizedBox(width: 10),
@@ -159,14 +159,14 @@ class _MyTaskScreenState extends State<MyTaskScreen> {
                                 ],
                               ),
                             ),
-                            SizedBox(width: 5),
+                            const SizedBox(width: 5),
                             Container(width: 1, height: 25, color: Colors.grey),
-                            SizedBox(width: 5),
+                            const SizedBox(width: 5),
                             TextButton(
                               onPressed: () {
                                 _showStateDrawer(context);
                               },
-                              child: Row(
+                              child: const Row(
                                 children: [
                                   Icon(Icons.flag_outlined, size: 15),
                                   SizedBox(width: 10),
@@ -178,9 +178,9 @@ class _MyTaskScreenState extends State<MyTaskScreen> {
                             ),
                           ],
                         ),
-                        SizedBox(height: 5),
-                        Divider(),
-                        ExpansionTileTasks(),
+                        const SizedBox(height: 5),
+                        const Divider(),
+                        const ExpansionTileTasks(),
                       ],
                     ))))
           ],
@@ -204,13 +204,13 @@ class _MyTaskScreenState extends State<MyTaskScreen> {
                 return Column(
                   children: <Widget>[
                     ListTile(
-                      leading:
-                          CircleAvatar(child: Icon(Icons.keyboard_arrow_down)),
+                      leading: const CircleAvatar(
+                          child: Icon(Icons.keyboard_arrow_down)),
                       title: Text(project,
-                          style: TextStyle(fontFamily: 'MontMed')),
-                      subtitle: Text(
+                          style: const TextStyle(fontFamily: 'MontMed')),
+                      subtitle: const Text(
                         "Members",
-                        style: const TextStyle(fontFamily: 'MontMed'),
+                        style: TextStyle(fontFamily: 'MontMed'),
                       ),
                       onTap: () {},
                     ),
@@ -248,19 +248,19 @@ class _MyTaskScreenState extends State<MyTaskScreen> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              SizedBox(height: 20),
-              Row(
+              const SizedBox(height: 20),
+              const Row(
                 children: [
                   SizedBox(width: 25),
                   Text('Filter by:',
                       style: TextStyle(fontFamily: 'MontMed', fontSize: 16)),
                 ],
               ),
-              SizedBox(height: 5),
-              Divider(),
+              const SizedBox(height: 5),
+              const Divider(),
               ListTile(
-                  leading: Icon(Icons.people_alt_outlined),
-                  title: Text('Number of members involved',
+                  leading: const Icon(Icons.people_alt_outlined),
+                  title: const Text('Number of members involved',
                       style: TextStyle(fontFamily: 'MontMed', fontSize: 14)),
                   onTap: () {
                     numberVisibility = true;
@@ -270,11 +270,11 @@ class _MyTaskScreenState extends State<MyTaskScreen> {
                   trailing: Container(
                       child: Visibility(
                     visible: numberVisibility,
-                    child: Icon(Icons.check),
+                    child: const Icon(Icons.check),
                   ))),
               ListTile(
-                  leading: Icon(Icons.folder_open_sharp),
-                  title: Text('Name',
+                  leading: const Icon(Icons.folder_open_sharp),
+                  title: const Text('Name',
                       style: TextStyle(fontFamily: 'MontMed', fontSize: 14)),
                   onTap: () {
                     numberVisibility = false;
@@ -284,7 +284,7 @@ class _MyTaskScreenState extends State<MyTaskScreen> {
                   trailing: Container(
                       child: Visibility(
                     visible: nameVisibility,
-                    child: Icon(Icons.check),
+                    child: const Icon(Icons.check),
                   ))),
             ],
           ),
@@ -305,19 +305,19 @@ class _MyTaskScreenState extends State<MyTaskScreen> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              SizedBox(height: 20),
-              Row(
+              const SizedBox(height: 20),
+              const Row(
                 children: [
                   SizedBox(width: 25),
                   Text('Order:',
                       style: TextStyle(fontFamily: 'MontMed', fontSize: 16)),
                 ],
               ),
-              SizedBox(height: 5),
-              Divider(),
+              const SizedBox(height: 5),
+              const Divider(),
               ListTile(
-                  leading: Icon(Icons.arrow_downward),
-                  title: Text('Ascending',
+                  leading: const Icon(Icons.arrow_downward),
+                  title: const Text('Ascending',
                       style: TextStyle(fontFamily: 'MontMed', fontSize: 14)),
                   onTap: () {
                     ascendingVisibility = true;
@@ -327,11 +327,11 @@ class _MyTaskScreenState extends State<MyTaskScreen> {
                   trailing: Container(
                       child: Visibility(
                     visible: ascendingVisibility,
-                    child: Icon(Icons.check),
+                    child: const Icon(Icons.check),
                   ))),
               ListTile(
-                  leading: Icon(Icons.arrow_upward),
-                  title: Text('Descending',
+                  leading: const Icon(Icons.arrow_upward),
+                  title: const Text('Descending',
                       style: TextStyle(fontFamily: 'MontMed', fontSize: 14)),
                   onTap: () {
                     ascendingVisibility = false;
@@ -341,7 +341,7 @@ class _MyTaskScreenState extends State<MyTaskScreen> {
                   trailing: Container(
                       child: Visibility(
                     visible: descendingVisibility,
-                    child: Icon(Icons.check),
+                    child: const Icon(Icons.check),
                   ))),
             ],
           ),
@@ -363,19 +363,19 @@ class _MyTaskScreenState extends State<MyTaskScreen> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              SizedBox(height: 20),
-              Row(
+              const SizedBox(height: 20),
+              const Row(
                 children: [
                   SizedBox(width: 25),
                   Text('Priority:',
                       style: TextStyle(fontFamily: 'MontMed', fontSize: 16)),
                 ],
               ),
-              SizedBox(height: 5),
-              Divider(),
+              const SizedBox(height: 5),
+              const Divider(),
               ListTile(
                   leading: Container(width: 15, height: 15, color: Colors.red),
-                  title: Text('HIGH',
+                  title: const Text('HIGH',
                       style: TextStyle(fontFamily: 'MontMed', fontSize: 14)),
                   onTap: () {
                     highVisibility = true;
@@ -386,12 +386,12 @@ class _MyTaskScreenState extends State<MyTaskScreen> {
                   trailing: Container(
                       child: Visibility(
                     visible: highVisibility,
-                    child: Icon(Icons.check),
+                    child: const Icon(Icons.check),
                   ))),
               ListTile(
                   leading: Container(
                       width: 15, height: 15, color: Colors.orangeAccent),
-                  title: Text('MEDIUM',
+                  title: const Text('MEDIUM',
                       style: TextStyle(fontFamily: 'MontMed', fontSize: 14)),
                   onTap: () {
                     highVisibility = false;
@@ -402,11 +402,11 @@ class _MyTaskScreenState extends State<MyTaskScreen> {
                   trailing: Container(
                       child: Visibility(
                     visible: mediumVisibility,
-                    child: Icon(Icons.check),
+                    child: const Icon(Icons.check),
                   ))),
               ListTile(
                   leading: Container(width: 15, height: 15, color: Colors.blue),
-                  title: Text('LOW',
+                  title: const Text('LOW',
                       style: TextStyle(fontFamily: 'MontMed', fontSize: 14)),
                   onTap: () {
                     highVisibility = false;
@@ -417,7 +417,7 @@ class _MyTaskScreenState extends State<MyTaskScreen> {
                   trailing: Container(
                       child: Visibility(
                     visible: lowVisibility,
-                    child: Icon(Icons.check),
+                    child: const Icon(Icons.check),
                   ))),
             ],
           ),
@@ -452,16 +452,16 @@ class _ExpansionTileTasksState extends State<ExpansionTileTasks> {
     return Column(
       children: <Widget>[
         ExpansionTile(
-          shape: RoundedRectangleBorder(
+          shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.zero,
           ),
           initiallyExpanded: true,
           title: Row(
             children: [
-              Icon(Icons.calendar_month),
-              SizedBox(width: 10),
+              const Icon(Icons.calendar_month),
+              const SizedBox(width: 10),
               Text('Selected Day: ' + today.toString().split(' ')[0],
-                  style: TextStyle(fontFamily: 'MontMed', fontSize: 13)),
+                  style: const TextStyle(fontFamily: 'MontMed', fontSize: 13)),
             ],
           ),
           trailing: Icon(
@@ -470,17 +470,17 @@ class _ExpansionTileTasksState extends State<ExpansionTileTasks> {
                 : Icons.arrow_drop_down,
           ),
           children: [
-            Divider(),
+            const Divider(),
             Container(
               child: TableCalendar(
                   rowHeight: 50,
-                  headerStyle: HeaderStyle(
+                  headerStyle: const HeaderStyle(
                       formatButtonVisible: false,
                       titleCentered: true,
                       titleTextStyle: TextStyle(fontFamily: 'MontMed')),
-                  daysOfWeekStyle: DaysOfWeekStyle(
+                  daysOfWeekStyle: const DaysOfWeekStyle(
                       weekdayStyle: TextStyle(fontFamily: 'MontMed')),
-                  calendarStyle: CalendarStyle(
+                  calendarStyle: const CalendarStyle(
                       defaultTextStyle: TextStyle(fontFamily: 'MontMed')),
                   availableGestures: AvailableGestures.all,
                   selectedDayPredicate: (day) => isSameDay(day, today),
@@ -496,14 +496,14 @@ class _ExpansionTileTasksState extends State<ExpansionTileTasks> {
             });
           },
         ),
-        Divider(),
-        Divider(),
+        const Divider(),
+        const Divider(),
         ExpansionTile(
-          shape: RoundedRectangleBorder(
+          shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.zero,
           ),
           initiallyExpanded: true,
-          title: Row(
+          title: const Row(
             children: [
               Icon(Icons.list_alt),
               SizedBox(width: 10),
@@ -517,7 +517,7 @@ class _ExpansionTileTasksState extends State<ExpansionTileTasks> {
                 : Icons.arrow_drop_down,
           ),
           children: [
-            Divider(),
+            const Divider(),
             Container(
               child: Column(
                 children: allTasks.map((project) {
@@ -527,8 +527,9 @@ class _ExpansionTileTasksState extends State<ExpansionTileTasks> {
                     title: Text('Task Name: ${project}',
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(fontFamily: 'MontMed', fontSize: 13)),
-                    subtitle: Column(
+                        style: const TextStyle(
+                            fontFamily: 'MontMed', fontSize: 13)),
+                    subtitle: const Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
@@ -545,7 +546,7 @@ class _ExpansionTileTasksState extends State<ExpansionTileTasks> {
                         ),
                       ],
                     ),
-                    trailing: Column(
+                    trailing: const Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text('Priority: ',
@@ -569,13 +570,13 @@ class _ExpansionTileTasksState extends State<ExpansionTileTasks> {
             });
           },
         ),
-        Divider(),
+        const Divider(),
         ExpansionTile(
-          shape: RoundedRectangleBorder(
+          shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.zero,
           ),
           initiallyExpanded: true,
-          title: Row(
+          title: const Row(
             children: [
               Text('Recent Tasks (3)',
                   style: TextStyle(fontFamily: 'MontMed', fontSize: 13)),
@@ -587,7 +588,7 @@ class _ExpansionTileTasksState extends State<ExpansionTileTasks> {
                 : Icons.arrow_drop_down,
           ),
           children: [
-            Divider(),
+            const Divider(),
             Container(
               child: Column(
                 children: allTasks.map((project) {
@@ -597,8 +598,9 @@ class _ExpansionTileTasksState extends State<ExpansionTileTasks> {
                     title: Text('Task Name: ${project}',
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(fontFamily: 'MontMed', fontSize: 13)),
-                    subtitle: Column(
+                        style: const TextStyle(
+                            fontFamily: 'MontMed', fontSize: 13)),
+                    subtitle: const Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
@@ -615,7 +617,7 @@ class _ExpansionTileTasksState extends State<ExpansionTileTasks> {
                         ),
                       ],
                     ),
-                    trailing: Column(
+                    trailing: const Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text('Priority: ',
@@ -639,12 +641,12 @@ class _ExpansionTileTasksState extends State<ExpansionTileTasks> {
             });
           },
         ),
-        Divider(),
+        const Divider(),
         ExpansionTile(
-          shape: RoundedRectangleBorder(
+          shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.zero,
           ),
-          title: Row(
+          title: const Row(
             children: [
               Text('Overdue Tasks (4)',
                   style: TextStyle(fontFamily: 'MontMed', fontSize: 13)),
@@ -656,7 +658,7 @@ class _ExpansionTileTasksState extends State<ExpansionTileTasks> {
                 : Icons.arrow_drop_down,
           ),
           children: [
-            Divider(),
+            const Divider(),
             Container(
               child: Column(
                 children: allTasks.map((project) {
@@ -666,8 +668,9 @@ class _ExpansionTileTasksState extends State<ExpansionTileTasks> {
                     title: Text('Task Name: ${project}',
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(fontFamily: 'MontMed', fontSize: 13)),
-                    subtitle: Column(
+                        style: const TextStyle(
+                            fontFamily: 'MontMed', fontSize: 13)),
+                    subtitle: const Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
@@ -684,7 +687,7 @@ class _ExpansionTileTasksState extends State<ExpansionTileTasks> {
                         ),
                       ],
                     ),
-                    trailing: Column(
+                    trailing: const Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text('Priority: ',
@@ -708,7 +711,7 @@ class _ExpansionTileTasksState extends State<ExpansionTileTasks> {
             });
           },
         ),
-        Divider(),
+        const Divider(),
       ],
     );
   }

@@ -2,6 +2,7 @@ import 'package:capstone2_project_management_app/models/project_model.dart';
 import 'package:capstone2_project_management_app/views/list_of_tasks_screen.dart';
 import 'package:capstone2_project_management_app/views/stats/stats.dart';
 import 'package:capstone2_project_management_app/views/subs/db_side_menu.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class listOfProjects extends StatefulWidget {
@@ -18,10 +19,11 @@ class _listOfProjectsState extends State<listOfProjects>
   late Map<dynamic, dynamic> projectMap;
   late Map<String, dynamic> userMap;
   List<ProjectModel> allProjects = [];
-
+  User? user;
   @override
   void initState() {
     super.initState();
+    user = FirebaseAuth.instance.currentUser;
     projectMap = widget.projectMap;
     allProjects = _getData();
     _tabController = TabController(length: 2, vsync: this);
@@ -32,7 +34,9 @@ class _listOfProjectsState extends State<listOfProjects>
     for (var project in projectMap.values) {
       ProjectModel projectModel =
           ProjectModel.fromMap(Map<String, dynamic>.from(project));
-      allProjects.add(projectModel);
+      if (projectModel.projectMembers.contains(user!.uid)) {
+        allProjects.add(projectModel);
+      }
     }
     return allProjects;
   }

@@ -3,6 +3,7 @@ import 'package:capstone2_project_management_app/views/subs/db_main_screen.dart'
 import 'package:capstone2_project_management_app/views/subs/db_main_screen_v2.dart';
 import 'package:capstone2_project_management_app/views/subs/db_side_menu.dart';
 import 'package:capstone2_project_management_app/views/subs/project_create_step1.dart';
+import 'package:capstone2_project_management_app/views/subs/sub_widgets.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -59,33 +60,33 @@ class _dashboard_screenState extends State<dashboard_screen> {
   Widget build(BuildContext context) {
     return Scaffold(
         body: userModel == null
-            ? const Center(child: CircularProgressIndicator())
+            ? Center(child: loader())
             : SafeArea(
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     db_side_menu(),
                     FutureBuilder(
-                        future: _getProjectValues(),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return const Center(
-                                child: CircularProgressIndicator());
-                          } else if (snapshot.hasError) {
-                            return Center(
-                                child: Text('Error: ${snapshot.error}'));
-                          } else {
-                            projectMap = snapshot.data ?? {};
-                            return Expanded(
-                              child: userModel?.userRole == "User"
-                                  ? const DashboardMainV2()
-                                  : DashboardMainV1(
-                                      currentUserModel: userModel,
-                                      projectMap: projectMap),
-                            );
-                          }
-                        }),
+                      future: _getProjectValues(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return Expanded(child: loader());
+                        } else if (snapshot.hasError) {
+                          return Center(
+                              child: Text('Error: ${snapshot.error}'));
+                        } else {
+                          projectMap = snapshot.data ?? {};
+                          return Expanded(
+                            child: userModel?.userRole == "User"
+                                ? const DashboardMainV2()
+                                : DashboardMainV1(
+                                    currentUserModel: userModel,
+                                    projectMap: projectMap),
+                          );
+                        }
+                      },
+                    ),
                     // Expanded(
                     //   child: userModel?.userRole == "User"
                     //       ? const DashboardMainV2()

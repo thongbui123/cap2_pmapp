@@ -1,4 +1,3 @@
-import 'package:capstone2_project_management_app/services/auth_services.dart';
 import 'package:capstone2_project_management_app/views/dashboard_screen.dart';
 import 'package:capstone2_project_management_app/views/profile_screen.dart';
 import 'package:capstone2_project_management_app/views/subs/sign_out_dialog.dart';
@@ -56,7 +55,6 @@ class db_side_menu extends StatelessWidget {
           ListTile(
             leading: const Icon(Icons.logout_sharp, color: Colors.white),
             onTap: () {
-              AuthServices().signOut(context);
               SignOutDialog().showMySignOutDialog(context);
             },
           ),

@@ -341,9 +341,10 @@ class _projectCreateStep1State extends State<projectCreateStep1> {
                                   shape: CircleBorder(),
                                 ),
                                 child: IconButton(
-                                    icon: const Icon(Icons.change_circle),
-                                    color: Colors.blueAccent,
-                                    onPressed: _showMemberSelectionDialog),
+                                  icon: const Icon(Icons.change_circle),
+                                  color: Colors.blueAccent,
+                                  onPressed: _showMemberSelectionDialog,
+                                ),
                               ),
                             ),
                       const SizedBox(height: 5),
