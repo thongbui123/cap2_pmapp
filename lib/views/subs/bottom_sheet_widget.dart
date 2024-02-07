@@ -1,14 +1,26 @@
+import 'package:capstone2_project_management_app/models/project_model.dart';
 import 'package:capstone2_project_management_app/models/user_model.dart';
+import 'package:capstone2_project_management_app/services/project_services.dart';
+import 'package:capstone2_project_management_app/services/user_services.dart';
+import 'package:capstone2_project_management_app/views/project_detail_screen.dart';
+import 'package:capstone2_project_management_app/views/subs/sub_widgets.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 
 class StatefulBottomSheetWidget extends StatefulWidget {
+  final ProjectModel projectModel;
   final String message;
   final List<UserModel> allMembers;
   final List<String> currentList;
+  final Map<String, dynamic> userMap;
+  final Map<dynamic, dynamic> projectMap;
   StatefulBottomSheetWidget(
       {required this.message,
       required this.allMembers,
-      required this.currentList});
+      required this.currentList,
+      required this.userMap,
+      required this.projectMap,
+      required this.projectModel});
 
   @override
   _StatefulBottomSheetWidgetState createState() =>
@@ -16,15 +28,22 @@ class StatefulBottomSheetWidget extends StatefulWidget {
 }
 
 class _StatefulBottomSheetWidgetState extends State<StatefulBottomSheetWidget> {
+  late ProjectModel projectModel;
   late List<UserModel> allMembers;
   late List<String> currentList;
-
+  late Map<String, dynamic> userMap;
+  Map<String, String> mapName = {};
+  UserServices userServices = UserServices();
+  late Map<dynamic, dynamic> projectMap;
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     allMembers = widget.allMembers;
     currentList = widget.currentList;
+    userMap = widget.userMap;
+    projectMap = widget.projectMap;
+    projectModel = widget.projectModel;
   }
 
   @override
@@ -60,16 +79,12 @@ class _StatefulBottomSheetWidgetState extends State<StatefulBottomSheetWidget> {
                     context, // Make sure to provide the BuildContext if this code is inside a widget build method
                 tiles: currentList.map((member) {
                   return ListTile(
-                    leading: const CircleAvatar(
-                      child: Icon(
-                        Icons.person,
-                      ),
-                    ),
-                    title: Text(member,
+                    leading: avatar(userMap, member),
+                    title: Text(userServices.getNameFromId(userMap, member),
                         style: const TextStyle(
                             fontFamily: 'MontMed', fontSize: 13)),
-                    subtitle: const Text(
-                      'Participants: 3',
+                    subtitle: Text(
+                      'Joined project numbers: ${ProjectServices().getJoinedProjectNumber(projectMap, member)}',
                       style: TextStyle(fontFamily: 'MontMed', fontSize: 12),
                     ),
                     trailing: Ink(
@@ -95,6 +110,26 @@ class _StatefulBottomSheetWidgetState extends State<StatefulBottomSheetWidget> {
     );
   }
 
+  // CircleAvatar avatar(String member) {
+  //   return CircleAvatar(
+  //     child: userServices.getAvatarFromId(userMap, member) == ''
+  //         ? Text(
+  //             userServices.getFirstLetter(
+  //                 userServices.getNameFromId(userMap, member).toString()),
+  //             style: const TextStyle(fontFamily: 'MontMed'),
+  //           )
+  //         : CircleAvatar(
+  //             radius: 66,
+  //             backgroundColor: Colors.white,
+  //             backgroundImage: userServices.showLocalFile
+  //                 ? FileImage(userServices.imageFile!) as ImageProvider
+  //                 : NetworkImage(
+  //                     userServices.getAvatarFromId(userMap, member)!,
+  //                   ),
+  //           ),
+  //   );
+  // }
+
   Future<void> _showMemberSelectionDialog() async {
     await showDialog(
       context: context,
@@ -110,21 +145,31 @@ class _StatefulBottomSheetWidgetState extends State<StatefulBottomSheetWidget> {
                 return Column(
                   children: <Widget>[
                     ListTile(
-                      leading: const CircleAvatar(
-                          child: Text(
-                        'A',
-                        style: TextStyle(fontFamily: 'MontMed'),
-                      )),
-                      title: Text(user.userId),
-                      subtitle: const Text(
-                        '2 Projects Involved',
-                        style: TextStyle(fontFamily: 'MontMed'),
+                      leading: avatar(userMap, user.userId),
+                      title: Text(
+                          userServices.getNameFromId(userMap, user.userId)),
+                      subtitle: Text(
+                        '${ProjectServices().getJoinedProjectNumber(projectMap, user.userId)} Project(s) Involved',
+                        style: const TextStyle(fontFamily: 'MontMed'),
                       ),
-                      onTap: () {
+                      onTap: () async {
                         setState(() {
                           currentList.add(user.userId);
+                          DatabaseReference memberRef = FirebaseDatabase
+                              .instance
+                              .ref()
+                              .child('projects')
+                              .child(projectModel.projectId);
+                          memberRef.update({
+                            'projectMembers': currentList,
+                          });
                         });
-                        Navigator.of(context).pop(); // Close the dialog
+                        Navigator.of(context).pushReplacement(MaterialPageRoute(
+                            builder: (context) => projectDetailScreen(
+                                projectModel: projectModel,
+                                userMap: userMap,
+                                projectMap: projectMap)));
+                        // Close the dialog
                       },
                     ),
                     const Divider(height: 0),
@@ -169,8 +214,19 @@ class _StatefulBottomSheetWidgetState extends State<StatefulBottomSheetWidget> {
               onPressed: () {
                 setState(() {
                   currentList.remove(member);
+                  DatabaseReference memberRef = FirebaseDatabase.instance
+                      .ref()
+                      .child('projects')
+                      .child(projectModel.projectId);
+                  memberRef.update({
+                    'projectMembers': currentList,
+                  });
                 });
-                Navigator.of(context).pop();
+                Navigator.of(context).pushReplacement(MaterialPageRoute(
+                    builder: (context) => projectDetailScreen(
+                        projectModel: projectModel,
+                        userMap: userMap,
+                        projectMap: projectMap)));
               },
             ),
             TextButton(

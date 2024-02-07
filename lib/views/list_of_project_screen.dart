@@ -185,8 +185,10 @@ class _listOfProjectsState extends State<listOfProjects>
                                           Navigator.of(context).push(
                                               MaterialPageRoute(
                                                   builder: (context) {
-                                            return listOfTasks(
-                                                projectModel: project);
+                                            return ListOfTasks(
+                                              projectModel: project,
+                                              projectMap: projectMap,
+                                            );
                                           }));
                                         },
                                         leading: const CircleAvatar(

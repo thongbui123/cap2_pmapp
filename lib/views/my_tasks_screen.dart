@@ -28,6 +28,7 @@ List<String> allProjects = [
 class _MyTaskScreenState extends State<MyTaskScreen> {
   late ProjectModel projectModel;
   late Map<String, dynamic> userMap;
+  late Map<dynamic, dynamic> projectMap;
   @override
   void initState() {
     super.initState();
@@ -95,6 +96,7 @@ class _MyTaskScreenState extends State<MyTaskScreen> {
                                         child: projectDetailScreen(
                                           projectModel: projectModel,
                                           userMap: userMap,
+                                          projectMap: projectMap,
                                         ),
                                       );
                                     }

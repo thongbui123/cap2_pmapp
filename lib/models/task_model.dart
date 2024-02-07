@@ -6,13 +6,15 @@ class TaskModel {
   String taskName;
   String description;
   String status;
-  String teamId;
+  String projectId;
+  String phraseId;
   TaskModel({
     required this.taskId,
     required this.taskName,
     required this.description,
     required this.status,
-    required this.teamId,
+    required this.projectId,
+    required this.phraseId,
   });
 
   TaskModel copyWith({
@@ -20,14 +22,16 @@ class TaskModel {
     String? taskName,
     String? description,
     String? status,
-    String? teamId,
+    String? projectId,
+    String? phraseId,
   }) {
     return TaskModel(
       taskId: taskId ?? this.taskId,
       taskName: taskName ?? this.taskName,
       description: description ?? this.description,
       status: status ?? this.status,
-      teamId: teamId ?? this.teamId,
+      projectId: projectId ?? this.projectId,
+      phraseId: phraseId ?? this.phraseId,
     );
   }
 
@@ -37,7 +41,8 @@ class TaskModel {
       'taskName': taskName,
       'description': description,
       'status': status,
-      'teamId': teamId,
+      'projectId': projectId,
+      'phraseId': phraseId,
     };
   }
 
@@ -47,7 +52,8 @@ class TaskModel {
       taskName: map['taskName'] as String,
       description: map['description'] as String,
       status: map['status'] as String,
-      teamId: map['teamId'] as String,
+      projectId: map['projectId'] as String,
+      phraseId: map['phraseId'] as String,
     );
   }
 
@@ -58,7 +64,7 @@ class TaskModel {
 
   @override
   String toString() {
-    return 'Task(taskId: $taskId, taskName: $taskName, description: $description, status: $status, teamId: $teamId)';
+    return 'TaskModel(taskId: $taskId, taskName: $taskName, description: $description, status: $status, projectId: $projectId, phraseId: $phraseId)';
   }
 
   @override
@@ -69,7 +75,8 @@ class TaskModel {
         other.taskName == taskName &&
         other.description == description &&
         other.status == status &&
-        other.teamId == teamId;
+        other.projectId == projectId &&
+        other.phraseId == phraseId;
   }
 
   @override
@@ -78,6 +85,7 @@ class TaskModel {
         taskName.hashCode ^
         description.hashCode ^
         status.hashCode ^
-        teamId.hashCode;
+        projectId.hashCode ^
+        phraseId.hashCode;
   }
 }

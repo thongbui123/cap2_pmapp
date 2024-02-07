@@ -1,17 +1,25 @@
+import 'package:capstone2_project_management_app/models/phrase_model.dart';
 import 'package:capstone2_project_management_app/models/project_model.dart';
 import 'package:capstone2_project_management_app/models/user_model.dart';
+import 'package:capstone2_project_management_app/services/phrase_services.dart';
 import 'package:capstone2_project_management_app/services/user_services.dart';
 import 'package:capstone2_project_management_app/views/stats/stats.dart';
 import 'package:capstone2_project_management_app/views/subs/bottom_sheet_widget.dart';
 import 'package:capstone2_project_management_app/views/subs/db_side_menu.dart';
+import 'package:capstone2_project_management_app/views/subs/sub_widgets.dart';
 import 'package:flutter/material.dart';
 
 class projectDetailScreen extends StatefulWidget {
   final ProjectModel projectModel;
   final Map<String, dynamic> userMap;
-  const projectDetailScreen(
-      {Key? key, required this.projectModel, required this.userMap})
-      : super(key: key);
+  final Map<dynamic, dynamic> projectMap;
+
+  const projectDetailScreen({
+    Key? key,
+    required this.projectModel,
+    required this.userMap,
+    required this.projectMap,
+  }) : super(key: key);
 
   @override
   State<projectDetailScreen> createState() => _projectDetailScreenState();
@@ -24,20 +32,27 @@ List<String> allMembers = [
 ];
 
 List<String> currentList = [];
+List<PhraseModel> listOfPhrase = [];
 
 class _projectDetailScreenState extends State<projectDetailScreen> {
   late ProjectModel projectModel;
+  late PhraseModel phraseModel;
   UserServices userServices = UserServices();
+  PhraseServices phraseServices = PhraseServices();
   List<UserModel> allMembers = [];
   late Map<String, dynamic> userMap;
   List<UserModel> currentList = [];
   bool _customTileExpanded = false;
-
+  late Map<dynamic, dynamic> projectMap;
+  late String currentPhrase;
+  late Map phraseMap;
   @override
   void initState() {
     super.initState();
     projectModel = widget.projectModel;
     userMap = widget.userMap;
+    projectMap = widget.projectMap;
+    currentPhrase = projectModel.projectStatus;
     allMembers = userServices.getUserDataList(userMap).cast<UserModel>();
   }
 
@@ -56,6 +71,22 @@ class _projectDetailScreenState extends State<projectDetailScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      FutureBuilder(
+                        future:
+                            phraseServices.getPhraseMap(projectModel.projectId),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Center(
+                                child: CircularProgressIndicator());
+                          } else if (snapshot.hasError) {
+                            return Text('Error: ${snapshot.error}');
+                          } else {
+                            phraseMap = snapshot.data ?? {};
+                            return const SizedBox.shrink();
+                          }
+                        },
+                      ),
                       Row(
                         children: [
                           IconButton(
@@ -82,7 +113,7 @@ class _projectDetailScreenState extends State<projectDetailScreen> {
                                 color: Colors.black,
                                 fontSize: 13)),
                         subtitle: Text(
-                          'Current State: ${projectModel.projectStatus}',
+                          'Current State: $currentPhrase',
                           style: const TextStyle(
                               fontFamily: 'MontMed', fontSize: 12),
                         ),
@@ -104,28 +135,7 @@ class _projectDetailScreenState extends State<projectDetailScreen> {
                       const SizedBox(height: 10),
                       const Divider(),
                       ListTile(
-                        leading: CircleAvatar(
-                          child: userServices.getAvatarFromId(
-                                      userMap, projectModel.managerId) ==
-                                  ''
-                              ? Text(
-                                  userServices.getFirstLetter(userServices
-                                      .getNameFromId(
-                                          userMap, projectModel.managerId)
-                                      .toString()),
-                                  style: const TextStyle(fontFamily: 'MontMed'),
-                                )
-                              : CircleAvatar(
-                                  radius: 66,
-                                  backgroundColor: Colors.white,
-                                  backgroundImage: userServices.showLocalFile
-                                      ? FileImage(userServices.imageFile!)
-                                          as ImageProvider
-                                      : NetworkImage(
-                                          userServices.getAvatarFromId(userMap,
-                                              projectModel.managerId)!),
-                                ),
-                        ),
+                        leading: avatar(userMap, projectModel.managerId),
                         title: const Text('Assigned by: ',
                             style: TextStyle(
                                 fontFamily: 'MontMed',
@@ -174,9 +184,11 @@ class _projectDetailScreenState extends State<projectDetailScreen> {
                                   fontFamily: 'MontMed',
                                   fontSize: 12,
                                   color: Colors.black54)),
-                          subtitle: const Text('Requirement Gathering',
-                              style: TextStyle(
-                                  fontFamily: 'MontMed', fontSize: 14)),
+                          subtitle: Text(
+                            currentPhrase,
+                            style: const TextStyle(
+                                fontFamily: 'MontMed', fontSize: 14),
+                          ),
                           trailing: TextButton(
                               onPressed: () {
                                 _showStateDrawer(context);
@@ -185,43 +197,7 @@ class _projectDetailScreenState extends State<projectDetailScreen> {
                                   style: TextStyle(
                                       fontFamily: 'MontMed', fontSize: 14)))),
                       const Divider(),
-                      // ListTile(
-                      //   leading: const CircleAvatar(
-                      //     child: Icon(Icons.people),
-                      //   ),
-                      //   title: const Text('Participants: ',
-                      //       style: TextStyle(
-                      //           fontFamily: 'MontMed',
-                      //           fontSize: 12,
-                      //           color: Colors.black54)),
-                      //   subtitle: Text(
-                      //       '${projectModel.projectMembers.length} participant(s)',
-                      //       style: const TextStyle(
-                      //           fontFamily: 'MontMed', fontSize: 14)),
-                      // ),
-                      // const Divider(),
                       const SizedBox(height: 5),
-                      // Container(
-                      //   margin: const EdgeInsets.fromLTRB(30, 0, 0, 0),
-                      //   child: TextButton(
-                      //     onPressed: _showMemberSelectionDialog,
-                      //     child: const Row(
-                      //       children: [
-                      //         Icon(
-                      //           Icons.add,
-                      //           color: Colors.blueAccent,
-                      //         ),
-                      //         SizedBox(width: 10),
-                      //         Text(
-                      //           'Add New Participant',
-                      //           style: TextStyle(
-                      //               fontFamily: 'MontMed',
-                      //               color: Colors.blueAccent),
-                      //         ),
-                      //       ],
-                      //     ),
-                      //   ),
-                      // ),
                       ListTile(
                         leading: const CircleAvatar(
                           child: Icon(Icons.people),
@@ -388,9 +364,10 @@ class _projectDetailScreenState extends State<projectDetailScreen> {
               ),
               ListTile(
                 leading: const Icon(Icons.arrow_forward),
-                title: const Text('Conclude Phrase',
+                title: Text('Conclude Phrase',
                     style: TextStyle(fontFamily: 'MontMed', fontSize: 14)),
                 onTap: () {
+                  setState(() {});
                   Navigator.pop(context);
                 },
               ),
@@ -461,6 +438,9 @@ class _projectDetailScreenState extends State<projectDetailScreen> {
           message: 'Hello',
           allMembers: allMembers,
           currentList: currentStringList,
+          userMap: userMap,
+          projectMap: projectMap,
+          projectModel: projectModel,
         );
       },
     );

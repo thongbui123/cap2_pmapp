@@ -3,6 +3,7 @@ import 'package:capstone2_project_management_app/models/user_model.dart';
 import 'package:capstone2_project_management_app/services/project_services.dart';
 import 'package:capstone2_project_management_app/views/list_of_project_screen.dart';
 import 'package:capstone2_project_management_app/views/stats/stats.dart';
+import 'package:capstone2_project_management_app/views/subs/project_create_step2.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
@@ -541,7 +542,7 @@ class _DashboardMainV12State extends State<DashboardMainV12> {
                     children: [
                       FutureBuilder<List<ProjectModel>>(
                           future: projectServices.getJoinedProjectList(
-                              projectMap, currentUserModel),
+                              projectMap, user),
                           builder: (context, snapshot) {
                             if (snapshot.connectionState ==
                                 ConnectionState.waiting) {

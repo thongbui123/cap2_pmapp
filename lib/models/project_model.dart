@@ -13,6 +13,7 @@ class ProjectModel {
   String managerId;
   String leaderId;
   List<String> projectMembers;
+  List<String> projectPhrases;
   ProjectModel({
     required this.projectId,
     required this.projectName,
@@ -23,6 +24,7 @@ class ProjectModel {
     required this.managerId,
     required this.leaderId,
     required this.projectMembers,
+    required this.projectPhrases,
   });
 
   ProjectModel copyWith({
@@ -35,6 +37,7 @@ class ProjectModel {
     String? managerId,
     String? leaderId,
     List<String>? projectMembers,
+    List<String>? projectPhrases,
   }) {
     return ProjectModel(
       projectId: projectId ?? this.projectId,
@@ -46,6 +49,7 @@ class ProjectModel {
       managerId: managerId ?? this.managerId,
       leaderId: leaderId ?? this.leaderId,
       projectMembers: projectMembers ?? this.projectMembers,
+      projectPhrases: projectPhrases ?? this.projectPhrases,
     );
   }
 
@@ -60,22 +64,23 @@ class ProjectModel {
       'managerId': managerId,
       'leaderId': leaderId,
       'projectMembers': projectMembers,
+      'projectPhrases': projectPhrases,
     };
   }
 
   factory ProjectModel.fromMap(Map<String, dynamic> map) {
     return ProjectModel(
-        projectId: map['projectId'] as String,
-        projectName: map['projectName'] as String,
-        projecctDescription: map['projecctDescription'] as String,
-        startDate: map['startDate'] as String,
-        endDate: map['endDate'] as String,
-        projectStatus: map['projectStatus'] as String,
-        managerId: map['managerId'] as String,
-        leaderId: map['leaderId'] as String,
-        projectMembers: List<String>.from(
-          (map['projectMembers']),
-        ));
+      projectId: map['projectId'] as String,
+      projectName: map['projectName'] as String,
+      projecctDescription: map['projecctDescription'] as String,
+      startDate: map['startDate'] as String,
+      endDate: map['endDate'] as String,
+      projectStatus: map['projectStatus'] as String,
+      managerId: map['managerId'] as String,
+      leaderId: map['leaderId'] as String,
+      projectMembers: List<String>.from(map['projectMembers']),
+      projectPhrases: List<String>.from(map['projectPhrases']),
+    );
   }
 
   String toJson() => json.encode(toMap());
@@ -85,7 +90,7 @@ class ProjectModel {
 
   @override
   String toString() {
-    return 'ProjectModel(projectId: $projectId, projectName: $projectName, projecctDescription: $projecctDescription, startDate: $startDate, endDate: $endDate, projectStatus: $projectStatus, managerId: $managerId, leaderId: $leaderId, projectMembers: $projectMembers)';
+    return 'ProjectModel(projectId: $projectId, projectName: $projectName, projecctDescription: $projecctDescription, startDate: $startDate, endDate: $endDate, projectStatus: $projectStatus, managerId: $managerId, leaderId: $leaderId, projectMembers: $projectMembers, projectPhrases: $projectPhrases)';
   }
 
   @override
@@ -100,7 +105,8 @@ class ProjectModel {
         other.projectStatus == projectStatus &&
         other.managerId == managerId &&
         other.leaderId == leaderId &&
-        listEquals(other.projectMembers, projectMembers);
+        listEquals(other.projectMembers, projectMembers) &&
+        listEquals(other.projectPhrases, projectPhrases);
   }
 
   @override
@@ -113,6 +119,7 @@ class ProjectModel {
         projectStatus.hashCode ^
         managerId.hashCode ^
         leaderId.hashCode ^
-        projectMembers.hashCode;
+        projectMembers.hashCode ^
+        projectPhrases.hashCode;
   }
 }

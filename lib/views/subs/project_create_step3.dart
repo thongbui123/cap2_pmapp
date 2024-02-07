@@ -1,4 +1,5 @@
 import 'package:capstone2_project_management_app/models/user_model.dart';
+import 'package:capstone2_project_management_app/services/phrase_services.dart';
 import 'package:capstone2_project_management_app/services/project_services.dart';
 import 'package:capstone2_project_management_app/views/dashboard_screen.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -37,8 +38,8 @@ class _projectCreateStep3State extends State<projectCreateStep3> {
   UserModel? currentUserModel;
   String teamLeaderIdController = "";
   Map<String, dynamic> projectMap = {};
-
-  List<String> phrases = [
+  List<String> phrasesList = [];
+  List<String> phraseNames = [
     "Requirement and Gathering",
     "Planning",
     "Design",
@@ -107,7 +108,7 @@ class _projectCreateStep3State extends State<projectCreateStep3> {
                   ],
                 ),
                 Column(
-                  children: phrases.map((process) {
+                  children: phraseNames.map((process) {
                     return Column(
                       children: <Widget>[
                         ListTile(
@@ -190,22 +191,37 @@ class _projectCreateStep3State extends State<projectCreateStep3> {
                 Container(
                     height: 50,
                     child: TextButton(
-                      onPressed: () {
-                        ProjectServices().addProject(
+                      onPressed: () async {
+                        ProjectServices projectServices = ProjectServices();
+                        projectServices.addProject(
                             projectNameController.text,
                             projectDescriptionController.text,
                             startDateController.text,
                             endDateController.text,
                             teamLeaderIdController,
-                            phrases,
+                            phrasesList,
                             currentUserModel);
                         //Navigator.popUntil(context, ModalRoute.withName('/'));
-
+                        for (var i in phraseNames) {
+                          PhraseServices()
+                              .addPhrase(i, projectServices.realProjectID, []);
+                          phrasesList.add(projectServices.realProjectID);
+                          DatabaseReference projectRef = FirebaseDatabase
+                              .instance
+                              .ref()
+                              .child('projects')
+                              .child(projectServices.realProjectID);
+                          await projectRef.update({
+                            'projectPhrases': phrasesList,
+                          });
+                        }
                         Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute<void>(
-                                builder: (BuildContext context) =>
-                                    const dashboard_screen()));
+                          context,
+                          MaterialPageRoute<void>(
+                            builder: (BuildContext context) =>
+                                const dashboard_screen(),
+                          ),
+                        );
                       },
                       child: Container(
                         child: const Row(

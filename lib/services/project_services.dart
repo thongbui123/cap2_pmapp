@@ -9,7 +9,7 @@ class ProjectServices {
   final DatabaseReference reference =
       FirebaseDatabase.instance.ref().child('projects');
   //late Map<dynamic, dynamic> projectMap;
-
+  late String realProjectID;
   Future<Map> getProjectMap() async {
     DatabaseEvent databaseEvent = await reference.once();
     Map<dynamic, dynamic> projectMap = {};
@@ -21,16 +21,28 @@ class ProjectServices {
   }
 
   Future<List<ProjectModel>> getJoinedProjectList(
-      Map<dynamic, dynamic> projectMap, UserModel? currentUserModel) async {
+      Map<dynamic, dynamic> projectMap, User? currentUserModel) async {
     List<ProjectModel> joinedProjects = [];
     for (var project in projectMap.values) {
       ProjectModel projectModel =
           ProjectModel.fromMap(Map<String, dynamic>.from(project));
-      if (projectModel.leaderId == currentUserModel?.userId) {
+      if (projectModel.leaderId == currentUserModel?.uid) {
         joinedProjects.add(projectModel);
       }
     }
     return joinedProjects;
+  }
+
+  int getJoinedProjectNumber(Map<dynamic, dynamic> projectMap, String id) {
+    int count = 0;
+    for (var project in projectMap.values) {
+      ProjectModel projectModel =
+          ProjectModel.fromMap(Map<String, dynamic>.from(project));
+      if (projectModel.projectMembers.contains(id)) {
+        count++;
+      }
+    }
+    return count;
   }
 
   Future<void> addProject(
@@ -51,10 +63,8 @@ class ProjectServices {
       int dt = DateTime.now().microsecondsSinceEpoch;
       DatabaseReference projectRef =
           FirebaseDatabase.instance.ref().child('projects');
-
       String? projectId = projectRef.push().key;
-      DatabaseReference memberRef =
-          FirebaseDatabase.instance.ref().child('projects').child(projectId!);
+      realProjectID = projectId!;
       await projectRef.child(projectId).set({
         'projectId': projectId,
         'projectName': projectName,
@@ -67,7 +77,7 @@ class ProjectServices {
         'endDate': endDate,
         'projectStatus': 'Requirement & Gathering',
         'projectMembers': members,
-        'listOfPhrases': phrases,
+        'projectPhrases': phrases,
       });
       Fluttertoast.showToast(msg: 'New project has been created successfully');
     }

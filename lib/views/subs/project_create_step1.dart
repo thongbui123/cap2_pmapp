@@ -315,21 +315,23 @@ class _projectCreateStep1State extends State<projectCreateStep1> {
                           ? Container()
                           : ListTile(
                               leading: CircleAvatar(
-                                  child: userAvatarMap[selectedMember] == ''
-                                      ? Text(
-                                          getFirstLetter(
-                                              leaderIdMap[selectedMember]
-                                                  .toString()),
-                                          style: const TextStyle(
-                                              fontFamily: 'MontMed'),
-                                        )
-                                      : CircleAvatar(
-                                          backgroundColor: Colors.white,
-                                          backgroundImage: showLocalFile
-                                              ? FileImage(imageFile!)
-                                                  as ImageProvider
-                                              : NetworkImage(userAvatarMap[
-                                                  selectedMember]!))),
+                                child: userAvatarMap[selectedMember] == ''
+                                    ? Text(
+                                        getFirstLetter(
+                                            leaderIdMap[selectedMember]
+                                                .toString()),
+                                        style: const TextStyle(
+                                            fontFamily: 'MontMed'),
+                                      )
+                                    : CircleAvatar(
+                                        backgroundColor: Colors.white,
+                                        backgroundImage: showLocalFile
+                                            ? FileImage(imageFile!)
+                                                as ImageProvider
+                                            : NetworkImage(
+                                                userAvatarMap[selectedMember]!),
+                                      ),
+                              ),
                               title: Text(leaderIdMap[selectedMember]!),
                               subtitle: Text(
                                 "Handling: ${countProjectMap[selectedMember].toString()} project(s)",
