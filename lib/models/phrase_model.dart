@@ -4,13 +4,13 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 
 class PhraseModel {
-  String prhaseId;
+  String phraseId;
   String projectId;
   String phraseName;
   String phraseDescription;
   List<String> listTasks;
   PhraseModel({
-    required this.prhaseId,
+    required this.phraseId,
     required this.projectId,
     required this.phraseName,
     required this.phraseDescription,
@@ -18,14 +18,14 @@ class PhraseModel {
   });
 
   PhraseModel copyWith({
-    String? prhaseId,
+    String? phraseId,
     String? projectId,
     String? phraseName,
     String? phraseDescription,
     List<String>? listTasks,
   }) {
     return PhraseModel(
-      prhaseId: prhaseId ?? this.prhaseId,
+      phraseId: phraseId ?? this.phraseId,
       projectId: projectId ?? this.projectId,
       phraseName: phraseName ?? this.phraseName,
       phraseDescription: phraseDescription ?? this.phraseDescription,
@@ -35,7 +35,7 @@ class PhraseModel {
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
-      'prhaseId': prhaseId,
+      'phraseId': phraseId,
       'projectId': projectId,
       'phraseName': phraseName,
       'phraseDescription': phraseDescription,
@@ -45,12 +45,16 @@ class PhraseModel {
 
   factory PhraseModel.fromMap(Map<String, dynamic> map) {
     return PhraseModel(
-      prhaseId: map['prhaseId'] as String,
-      projectId: map['projectId'] as String,
-      phraseName: map['phraseName'] as String,
-      phraseDescription: map['phraseDescription'] as String,
-      listTasks: List<String>.from((map['listTasks'])),
-    );
+        phraseId: map['phraseId'] as String,
+        projectId: map['projectId'] as String,
+        phraseName: map['phraseName'] as String,
+        phraseDescription: map['phraseDescription'] as String,
+        listTasks: List<String>.from(
+          (map['listTasks'] as List<dynamic>?)
+                  ?.map((task) => task as String)
+                  .toList() ??
+              [],
+        ));
   }
 
   String toJson() => json.encode(toMap());
@@ -60,14 +64,14 @@ class PhraseModel {
 
   @override
   String toString() {
-    return 'PhraseModel(prhaseId: $prhaseId, projectId: $projectId, phraseName: $phraseName, phraseDescription: $phraseDescription, listTasks: $listTasks)';
+    return 'PhraseModel(phraseId: $phraseId, projectId: $projectId, phraseName: $phraseName, phraseDescription: $phraseDescription, listTasks: $listTasks)';
   }
 
   @override
   bool operator ==(covariant PhraseModel other) {
     if (identical(this, other)) return true;
 
-    return other.prhaseId == prhaseId &&
+    return other.phraseId == phraseId &&
         other.projectId == projectId &&
         other.phraseName == phraseName &&
         other.phraseDescription == phraseDescription &&
@@ -76,7 +80,7 @@ class PhraseModel {
 
   @override
   int get hashCode {
-    return prhaseId.hashCode ^
+    return phraseId.hashCode ^
         projectId.hashCode ^
         phraseName.hashCode ^
         phraseDescription.hashCode ^

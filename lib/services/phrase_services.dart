@@ -23,9 +23,20 @@ class PhraseServices {
         'phraseName': phraseName,
         'listTasks': listTasks,
         'projectId': projectId,
+        'phraseDescription': phraseName
       });
       Fluttertoast.showToast(msg: 'New phrase has been created successfully');
     }
+  }
+
+  Future<void> updatePhraseName(
+      String projectId, String phraseId, String currentPhrase) async {
+    DatabaseReference phraseRef =
+        FirebaseDatabase.instance.ref().child('phrases');
+    phraseRef.child(projectId).child(phraseId).update({
+      'phraseName': currentPhrase,
+    });
+    Fluttertoast.showToast(msg: 'Phrase name has been changed successfully');
   }
 
   Future<Map> getPhraseMap(String projectId) async {
@@ -45,11 +56,38 @@ class PhraseServices {
     for (var phrase in phraseMap.values) {
       PhraseModel phraseModel =
           PhraseModel.fromMap(Map<String, dynamic>.from(phrase));
-      mapName[phraseModel.prhaseId] = phraseModel.phraseName;
-      if (phraseModel.prhaseId == id) {
-        return mapName[phraseModel.prhaseId].toString();
+      mapName[phraseModel.phraseId] = phraseModel.phraseName;
+      if (phraseModel.phraseId == id) {
+        return mapName[phraseModel.phraseId].toString();
       }
     }
     return "";
+  }
+
+  int getPhraseIndex(Map<dynamic, dynamic> phraseMap, String phraseName) {
+    Map<String, int> mapName = {};
+    int num = 0;
+    for (var phrase in phraseMap.values) {
+      PhraseModel phraseModel =
+          PhraseModel.fromMap(Map<String, dynamic>.from(phrase));
+      mapName[phraseModel.phraseName] = num;
+      if (phraseModel.phraseName == phraseName) {
+        return num;
+      }
+      num++;
+    }
+    return 0;
+  }
+
+  Map<int, String> getMapPhraseIndex(Map<dynamic, dynamic> phraseMap) {
+    Map<int, String> mapName = {};
+    int num = 0;
+    for (var phrase in phraseMap.values) {
+      PhraseModel phraseModel =
+          PhraseModel.fromMap(Map<String, dynamic>.from(phrase));
+      mapName[num] = phraseModel.phraseName;
+      num++;
+    }
+    return mapName;
   }
 }

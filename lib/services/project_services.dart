@@ -75,11 +75,21 @@ class ProjectServices {
         'leaderId': teamLeaderId,
         'startDate': startDate,
         'endDate': endDate,
-        'projectStatus': 'Requirement & Gathering',
+        'projectStatus': 'Requirement and Gathering',
         'projectMembers': members,
         'projectPhrases': phrases,
       });
       Fluttertoast.showToast(msg: 'New project has been created successfully');
     }
+  }
+
+  Future<void> updateProjectStatus(
+      String projectId, String currentPhraseName) async {
+    DatabaseReference phraseRef =
+        FirebaseDatabase.instance.ref().child('projects');
+    phraseRef.child(projectId).update({
+      'projectStatus': currentPhraseName,
+    });
+    Fluttertoast.showToast(msg: 'Current Phrase has been changed successfully');
   }
 }

@@ -1,5 +1,4 @@
 import 'package:capstone2_project_management_app/models/project_model.dart';
-import 'package:capstone2_project_management_app/models/user_model.dart';
 import 'package:capstone2_project_management_app/services/project_services.dart';
 import 'package:capstone2_project_management_app/services/user_services.dart';
 import 'package:capstone2_project_management_app/views/project_detail_screen.dart';
@@ -10,17 +9,19 @@ import 'package:flutter/material.dart';
 class StatefulBottomSheetWidget extends StatefulWidget {
   final ProjectModel projectModel;
   final String message;
-  final List<UserModel> allMembers;
+  final List<String> allMembers;
   final List<String> currentList;
   final Map<String, dynamic> userMap;
   final Map<dynamic, dynamic> projectMap;
-  StatefulBottomSheetWidget(
+  final Map<dynamic, dynamic> phraseMap;
+  const StatefulBottomSheetWidget(
       {required this.message,
       required this.allMembers,
       required this.currentList,
       required this.userMap,
       required this.projectMap,
-      required this.projectModel});
+      required this.projectModel,
+      required this.phraseMap});
 
   @override
   _StatefulBottomSheetWidgetState createState() =>
@@ -29,21 +30,34 @@ class StatefulBottomSheetWidget extends StatefulWidget {
 
 class _StatefulBottomSheetWidgetState extends State<StatefulBottomSheetWidget> {
   late ProjectModel projectModel;
-  late List<UserModel> allMembers;
+  late List<String> allMembers;
+  late List<String> allLeader;
   late List<String> currentList;
   late Map<String, dynamic> userMap;
   Map<String, String> mapName = {};
   UserServices userServices = UserServices();
   late Map<dynamic, dynamic> projectMap;
+  late Map<dynamic, dynamic> phraseMap;
+  late int joinProjectNumber;
+  ProjectServices projectServices = ProjectServices();
+  late DatabaseReference projectRef;
+  String selectedMember = '';
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     allMembers = widget.allMembers;
-    currentList = widget.currentList;
     userMap = widget.userMap;
+    currentList = widget.currentList;
     projectMap = widget.projectMap;
     projectModel = widget.projectModel;
+    phraseMap = widget.phraseMap;
+    projectRef = FirebaseDatabase.instance
+        .ref()
+        .child('projects')
+        .child(projectModel.projectId);
+    allLeader = userServices.getAllLeaderStringList(userMap);
+    selectedMember = projectModel.projectMembers.first;
   }
 
   @override
@@ -55,7 +69,7 @@ class _StatefulBottomSheetWidgetState extends State<StatefulBottomSheetWidget> {
           const SizedBox(height: 10),
           Container(
               child: TextButton(
-            onPressed: _showMemberSelectionDialog,
+            onPressed: () => _showMemberSelectionDialog(allMembers),
             child: const Row(
               children: [
                 Icon(
@@ -73,64 +87,83 @@ class _StatefulBottomSheetWidgetState extends State<StatefulBottomSheetWidget> {
           )),
           const SizedBox(height: 10),
           Expanded(
-            child: Column(
-              children: ListTile.divideTiles(
-                context:
-                    context, // Make sure to provide the BuildContext if this code is inside a widget build method
-                tiles: currentList.map((member) {
-                  return ListTile(
-                    leading: avatar(userMap, member),
-                    title: Text(userServices.getNameFromId(userMap, member),
+            child: SingleChildScrollView(
+              child: Column(
+                children: ListTile.divideTiles(
+                  context:
+                      context, // Make sure to provide the BuildContext if this code is inside a widget build method
+                  tiles: currentList.map((member) {
+                    return ListTile(
+                      leading: avatar(userMap, member),
+                      title: Text(userServices.getNameFromId(userMap, member),
+                          style: const TextStyle(
+                              fontFamily: 'MontMed', fontSize: 13)),
+                      subtitle: Text(
+                        'Joined project numbers: ${projectServices.getJoinedProjectNumber(projectMap, member)}',
                         style: const TextStyle(
-                            fontFamily: 'MontMed', fontSize: 13)),
-                    subtitle: Text(
-                      'Joined project numbers: ${ProjectServices().getJoinedProjectNumber(projectMap, member)}',
-                      style: TextStyle(fontFamily: 'MontMed', fontSize: 12),
-                    ),
-                    trailing: Ink(
-                      decoration: const ShapeDecoration(
-                        color: Colors.transparent,
-                        shape: CircleBorder(),
+                            fontFamily: 'MontMed', fontSize: 12),
                       ),
-                      child: IconButton(
-                        icon: const Icon(Icons.delete),
-                        color: Colors.red,
-                        onPressed: () {
-                          _showDeleteMemberDialog(member);
-                        },
+                      trailing: Ink(
+                        decoration: const ShapeDecoration(
+                          color: Colors.transparent,
+                          shape: CircleBorder(),
+                        ),
+                        child: (member != currentList.first)
+                            ? IconButton(
+                                icon: const Icon(Icons.delete),
+                                color: Colors.red,
+                                onPressed: () {
+                                  _showDeleteMemberDialog(member);
+                                },
+                              )
+                            : IconButton(
+                                icon: const Icon(Icons.change_circle),
+                                color: Colors.blueAccent,
+                                onPressed: () {
+                                  _showLeaderSelectionDialog(allLeader);
+                                },
+                              ),
                       ),
-                    ),
-                  );
-                }),
-              ).toList(),
+                    );
+                  }),
+                ).toList(),
+              ),
             ),
           ),
+          TextButton(
+              onPressed: () async {
+                DatabaseReference projectRef =
+                    FirebaseDatabase.instance.ref().child('projects');
+
+                projectRef.child(projectModel.projectId).update({
+                  'projectMembers': currentList,
+                });
+                DatabaseEvent snapshot = await projectRef.once();
+                if (snapshot.snapshot.value != null &&
+                    snapshot.snapshot.value is Map) {
+                  setState(() {
+                    projectMap = Map.from(snapshot.snapshot.value as dynamic);
+                  });
+                }
+                //Navigator.of(context).pop();
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(
+                    builder: (context) => projectDetailScreen(
+                      projectModel: projectModel,
+                      userMap: userMap,
+                      projectMap: projectMap,
+                      phraseMap: phraseMap,
+                    ),
+                  ),
+                );
+              },
+              child: const Text('SAVE')),
         ],
       ),
     );
   }
 
-  // CircleAvatar avatar(String member) {
-  //   return CircleAvatar(
-  //     child: userServices.getAvatarFromId(userMap, member) == ''
-  //         ? Text(
-  //             userServices.getFirstLetter(
-  //                 userServices.getNameFromId(userMap, member).toString()),
-  //             style: const TextStyle(fontFamily: 'MontMed'),
-  //           )
-  //         : CircleAvatar(
-  //             radius: 66,
-  //             backgroundColor: Colors.white,
-  //             backgroundImage: userServices.showLocalFile
-  //                 ? FileImage(userServices.imageFile!) as ImageProvider
-  //                 : NetworkImage(
-  //                     userServices.getAvatarFromId(userMap, member)!,
-  //                   ),
-  //           ),
-  //   );
-  // }
-
-  Future<void> _showMemberSelectionDialog() async {
+  Future<void> _showMemberSelectionDialog(List<String> allMembers) async {
     await showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -145,31 +178,70 @@ class _StatefulBottomSheetWidgetState extends State<StatefulBottomSheetWidget> {
                 return Column(
                   children: <Widget>[
                     ListTile(
-                      leading: avatar(userMap, user.userId),
-                      title: Text(
-                          userServices.getNameFromId(userMap, user.userId)),
+                      leading: avatar(userMap, user),
+                      title: Text(userServices.getNameFromId(userMap, user)),
                       subtitle: Text(
-                        '${ProjectServices().getJoinedProjectNumber(projectMap, user.userId)} Project(s) Involved',
+                        '${projectServices.getJoinedProjectNumber(projectMap, user)} Project(s) Involved',
                         style: const TextStyle(fontFamily: 'MontMed'),
                       ),
                       onTap: () async {
                         setState(() {
-                          currentList.add(user.userId);
-                          DatabaseReference memberRef = FirebaseDatabase
-                              .instance
-                              .ref()
-                              .child('projects')
-                              .child(projectModel.projectId);
-                          memberRef.update({
-                            'projectMembers': currentList,
-                          });
+                          currentList.add(user);
+                          allMembers.remove(user);
                         });
-                        Navigator.of(context).pushReplacement(MaterialPageRoute(
-                            builder: (context) => projectDetailScreen(
-                                projectModel: projectModel,
-                                userMap: userMap,
-                                projectMap: projectMap)));
-                        // Close the dialog
+
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                    const Divider(height: 0),
+                  ],
+                );
+              }).toList(),
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text(
+                'Cancel',
+                style: TextStyle(fontFamily: 'MontMed'),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _showLeaderSelectionDialog(List<String> allMembers) async {
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text(
+            'MEMBERS',
+            style: TextStyle(fontFamily: 'Anurati'),
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              children: allMembers.map((user) {
+                return Column(
+                  children: <Widget>[
+                    ListTile(
+                      leading: avatar(userMap, user),
+                      title: Text(userServices.getNameFromId(userMap, user)),
+                      subtitle: Text(
+                        '${projectServices.getJoinedProjectNumber(projectMap, user)} Project(s) Involved',
+                        style: const TextStyle(fontFamily: 'MontMed'),
+                      ),
+                      onTap: () async {
+                        setState(() {
+                          _changeTeamLeader(user);
+                        });
+
+                        Navigator.of(context).pop();
                       },
                     ),
                     const Divider(height: 0),
@@ -214,19 +286,19 @@ class _StatefulBottomSheetWidgetState extends State<StatefulBottomSheetWidget> {
               onPressed: () {
                 setState(() {
                   currentList.remove(member);
-                  DatabaseReference memberRef = FirebaseDatabase.instance
-                      .ref()
-                      .child('projects')
-                      .child(projectModel.projectId);
-                  memberRef.update({
-                    'projectMembers': currentList,
-                  });
+                  allMembers.add(member);
                 });
-                Navigator.of(context).pushReplacement(MaterialPageRoute(
-                    builder: (context) => projectDetailScreen(
-                        projectModel: projectModel,
-                        userMap: userMap,
-                        projectMap: projectMap)));
+                Navigator.of(context).pop();
+                // Navigator.of(context).pushReplacement(
+                //   MaterialPageRoute(
+                //     builder: (context) => projectDetailScreen(
+                //       projectModel: projectModel,
+                //       userMap: userMap,
+                //       projectMap: projectMap,
+                //       phraseMap: phraseMap,
+                //     ),
+                //   ),
+                // );
               },
             ),
             TextButton(
@@ -239,5 +311,12 @@ class _StatefulBottomSheetWidgetState extends State<StatefulBottomSheetWidget> {
         );
       },
     );
+  }
+
+  void _changeTeamLeader(String member) {
+    setState(() {
+      selectedMember = member;
+      currentList.first = selectedMember;
+    });
   }
 }

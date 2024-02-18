@@ -28,6 +28,47 @@ class UserServices {
     return userList;
   }
 
+  List<String> getAllLeaderStringList(Map<String, dynamic> userMap) {
+    List<String> userList = [];
+    for (var user in userMap.values) {
+      UserModel userModel = UserModel.fromMap(Map<String, dynamic>.from(user));
+      if (userModel.userRole == 'Team Leader') {
+        userList.add(userModel.userId);
+      }
+    }
+    return userList;
+  }
+
+  List<String> getAllUserStringList(Map<String, dynamic> userMap) {
+    List<String> userList = [];
+    for (var user in userMap.values) {
+      UserModel userModel = UserModel.fromMap(Map<String, dynamic>.from(user));
+      if (userModel.userRole == 'User') {
+        userList.add(userModel.userId);
+      }
+    }
+    return userList;
+  }
+
+  List<String> getUserIdList(Map<String, dynamic> userMap) {
+    List<String> userList = [];
+    for (var user in userMap.values) {
+      UserModel userModel = UserModel.fromMap(Map<String, dynamic>.from(user));
+      userList.add(userModel.userId);
+    }
+    return userList;
+  }
+
+  // UserModel getUserModelFromMap(Map<String, dynamic> userMap, String member) {
+  //   for (var user in userMap.values) {
+  //     UserModel userModel = UserModel.fromMap(Map<String, dynamic>.from(user));
+  //     if (userModel.userId == member) {
+  //       return userModel;
+  //     }
+  //   }
+  //   return user;
+  // }
+
   String getNameFromId(Map<String, dynamic> userMap, String id) {
     Map<String, String> mapName = {};
     for (var user in userMap.values) {

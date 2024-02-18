@@ -1,9 +1,11 @@
 import 'package:capstone2_project_management_app/models/project_model.dart';
+import 'package:capstone2_project_management_app/services/phrase_services.dart';
 import 'package:capstone2_project_management_app/services/user_services.dart';
 import 'package:capstone2_project_management_app/views/project_detail_screen.dart';
 import 'package:capstone2_project_management_app/views/stats/stats.dart';
 import 'package:capstone2_project_management_app/views/subs/db_side_menu.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -34,12 +36,15 @@ class _ListOfTasksState extends State<ListOfTasks> {
   late Map<String, dynamic> userMap;
   late Map<dynamic, dynamic> projectMap;
   late List<ProjectModel> listProjects;
+  late Map phraseMap = {};
+  PhraseServices phraseServices = PhraseServices();
   @override
   void initState() {
     super.initState();
     projectModel = widget.projectModel;
     projectMap = widget.projectMap;
     listProjects = getData(projectMap);
+    _getPhraseData();
   }
 
   List<ProjectModel> getData(Map<dynamic, dynamic> projectMap) {
@@ -53,6 +58,19 @@ class _ListOfTasksState extends State<ListOfTasks> {
       }
     }
     return results;
+  }
+
+  Future<void> _getPhraseData() async {
+    DatabaseReference phraseRef = FirebaseDatabase.instance
+        .ref()
+        .child('phrases')
+        .child(projectModel.projectId);
+    DatabaseEvent snapshot = await phraseRef.once();
+    if (snapshot.snapshot.value != null && snapshot.snapshot.value is Map) {
+      setState(() {
+        phraseMap = Map.from(snapshot.snapshot.value as dynamic);
+      });
+    }
   }
 
   @override
@@ -74,6 +92,19 @@ class _ListOfTasksState extends State<ListOfTasks> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             db_side_menu(),
+            // FutureBuilder(
+            //   future: phraseServices.getPhraseMap(projectModel.projectId),
+            //   builder: (context, snapshot) {
+            //     if (snapshot.connectionState == ConnectionState.waiting) {
+            //       return const Center(child: CircularProgressIndicator());
+            //     } else if (snapshot.hasError) {
+            //       return Text('Error: ${snapshot.error}');
+            //     } else {
+            //       phraseMap = snapshot.data ?? {};
+            //       return const SizedBox.shrink();
+            //     }
+            //   },
+            // ),
             Expanded(
                 child: Padding(
                     padding: const EdgeInsets.all(defaultPadding),
@@ -118,6 +149,7 @@ class _ListOfTasksState extends State<ListOfTasks> {
                                           projectModel: projectModel,
                                           userMap: userMap,
                                           projectMap: projectMap,
+                                          phraseMap: phraseMap,
                                         ),
                                       );
                                     }
@@ -226,6 +258,22 @@ class _ListOfTasksState extends State<ListOfTasks> {
               children: listProjects.map((project) {
                 return Column(
                   children: <Widget>[
+                    FutureBuilder(
+                      future:
+                          phraseServices.getPhraseMap(projectModel.projectId),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                              child: CircularProgressIndicator());
+                        } else if (snapshot.hasError) {
+                          return Text('Error: ${snapshot.error}');
+                        } else {
+                          phraseMap = snapshot.data ?? {};
+                          return const SizedBox.shrink();
+                        }
+                      },
+                    ),
                     ListTile(
                       leading: const CircleAvatar(
                           child: Icon(Icons.keyboard_arrow_down)),

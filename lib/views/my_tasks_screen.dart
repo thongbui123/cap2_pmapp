@@ -97,6 +97,7 @@ class _MyTaskScreenState extends State<MyTaskScreen> {
                                           projectModel: projectModel,
                                           userMap: userMap,
                                           projectMap: projectMap,
+                                          phraseMap: {},
                                         ),
                                       );
                                     }
