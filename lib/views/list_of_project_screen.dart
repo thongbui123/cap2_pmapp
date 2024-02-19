@@ -1,4 +1,5 @@
 import 'package:capstone2_project_management_app/models/project_model.dart';
+import 'package:capstone2_project_management_app/models/user_model.dart';
 import 'package:capstone2_project_management_app/views/list_of_tasks_screen.dart';
 import 'package:capstone2_project_management_app/views/stats/stats.dart';
 import 'package:capstone2_project_management_app/views/subs/db_side_menu.dart';
@@ -7,7 +8,10 @@ import 'package:flutter/material.dart';
 
 class listOfProjects extends StatefulWidget {
   final Map<dynamic, dynamic> projectMap;
-  const listOfProjects({Key? key, required this.projectMap}) : super(key: key);
+  final UserModel? currentUserModel;
+  const listOfProjects(
+      {Key? key, required this.projectMap, required this.currentUserModel})
+      : super(key: key);
 
   @override
   State<listOfProjects> createState() => _listOfProjectsState();
@@ -19,12 +23,14 @@ class _listOfProjectsState extends State<listOfProjects>
   late Map<dynamic, dynamic> projectMap;
   late Map<String, dynamic> userMap;
   List<ProjectModel> allProjects = [];
+  late UserModel? userModel;
   User? user;
   @override
   void initState() {
     super.initState();
     user = FirebaseAuth.instance.currentUser;
     projectMap = widget.projectMap;
+    userModel = widget.currentUserModel;
     allProjects = _getData();
     _tabController = TabController(length: 2, vsync: this);
   }
@@ -65,6 +71,7 @@ class _listOfProjectsState extends State<listOfProjects>
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButton: Visibility(
+        visible: userModel?.userRole != 'User',
         child: FloatingActionButton(
           onPressed: () {},
           backgroundColor: Colors.deepOrangeAccent,
@@ -72,7 +79,8 @@ class _listOfProjectsState extends State<listOfProjects>
           child: Icon(
             Icons.create_new_folder,
             color: Colors.white,
-          ), // Updated icon for the FAB
+          ),
+          // Updated icon for the FAB
         ),
       ),
       body: SafeArea(
@@ -188,6 +196,7 @@ class _listOfProjectsState extends State<listOfProjects>
                                             return ListOfTasks(
                                               projectModel: project,
                                               projectMap: projectMap,
+                                              userModel: userModel!,
                                             );
                                           }));
                                         },

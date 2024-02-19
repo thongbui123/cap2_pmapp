@@ -219,6 +219,7 @@ class _DashboardMainV12State extends State<DashboardMainV12> {
                                 Navigator.of(context)
                                     .push(MaterialPageRoute(builder: (context) {
                                   return listOfProjects(
+                                    currentUserModel: currentUserModel,
                                     projectMap: projectMap,
                                   );
                                 }));

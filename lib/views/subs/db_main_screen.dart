@@ -169,7 +169,9 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
                                         Navigator.of(context).push(
                                             MaterialPageRoute(
                                                 builder: (context) {
-                                          return const MyTaskScreen();
+                                          return MyTaskScreen(
+                                            userModel: currentUserModel!,
+                                          );
                                         }));
                                       },
                                       icon: const Icon(
@@ -229,11 +231,16 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
                                   IconButton(
                                     onPressed: () {
                                       Navigator.of(context).push(
-                                          MaterialPageRoute(builder: (context) {
-                                        return listOfProjects(
-                                          projectMap: projectMap,
-                                        );
-                                      }));
+                                        MaterialPageRoute(
+                                          builder: (context) {
+                                            return listOfProjects(
+                                              currentUserModel:
+                                                  currentUserModel,
+                                              projectMap: projectMap,
+                                            );
+                                          },
+                                        ),
+                                      );
                                     },
                                     icon: const Icon(
                                       Icons.folder,

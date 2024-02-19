@@ -1,4 +1,5 @@
 import 'package:capstone2_project_management_app/models/project_model.dart';
+import 'package:capstone2_project_management_app/models/user_model.dart';
 import 'package:capstone2_project_management_app/services/user_services.dart';
 import 'package:capstone2_project_management_app/views/project_detail_screen.dart';
 import 'package:capstone2_project_management_app/views/stats/stats.dart';
@@ -7,7 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class MyTaskScreen extends StatefulWidget {
-  const MyTaskScreen({super.key});
+  final UserModel userModel;
+  const MyTaskScreen({super.key, required this.userModel});
 
   @override
   State<MyTaskScreen> createState() => _MyTaskScreenState();
@@ -26,11 +28,13 @@ List<String> allProjects = [
 ];
 
 class _MyTaskScreenState extends State<MyTaskScreen> {
+  late UserModel _userModel;
   late ProjectModel projectModel;
   late Map<String, dynamic> userMap;
   late Map<dynamic, dynamic> projectMap;
   @override
   void initState() {
+    _userModel = widget.userModel;
     super.initState();
   }
 
@@ -96,6 +100,7 @@ class _MyTaskScreenState extends State<MyTaskScreen> {
                                         child: projectDetailScreen(
                                           projectModel: projectModel,
                                           userMap: userMap,
+                                          userModel: _userModel,
                                           projectMap: projectMap,
                                           phraseMap: {},
                                         ),

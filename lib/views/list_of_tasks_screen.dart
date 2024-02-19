@@ -1,4 +1,5 @@
 import 'package:capstone2_project_management_app/models/project_model.dart';
+import 'package:capstone2_project_management_app/models/user_model.dart';
 import 'package:capstone2_project_management_app/services/phrase_services.dart';
 import 'package:capstone2_project_management_app/services/user_services.dart';
 import 'package:capstone2_project_management_app/views/project_detail_screen.dart';
@@ -12,8 +13,12 @@ import 'package:table_calendar/table_calendar.dart';
 class ListOfTasks extends StatefulWidget {
   final ProjectModel projectModel;
   final Map<dynamic, dynamic> projectMap;
+  final UserModel userModel;
   const ListOfTasks(
-      {super.key, required this.projectModel, required this.projectMap});
+      {super.key,
+      required this.projectModel,
+      required this.projectMap,
+      required this.userModel});
 
   @override
   State<ListOfTasks> createState() => _ListOfTasksState();
@@ -33,6 +38,7 @@ List<String> allProjects = [
 
 class _ListOfTasksState extends State<ListOfTasks> {
   late ProjectModel projectModel;
+  late UserModel _userModel;
   late Map<String, dynamic> userMap;
   late Map<dynamic, dynamic> projectMap;
   late List<ProjectModel> listProjects;
@@ -43,6 +49,7 @@ class _ListOfTasksState extends State<ListOfTasks> {
     super.initState();
     projectModel = widget.projectModel;
     projectMap = widget.projectMap;
+    _userModel = widget.userModel;
     listProjects = getData(projectMap);
     _getPhraseData();
   }
@@ -77,6 +84,7 @@ class _ListOfTasksState extends State<ListOfTasks> {
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButton: Visibility(
+        visible: _userModel.userRole != 'User',
         child: FloatingActionButton(
           onPressed: () {},
           backgroundColor: Colors.blueAccent,
@@ -150,6 +158,7 @@ class _ListOfTasksState extends State<ListOfTasks> {
                                           userMap: userMap,
                                           projectMap: projectMap,
                                           phraseMap: phraseMap,
+                                          userModel: _userModel,
                                         ),
                                       );
                                     }
@@ -168,9 +177,12 @@ class _ListOfTasksState extends State<ListOfTasks> {
                             onPressed: () {
                               _showProjectSelectionDialog();
                             },
-                            child: const Text('Switch',
-                                style: TextStyle(
-                                    fontFamily: 'MontMed', fontSize: 12)),
+                            child: Visibility(
+                              visible: listProjects.length > 1,
+                              child: const Text('Switch',
+                                  style: TextStyle(
+                                      fontFamily: 'MontMed', fontSize: 12)),
+                            ),
                           ),
                         ),
                         const SizedBox(height: 5),
@@ -286,6 +298,7 @@ class _ListOfTasksState extends State<ListOfTasks> {
                       onTap: () {
                         Navigator.of(context).pushReplacement(MaterialPageRoute(
                             builder: (context) => ListOfTasks(
+                                userModel: _userModel,
                                 projectModel: project,
                                 projectMap: projectMap)));
                       },

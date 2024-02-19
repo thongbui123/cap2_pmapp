@@ -11,6 +11,7 @@ import 'package:capstone2_project_management_app/views/subs/sub_widgets.dart';
 import 'package:flutter/material.dart';
 
 class projectDetailScreen extends StatefulWidget {
+  final UserModel userModel;
   final ProjectModel projectModel;
   final Map<String, dynamic> userMap;
   final Map<dynamic, dynamic> projectMap;
@@ -18,6 +19,7 @@ class projectDetailScreen extends StatefulWidget {
 
   const projectDetailScreen({
     Key? key,
+    required this.userModel,
     required this.projectModel,
     required this.userMap,
     required this.projectMap,
@@ -35,6 +37,7 @@ class _projectDetailScreenState extends State<projectDetailScreen> {
   late ProjectModel projectModel;
   late PhraseModel phraseModel;
   UserServices userServices = UserServices();
+  late UserModel _userModel;
   PhraseServices phraseServices = PhraseServices();
   List<UserModel> allMembers = [];
   List<String> allMemberIds = [];
@@ -54,6 +57,7 @@ class _projectDetailScreenState extends State<projectDetailScreen> {
     super.initState();
     projectModel = widget.projectModel;
     userMap = widget.userMap;
+    _userModel = widget.userModel;
     projectMap = widget.projectMap;
     currentPhraseName = projectModel.projectStatus;
     phraseMap = widget.phraseMap;
@@ -185,9 +189,12 @@ class _projectDetailScreenState extends State<projectDetailScreen> {
                               onPressed: () {
                                 _showStateDrawer(context);
                               },
-                              child: const Text('Alter',
-                                  style: TextStyle(
-                                      fontFamily: 'MontMed', fontSize: 14)))),
+                              child: Visibility(
+                                visible: _userModel.userRole != 'User',
+                                child: const Text('Alter',
+                                    style: TextStyle(
+                                        fontFamily: 'MontMed', fontSize: 14)),
+                              ))),
                       const Divider(),
                       const SizedBox(height: 5),
                       ListTile(
@@ -213,39 +220,12 @@ class _projectDetailScreenState extends State<projectDetailScreen> {
                               _showStateBottomSheet(
                                   context, projectModel.projectMembers);
                             },
-                            child: const Text('View All ',
-                                style: TextStyle(
-                                    fontFamily: 'MontMed', fontSize: 14))),
-                      ),
-                      const Divider(),
-                      Container(
-                        padding: const EdgeInsets.fromLTRB(18, 0, 0, 0),
-                        child: Column(
-                          children: currentList.map((member) {
-                            return ListTile(
-                              leading: const CircleAvatar(
-                                  child: Text(
-                                'A',
-                                style: TextStyle(fontFamily: 'MontMed'),
-                              )),
-                              title: Text(member.userFirstName,
-                                  style: const TextStyle(
+                            child: Visibility(
+                              visible: _userModel.userRole != 'User',
+                              child: const Text('View All ',
+                                  style: TextStyle(
                                       fontFamily: 'MontMed', fontSize: 14)),
-                              subtitle: const Text(
-                                'Member',
-                                style: TextStyle(
-                                    fontFamily: 'MontMed', fontSize: 12),
-                              ),
-                              trailing: TextButton(
-                                onPressed: () {},
-                                child: const Text(
-                                  'Remove',
-                                  style: TextStyle(fontFamily: 'MontMed'),
-                                ),
-                              ),
-                            );
-                          }).toList(),
-                        ),
+                            )),
                       ),
                       const Divider(),
                       ListTile(
@@ -259,9 +239,12 @@ class _projectDetailScreenState extends State<projectDetailScreen> {
                               onPressed: () {
                                 _showStateDrawer2(context);
                               },
-                              child: const Text('View',
-                                  style: TextStyle(
-                                      fontFamily: 'MontMed', fontSize: 14)))),
+                              child: Visibility(
+                                visible: _userModel.userRole != 'User',
+                                child: const Text('View',
+                                    style: TextStyle(
+                                        fontFamily: 'MontMed', fontSize: 14)),
+                              ))),
                       const Divider(),
                     ],
                   ),
@@ -451,6 +434,7 @@ class _projectDetailScreenState extends State<projectDetailScreen> {
           projectMap: projectMap,
           projectModel: projectModel,
           phraseMap: phraseMap,
+          userModel: _userModel,
         );
       },
     );

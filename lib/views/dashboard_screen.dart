@@ -79,7 +79,9 @@ class _dashboard_screenState extends State<dashboard_screen> {
                           projectMap = snapshot.data ?? {};
                           return Expanded(
                             child: userModel?.userRole == "User"
-                                ? const DashboardMainV2()
+                                ? DashboardMainV2(
+                                    userModel: userModel,
+                                    projectMap: projectMap)
                                 : DashboardMainV1(
                                     currentUserModel: userModel,
                                     projectMap: projectMap),
