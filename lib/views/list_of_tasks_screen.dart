@@ -108,12 +108,7 @@ class _ListOfTasksState extends State<ListOfTasks> {
         child: FloatingActionButton(
           onPressed: () {
             Navigator.of(context).push(
-              MaterialPageRoute(
-                  builder: (context) => TaskCreateScreen(
-                        projectMap: projectMap,
-                        currentUserModel: _userModel,
-                        userMap: userMap,
-                      )),
+              MaterialPageRoute(builder: (context) => _getTaskCreateScreen()),
             );
           },
           backgroundColor: Colors.blueAccent,
@@ -155,30 +150,7 @@ class _ListOfTasksState extends State<ListOfTasks> {
                           onTap: () {
                             Navigator.of(context)
                                 .push(MaterialPageRoute(builder: (context) {
-                              return FutureBuilder(
-                                  future: UserServices().getUserDataMap(),
-                                  builder: (context, snapshot) {
-                                    if (snapshot.connectionState ==
-                                        ConnectionState.waiting) {
-                                      return const Center(
-                                          child: CircularProgressIndicator());
-                                    } else if (snapshot.hasError) {
-                                      return Center(
-                                          child:
-                                              Text('Error: ${snapshot.error}'));
-                                    } else {
-                                      userMap = snapshot.data ?? {};
-                                      return Expanded(
-                                        child: ProjectDetailScreen(
-                                          projectModel: projectModel,
-                                          userMap: userMap,
-                                          projectMap: projectMap,
-                                          phraseMap: phraseMap,
-                                          userModel: _userModel,
-                                        ),
-                                      );
-                                    }
-                                  });
+                              return _getProjectDetailScreen();
                             }));
                           },
                           title: Text('${projectModel.projectName}',
@@ -270,6 +242,48 @@ class _ListOfTasksState extends State<ListOfTasks> {
         ),
       ),
     );
+  }
+
+  FutureBuilder<Map<String, dynamic>> _getProjectDetailScreen() {
+    return FutureBuilder(
+        future: UserServices().getUserDataMap(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else {
+            userMap = snapshot.data ?? {};
+            return Expanded(
+              child: ProjectDetailScreen(
+                projectModel: projectModel,
+                userMap: userMap,
+                projectMap: projectMap,
+                phraseMap: phraseMap,
+                userModel: _userModel,
+              ),
+            );
+          }
+        });
+  }
+
+  FutureBuilder<Map<String, dynamic>> _getTaskCreateScreen() {
+    return FutureBuilder(
+        future: UserServices().getUserDataMap(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else {
+            userMap = snapshot.data ?? {};
+            return Expanded(
+                child: TaskCreateScreen(
+                    projectMap: projectMap,
+                    currentUserModel: _userModel,
+                    userMap: userMap));
+          }
+        });
   }
 
   Future<void> _showProjectSelectionDialog() async {

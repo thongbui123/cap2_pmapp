@@ -2,6 +2,7 @@ import 'package:capstone2_project_management_app/models/project_model.dart';
 import 'package:capstone2_project_management_app/models/user_model.dart';
 import 'package:capstone2_project_management_app/services/project_services.dart';
 import 'package:capstone2_project_management_app/services/user_services.dart';
+import 'package:capstone2_project_management_app/views/project_detail_screen.dart';
 import 'package:capstone2_project_management_app/views/stats/stats.dart';
 import 'package:capstone2_project_management_app/views/subs/db_side_menu.dart';
 import 'package:capstone2_project_management_app/views/subs/sub_widgets.dart';
@@ -91,7 +92,7 @@ class _MyTaskScreenState extends State<MyTaskScreen> {
           onPressed: () {
             Navigator.of(context).push(
               MaterialPageRoute(
-                builder: (context) => _getFutureUserMap(),
+                builder: (context) => _getTaskCreateScreen(),
               ),
             );
           },
@@ -135,7 +136,7 @@ class _MyTaskScreenState extends State<MyTaskScreen> {
                             Navigator.of(context).push(
                               MaterialPageRoute(
                                 builder: (context) {
-                                  return _getFutureUserMap();
+                                  return _getProjectDetailScreen();
                                 },
                               ),
                             );
@@ -228,7 +229,7 @@ class _MyTaskScreenState extends State<MyTaskScreen> {
     );
   }
 
-  FutureBuilder<Map<String, dynamic>> _getFutureUserMap() {
+  FutureBuilder<Map<String, dynamic>> _getTaskCreateScreen() {
     return FutureBuilder(
       future: userServices.getUserDataMap(),
       builder: (context, snapshot) {
@@ -245,13 +246,32 @@ class _MyTaskScreenState extends State<MyTaskScreen> {
                 projectMap: projectMap,
                 currentUserModel: currentUserModel,
                 userMap: userMap),
-            // ProjectDetailScreen(
-            //   projectModel: projectModel,
-            //   userMap: userMap,
-            //   userModel: currentUserModel,
-            //   projectMap: projectMap,
-            //   phraseMap: phraseMap,
-            // ),
+          );
+        }
+      },
+    );
+  }
+
+  FutureBuilder<Map<String, dynamic>> _getProjectDetailScreen() {
+    return FutureBuilder(
+      future: userServices.getUserDataMap(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        } else {
+          userMap = snapshot.data ?? {};
+          return Expanded(
+            child: ProjectDetailScreen(
+              projectModel: projectModel,
+              userMap: userMap,
+              userModel: currentUserModel,
+              projectMap: projectMap,
+              phraseMap: phraseMap,
+            ),
           );
         }
       },
