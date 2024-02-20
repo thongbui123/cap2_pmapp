@@ -3,6 +3,7 @@ import 'package:capstone2_project_management_app/models/user_model.dart';
 import 'package:capstone2_project_management_app/views/list_of_tasks_screen.dart';
 import 'package:capstone2_project_management_app/views/stats/stats.dart';
 import 'package:capstone2_project_management_app/views/subs/db_side_menu.dart';
+import 'package:capstone2_project_management_app/views/subs/project_create_step1.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -73,7 +74,14 @@ class _listOfProjectsState extends State<listOfProjects>
       floatingActionButton: Visibility(
         visible: userModel?.userRole != 'User',
         child: FloatingActionButton(
-          onPressed: () {},
+          onPressed: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => ProjectCreateStep1(
+                    projectMap: projectMap, currentUserModel: userModel),
+              ),
+            );
+          },
           backgroundColor: Colors.deepOrangeAccent,
           tooltip: 'Add Project', // Optional tooltip text shown on long-press
           child: Icon(

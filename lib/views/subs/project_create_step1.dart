@@ -12,18 +12,18 @@ import 'package:flutter/material.dart';
 import '../../models/user_model.dart';
 import '../../services/project_services.dart';
 
-class projectCreateStep1 extends StatefulWidget {
+class ProjectCreateStep1 extends StatefulWidget {
   final UserModel? currentUserModel;
   final Map<dynamic, dynamic> projectMap;
-  const projectCreateStep1(
-      {Key? key, this.currentUserModel, required this.projectMap})
+  const ProjectCreateStep1(
+      {Key? key, required this.currentUserModel, required this.projectMap})
       : super(key: key);
 
   @override
-  State<projectCreateStep1> createState() => _projectCreateStep1State();
+  State<ProjectCreateStep1> createState() => _ProjectCreateStep1State();
 }
 
-class _projectCreateStep1State extends State<projectCreateStep1> {
+class _ProjectCreateStep1State extends State<ProjectCreateStep1> {
   var projectNameController = TextEditingController();
   var projectDescriptionController = TextEditingController();
   var startDateController = TextEditingController();
@@ -278,7 +278,7 @@ class _projectCreateStep1State extends State<projectCreateStep1> {
                                 _selectDate(
                                     endDateController,
                                     DateTime.now()
-                                        .subtract(const Duration(days: 60)));
+                                        .add(const Duration(days: 60)));
                               },
                             ),
                           )),
@@ -400,7 +400,7 @@ class _projectCreateStep1State extends State<projectCreateStep1> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => projectCreateStep3(
+                                    builder: (context) => ProjectCreateStep3(
                                           projectNameController:
                                               projectNameController,
                                           projectDescriptionController:

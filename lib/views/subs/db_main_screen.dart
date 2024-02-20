@@ -26,6 +26,7 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
   final databaseReference = FirebaseDatabase.instance.ref();
   DatabaseReference? projectRef;
   Map<dynamic, dynamic> projectMap = {};
+
   List<ProjectModel> allProjects = [];
   List<ProjectModel> joinedProjects = [];
   int count_overduo = 0;
@@ -62,6 +63,7 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
     super.initState();
     currentUserModel = widget.currentUserModel;
     projectMap = widget.projectMap;
+
     _getData();
     //_getProjectDetails();
   }
@@ -171,6 +173,7 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
                                                 builder: (context) {
                                           return MyTaskScreen(
                                             userModel: currentUserModel!,
+                                            projectMap: projectMap,
                                           );
                                         }));
                                       },

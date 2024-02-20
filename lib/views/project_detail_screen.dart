@@ -2,22 +2,23 @@ import 'package:capstone2_project_management_app/models/phrase_model.dart';
 import 'package:capstone2_project_management_app/models/project_model.dart';
 import 'package:capstone2_project_management_app/models/user_model.dart';
 import 'package:capstone2_project_management_app/services/phrase_services.dart';
-import 'package:capstone2_project_management_app/services/project_services.dart';
 import 'package:capstone2_project_management_app/services/user_services.dart';
+import 'package:capstone2_project_management_app/views/list_of_tasks_screen.dart';
 import 'package:capstone2_project_management_app/views/stats/stats.dart';
 import 'package:capstone2_project_management_app/views/subs/bottom_sheet_widget.dart';
 import 'package:capstone2_project_management_app/views/subs/db_side_menu.dart';
 import 'package:capstone2_project_management_app/views/subs/sub_widgets.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 
-class projectDetailScreen extends StatefulWidget {
+class ProjectDetailScreen extends StatefulWidget {
   final UserModel userModel;
   final ProjectModel projectModel;
   final Map<String, dynamic> userMap;
   final Map<dynamic, dynamic> projectMap;
   final Map<dynamic, dynamic> phraseMap;
 
-  const projectDetailScreen({
+  const ProjectDetailScreen({
     Key? key,
     required this.userModel,
     required this.projectModel,
@@ -27,14 +28,14 @@ class projectDetailScreen extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<projectDetailScreen> createState() => _projectDetailScreenState();
+  State<ProjectDetailScreen> createState() => _ProjectDetailScreenState();
 }
 
 List<String> currentList = [];
 List<PhraseModel> listOfPhrase = [];
 
-class _projectDetailScreenState extends State<projectDetailScreen> {
-  late ProjectModel projectModel;
+class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
+  late ProjectModel _projectModel;
   late PhraseModel phraseModel;
   UserServices userServices = UserServices();
   late UserModel _userModel;
@@ -55,17 +56,17 @@ class _projectDetailScreenState extends State<projectDetailScreen> {
   @override
   void initState() {
     super.initState();
-    projectModel = widget.projectModel;
+    _projectModel = widget.projectModel;
     userMap = widget.userMap;
     _userModel = widget.userModel;
     projectMap = widget.projectMap;
-    currentPhraseName = projectModel.projectStatus;
+    currentPhraseName = _projectModel.projectStatus;
     phraseMap = widget.phraseMap;
-    memberLength = projectModel.projectMembers.length;
+    memberLength = _projectModel.projectMembers.length;
     allMembers = userServices.getUserDataList(userMap).cast<UserModel>();
     allMemberIds = userServices.getUserIdList(userMap);
-    selectedIndex = phraseServices.getPhraseIndex(phraseMap, currentPhraseName);
     mapPhraseIndex = phraseServices.getMapPhraseIndex(phraseMap);
+    selectedIndex = phraseServices.getPhraseIndex(phraseMap, currentPhraseName);
   }
 
   @override
@@ -88,7 +89,13 @@ class _projectDetailScreenState extends State<projectDetailScreen> {
                           IconButton(
                               icon: const Icon(Icons.arrow_back_ios),
                               onPressed: () {
-                                Navigator.pop(context);
+                                Navigator.of(context).pushReplacement(
+                                  MaterialPageRoute(
+                                      builder: (context) => ListOfTasks(
+                                          projectModel: _projectModel,
+                                          projectMap: projectMap,
+                                          userModel: _userModel)),
+                                );
                               }),
                           const Text(
                             'PROJECT',
@@ -103,7 +110,8 @@ class _projectDetailScreenState extends State<projectDetailScreen> {
                       ListTile(
                         leading: const CircleAvatar(
                             child: Icon(Icons.folder, color: Colors.orange)),
-                        title: Text('Project Name: ${projectModel.projectName}',
+                        title: Text(
+                            'Project Name: ${_projectModel.projectName}',
                             style: const TextStyle(
                                 fontFamily: 'MontMed',
                                 color: Colors.black,
@@ -122,7 +130,7 @@ class _projectDetailScreenState extends State<projectDetailScreen> {
                       ),
                       const SizedBox(height: 5),
                       Text(
-                        'Description: ${projectModel.projecctDescription}',
+                        'Description: ${_projectModel.projecctDescription}',
                         style: const TextStyle(
                             fontFamily: 'MontMed',
                             color: Colors.black87,
@@ -131,7 +139,7 @@ class _projectDetailScreenState extends State<projectDetailScreen> {
                       const SizedBox(height: 10),
                       const Divider(),
                       ListTile(
-                        leading: avatar(userMap, projectModel.managerId),
+                        leading: avatar(userMap, _projectModel.managerId),
                         title: const Text('Assigned by: ',
                             style: TextStyle(
                                 fontFamily: 'MontMed',
@@ -139,7 +147,7 @@ class _projectDetailScreenState extends State<projectDetailScreen> {
                                 color: Colors.black54)),
                         subtitle: Text(
                             userServices.getNameFromId(
-                                userMap, projectModel.managerId),
+                                userMap, _projectModel.managerId),
                             style: const TextStyle(
                                 fontFamily: 'MontMed', fontSize: 14)),
                       ),
@@ -153,7 +161,7 @@ class _projectDetailScreenState extends State<projectDetailScreen> {
                                 fontFamily: 'MontMed',
                                 fontSize: 12,
                                 color: Colors.black54)),
-                        subtitle: Text(projectModel.startDate,
+                        subtitle: Text(_projectModel.startDate,
                             style: const TextStyle(
                                 fontFamily: 'MontMed', fontSize: 14)),
                         trailing: Column(
@@ -165,36 +173,38 @@ class _projectDetailScreenState extends State<projectDetailScreen> {
                                       fontFamily: 'MontMed',
                                       fontSize: 12,
                                       color: Colors.black54)),
-                              Text(projectModel.endDate,
+                              Text(_projectModel.endDate,
                                   style: const TextStyle(
                                       fontFamily: 'MontMed', fontSize: 14))
                             ]),
                       ),
                       const Divider(),
                       ListTile(
-                          leading: const CircleAvatar(
-                            child: Icon(Icons.account_tree_outlined),
+                        leading: const CircleAvatar(
+                          child: Icon(Icons.account_tree_outlined),
+                        ),
+                        title: const Text('Current Phrase: ',
+                            style: TextStyle(
+                                fontFamily: 'MontMed',
+                                fontSize: 12,
+                                color: Colors.black54)),
+                        subtitle: Text(
+                          currentPhraseName,
+                          style: const TextStyle(
+                              fontFamily: 'MontMed', fontSize: 14),
+                        ),
+                        trailing: Visibility(
+                          visible: _userModel.userRole != 'User',
+                          child: TextButton(
+                            onPressed: () {
+                              _showStateDrawer(context);
+                            },
+                            child: const Text('Alter',
+                                style: TextStyle(
+                                    fontFamily: 'MontMed', fontSize: 14)),
                           ),
-                          title: const Text('Current Phrase: ',
-                              style: TextStyle(
-                                  fontFamily: 'MontMed',
-                                  fontSize: 12,
-                                  color: Colors.black54)),
-                          subtitle: Text(
-                            currentPhraseName,
-                            style: const TextStyle(
-                                fontFamily: 'MontMed', fontSize: 14),
-                          ),
-                          trailing: TextButton(
-                              onPressed: () {
-                                _showStateDrawer(context);
-                              },
-                              child: Visibility(
-                                visible: _userModel.userRole != 'User',
-                                child: const Text('Alter',
-                                    style: TextStyle(
-                                        fontFamily: 'MontMed', fontSize: 14)),
-                              ))),
+                        ),
+                      ),
                       const Divider(),
                       const SizedBox(height: 5),
                       ListTile(
@@ -215,36 +225,43 @@ class _projectDetailScreenState extends State<projectDetailScreen> {
                             fontSize: 14,
                           ),
                         ),
-                        trailing: TextButton(
+                        trailing: Visibility(
+                          visible: _userModel.userRole != 'User',
+                          child: TextButton(
                             onPressed: () {
                               _showStateBottomSheet(
-                                  context, projectModel.projectMembers);
+                                  context, _projectModel.projectMembers);
                             },
-                            child: Visibility(
-                              visible: _userModel.userRole != 'User',
-                              child: const Text('View All ',
-                                  style: TextStyle(
-                                      fontFamily: 'MontMed', fontSize: 14)),
-                            )),
+                            child: const Text(
+                              'View All ',
+                              style: TextStyle(
+                                  fontFamily: 'MontMed', fontSize: 14),
+                            ),
+                          ),
+                        ),
                       ),
                       const Divider(),
                       ListTile(
-                          leading: const CircleAvatar(
-                            child: Icon(Icons.settings),
-                          ),
-                          title: const Text('Advanced Options',
+                        leading: const CircleAvatar(
+                          child: Icon(Icons.settings),
+                        ),
+                        title: const Text('Advanced Options',
+                            style:
+                                TextStyle(fontFamily: 'MontMed', fontSize: 14)),
+                        trailing: Visibility(
+                          visible: _userModel.userRole != 'User',
+                          child: TextButton(
+                            onPressed: () {
+                              _showStateDrawer2(context);
+                            },
+                            child: const Text(
+                              'View',
                               style: TextStyle(
-                                  fontFamily: 'MontMed', fontSize: 14)),
-                          trailing: TextButton(
-                              onPressed: () {
-                                _showStateDrawer2(context);
-                              },
-                              child: Visibility(
-                                visible: _userModel.userRole != 'User',
-                                child: const Text('View',
-                                    style: TextStyle(
-                                        fontFamily: 'MontMed', fontSize: 14)),
-                              ))),
+                                  fontFamily: 'MontMed', fontSize: 14),
+                            ),
+                          ),
+                        ),
+                      ),
                       const Divider(),
                     ],
                   ),
@@ -339,8 +356,7 @@ class _projectDetailScreenState extends State<projectDetailScreen> {
                     setState(() {
                       selectedIndex--;
                       currentPhraseName = mapPhraseIndex[selectedIndex]!;
-                      ProjectServices().updateProjectStatus(
-                          projectModel.projectId, currentPhraseName);
+                      _updateProjectStatus(currentPhraseName);
                     });
                   }
                   Navigator.pop(context);
@@ -355,8 +371,7 @@ class _projectDetailScreenState extends State<projectDetailScreen> {
                     setState(() {
                       selectedIndex++;
                       currentPhraseName = mapPhraseIndex[selectedIndex]!;
-                      ProjectServices().updateProjectStatus(
-                          projectModel.projectId, currentPhraseName);
+                      _updateProjectStatus(currentPhraseName);
                     });
                   }
 
@@ -368,6 +383,25 @@ class _projectDetailScreenState extends State<projectDetailScreen> {
         );
       },
     );
+  }
+
+  Future<void> _updateProjectStatus(String currentPhraseName) async {
+    DatabaseReference projectRef =
+        FirebaseDatabase.instance.ref().child('projects');
+
+    projectRef.child(_projectModel.projectId).update({
+      'projectStatus': currentPhraseName,
+    });
+    DatabaseEvent snapshot = await projectRef.once();
+    DatabaseEvent databaseEventModel =
+        await projectRef.child(_projectModel.projectId).once();
+    if (snapshot.snapshot.value != null && snapshot.snapshot.value is Map) {
+      setState(() {
+        projectMap = Map.from(snapshot.snapshot.value as dynamic);
+        _projectModel = ProjectModel.fromMap(Map<String, dynamic>.from(
+            databaseEventModel.snapshot.value as dynamic));
+      });
+    }
   }
 
   void _showStateDrawer2(BuildContext context) {
@@ -432,7 +466,7 @@ class _projectDetailScreenState extends State<projectDetailScreen> {
           currentList: currentStringList,
           userMap: userMap,
           projectMap: projectMap,
-          projectModel: projectModel,
+          projectModel: _projectModel,
           phraseMap: phraseMap,
           userModel: _userModel,
         );

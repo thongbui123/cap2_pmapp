@@ -5,7 +5,7 @@ import 'package:capstone2_project_management_app/views/dashboard_screen.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 
-class projectCreateStep3 extends StatefulWidget {
+class ProjectCreateStep3 extends StatefulWidget {
   final TextEditingController projectNameController;
   final TextEditingController projectDescriptionController;
   final TextEditingController startDateController;
@@ -13,7 +13,7 @@ class projectCreateStep3 extends StatefulWidget {
   final String teamLeaderId;
   final UserModel? currentUserModel;
   final Map<String, dynamic> projectMap;
-  const projectCreateStep3(
+  const ProjectCreateStep3(
       {Key? key,
       required this.projectNameController,
       required this.projectDescriptionController,
@@ -25,12 +25,12 @@ class projectCreateStep3 extends StatefulWidget {
       : super(key: key);
 
   @override
-  State<projectCreateStep3> createState() => _projectCreateStep3State();
+  State<ProjectCreateStep3> createState() => _ProjectCreateStep3State();
 }
 
 List<String> list = <String>['Member', 'Leader'];
 
-class _projectCreateStep3State extends State<projectCreateStep3> {
+class _ProjectCreateStep3State extends State<ProjectCreateStep3> {
   var projectNameController = TextEditingController();
   var projectDescriptionController = TextEditingController();
   var startDateController = TextEditingController();
@@ -192,6 +192,13 @@ class _projectCreateStep3State extends State<projectCreateStep3> {
                     height: 50,
                     child: TextButton(
                       onPressed: () async {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute<void>(
+                            builder: (BuildContext context) =>
+                                const dashboard_screen(),
+                          ),
+                        );
                         ProjectServices projectServices = ProjectServices();
                         projectServices.addProject(
                             projectNameController.text,
@@ -215,13 +222,6 @@ class _projectCreateStep3State extends State<projectCreateStep3> {
                             'projectPhrases': phrasesList,
                           });
                         }
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute<void>(
-                            builder: (BuildContext context) =>
-                                const dashboard_screen(),
-                          ),
-                        );
                       },
                       child: Container(
                         child: const Row(

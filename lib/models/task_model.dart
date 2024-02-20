@@ -1,37 +1,55 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
+
 class TaskModel {
   String taskId;
   String taskName;
-  String description;
-  String status;
+  String taskDescription;
+  String taskStatus;
+  String taskPriority;
+  String taskStartDate;
+  String taskEndDate;
   String projectId;
   String phraseId;
+  List<String> taskMembers;
   TaskModel({
     required this.taskId,
     required this.taskName,
-    required this.description,
-    required this.status,
+    required this.taskDescription,
+    required this.taskStatus,
+    required this.taskPriority,
+    required this.taskStartDate,
+    required this.taskEndDate,
     required this.projectId,
     required this.phraseId,
+    required this.taskMembers,
   });
 
   TaskModel copyWith({
     String? taskId,
     String? taskName,
-    String? description,
-    String? status,
+    String? taskDescription,
+    String? taskStatus,
+    String? taskPriority,
+    String? taskStartDate,
+    String? taskEndDate,
     String? projectId,
     String? phraseId,
+    List<String>? taskMembers,
   }) {
     return TaskModel(
       taskId: taskId ?? this.taskId,
       taskName: taskName ?? this.taskName,
-      description: description ?? this.description,
-      status: status ?? this.status,
+      taskDescription: taskDescription ?? this.taskDescription,
+      taskStatus: taskStatus ?? this.taskStatus,
+      taskPriority: taskPriority ?? this.taskPriority,
+      taskStartDate: taskStartDate ?? this.taskStartDate,
+      taskEndDate: taskEndDate ?? this.taskEndDate,
       projectId: projectId ?? this.projectId,
       phraseId: phraseId ?? this.phraseId,
+      taskMembers: taskMembers ?? this.taskMembers,
     );
   }
 
@@ -39,10 +57,14 @@ class TaskModel {
     return <String, dynamic>{
       'taskId': taskId,
       'taskName': taskName,
-      'description': description,
-      'status': status,
+      'taskDescription': taskDescription,
+      'taskStatus': taskStatus,
+      'taskPriority': taskPriority,
+      'taskStartDate': taskStartDate,
+      'taskEndDate': taskEndDate,
       'projectId': projectId,
       'phraseId': phraseId,
+      'taskMembers': taskMembers,
     };
   }
 
@@ -50,10 +72,19 @@ class TaskModel {
     return TaskModel(
       taskId: map['taskId'] as String,
       taskName: map['taskName'] as String,
-      description: map['description'] as String,
-      status: map['status'] as String,
+      taskDescription: map['taskDescription'] as String,
+      taskStatus: map['taskStatus'] as String,
+      taskPriority: map['taskPriority'] as String,
+      taskStartDate: map['taskStartDate'] as String,
+      taskEndDate: map['taskEndDate'] as String,
       projectId: map['projectId'] as String,
       phraseId: map['phraseId'] as String,
+      taskMembers: List<String>.from(
+        (map['taskMembers'] as List<dynamic>?)
+                ?.map((task) => task as String)
+                .toList() ??
+            [],
+      ),
     );
   }
 
@@ -64,7 +95,7 @@ class TaskModel {
 
   @override
   String toString() {
-    return 'TaskModel(taskId: $taskId, taskName: $taskName, description: $description, status: $status, projectId: $projectId, phraseId: $phraseId)';
+    return 'TaskModel(taskId: $taskId, taskName: $taskName, taskDescription: $taskDescription, taskStatus: $taskStatus, taskPriority: $taskPriority, taskStartDate: $taskStartDate, taskEndDate: $taskEndDate, projectId: $projectId, phraseId: $phraseId, taskMembers: $taskMembers)';
   }
 
   @override
@@ -73,19 +104,27 @@ class TaskModel {
 
     return other.taskId == taskId &&
         other.taskName == taskName &&
-        other.description == description &&
-        other.status == status &&
+        other.taskDescription == taskDescription &&
+        other.taskStatus == taskStatus &&
+        other.taskPriority == taskPriority &&
+        other.taskStartDate == taskStartDate &&
+        other.taskEndDate == taskEndDate &&
         other.projectId == projectId &&
-        other.phraseId == phraseId;
+        other.phraseId == phraseId &&
+        listEquals(other.taskMembers, taskMembers);
   }
 
   @override
   int get hashCode {
     return taskId.hashCode ^
         taskName.hashCode ^
-        description.hashCode ^
-        status.hashCode ^
+        taskDescription.hashCode ^
+        taskStatus.hashCode ^
+        taskPriority.hashCode ^
+        taskStartDate.hashCode ^
+        taskEndDate.hashCode ^
         projectId.hashCode ^
-        phraseId.hashCode;
+        phraseId.hashCode ^
+        taskMembers.hashCode;
   }
 }

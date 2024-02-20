@@ -104,7 +104,7 @@ class _dashboard_screenState extends State<dashboard_screen> {
           child: FloatingActionButton(
             onPressed: () {
               Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-                return projectCreateStep1(
+                return ProjectCreateStep1(
                   currentUserModel: userModel,
                   projectMap: projectMap,
                 );

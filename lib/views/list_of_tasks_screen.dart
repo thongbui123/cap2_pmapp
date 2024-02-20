@@ -5,6 +5,7 @@ import 'package:capstone2_project_management_app/services/user_services.dart';
 import 'package:capstone2_project_management_app/views/project_detail_screen.dart';
 import 'package:capstone2_project_management_app/views/stats/stats.dart';
 import 'package:capstone2_project_management_app/views/subs/db_side_menu.dart';
+import 'package:capstone2_project_management_app/views/task_create_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -51,6 +52,7 @@ class _ListOfTasksState extends State<ListOfTasks> {
     projectMap = widget.projectMap;
     _userModel = widget.userModel;
     listProjects = getData(projectMap);
+
     _getPhraseData();
   }
 
@@ -72,10 +74,28 @@ class _ListOfTasksState extends State<ListOfTasks> {
         .ref()
         .child('phrases')
         .child(projectModel.projectId);
-    DatabaseEvent snapshot = await phraseRef.once();
+    DatabaseEvent snapshot = await phraseRef.orderByChild('timestamp').once();
     if (snapshot.snapshot.value != null && snapshot.snapshot.value is Map) {
       setState(() {
         phraseMap = Map.from(snapshot.snapshot.value as dynamic);
+        List<MapEntry<dynamic, dynamic>> sortedEntries =
+            phraseMap.entries.toList();
+        sortedEntries.sort((a, b) {
+          return (a.value['timestamp'] as int).compareTo(b.value['timestamp']);
+        });
+        phraseMap = Map.fromEntries(sortedEntries.map((entry) {
+          return MapEntry(
+            entry.key,
+            {
+              'timestamp': entry.value['timestamp'],
+              'phraseId': entry.value['phraseId'],
+              'phraseName': entry.value['phraseName'],
+              'listTasks': entry.value['listTasks'],
+              'phraseDescription': entry.value['phraseDescription'],
+              'projectId': entry.value['projectId'],
+            },
+          );
+        }));
       });
     }
   }
@@ -86,7 +106,16 @@ class _ListOfTasksState extends State<ListOfTasks> {
       floatingActionButton: Visibility(
         visible: _userModel.userRole != 'User',
         child: FloatingActionButton(
-          onPressed: () {},
+          onPressed: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                  builder: (context) => TaskCreateScreen(
+                        projectMap: projectMap,
+                        currentUserModel: _userModel,
+                        userMap: userMap,
+                      )),
+            );
+          },
           backgroundColor: Colors.blueAccent,
           tooltip: 'Add Project', // Optional tooltip text shown on long-press
           child: const Icon(
@@ -100,19 +129,6 @@ class _ListOfTasksState extends State<ListOfTasks> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             db_side_menu(),
-            // FutureBuilder(
-            //   future: phraseServices.getPhraseMap(projectModel.projectId),
-            //   builder: (context, snapshot) {
-            //     if (snapshot.connectionState == ConnectionState.waiting) {
-            //       return const Center(child: CircularProgressIndicator());
-            //     } else if (snapshot.hasError) {
-            //       return Text('Error: ${snapshot.error}');
-            //     } else {
-            //       phraseMap = snapshot.data ?? {};
-            //       return const SizedBox.shrink();
-            //     }
-            //   },
-            // ),
             Expanded(
                 child: Padding(
                     padding: const EdgeInsets.all(defaultPadding),
@@ -153,7 +169,7 @@ class _ListOfTasksState extends State<ListOfTasks> {
                                     } else {
                                       userMap = snapshot.data ?? {};
                                       return Expanded(
-                                        child: projectDetailScreen(
+                                        child: ProjectDetailScreen(
                                           projectModel: projectModel,
                                           userMap: userMap,
                                           projectMap: projectMap,
@@ -173,12 +189,12 @@ class _ListOfTasksState extends State<ListOfTasks> {
                             style:
                                 TextStyle(fontFamily: 'MontMed', fontSize: 12),
                           ),
-                          trailing: TextButton(
-                            onPressed: () {
-                              _showProjectSelectionDialog();
-                            },
-                            child: Visibility(
-                              visible: listProjects.length > 1,
+                          trailing: Visibility(
+                            visible: listProjects.length > 1,
+                            child: TextButton(
+                              onPressed: () {
+                                _showProjectSelectionDialog();
+                              },
                               child: const Text('Switch',
                                   style: TextStyle(
                                       fontFamily: 'MontMed', fontSize: 12)),

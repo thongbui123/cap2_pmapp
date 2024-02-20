@@ -105,7 +105,7 @@ class _projectCreateStep2State extends State<projectCreateStep2> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => projectCreateStep1(
+                              builder: (context) => ProjectCreateStep1(
                                     currentUserModel: currentUserModel,
                                     projectMap: projectMap,
                                   )),

@@ -76,7 +76,7 @@ class _StatefulBottomSheetWidgetState extends State<StatefulBottomSheetWidget> {
           const SizedBox(height: 10),
           Container(
               child: TextButton(
-            onPressed: () => _showMemberSelectionDialog(allMembers),
+            onPressed: () => _showMemberSelectionDialog(allStaff),
             child: const Row(
               children: [
                 Icon(
@@ -139,10 +139,11 @@ class _StatefulBottomSheetWidgetState extends State<StatefulBottomSheetWidget> {
           ),
           TextButton(
               onPressed: () async {
-                DatabaseReference projectRef =
-                    FirebaseDatabase.instance.ref().child('projects');
-
-                projectRef.child(projectModel.projectId).update({
+                DatabaseReference projectRef = FirebaseDatabase.instance
+                    .ref()
+                    .child('projects')
+                    .child(projectModel.projectId);
+                projectRef.update({
                   'projectMembers': currentList,
                 });
                 DatabaseEvent snapshot = await projectRef.once();
@@ -155,7 +156,7 @@ class _StatefulBottomSheetWidgetState extends State<StatefulBottomSheetWidget> {
                 //Navigator.of(context).pop();
                 Navigator.of(context).pushReplacement(
                   MaterialPageRoute(
-                    builder: (context) => projectDetailScreen(
+                    builder: (context) => ProjectDetailScreen(
                       projectModel: projectModel,
                       userMap: userMap,
                       projectMap: projectMap,

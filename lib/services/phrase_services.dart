@@ -23,7 +23,8 @@ class PhraseServices {
         'phraseName': phraseName,
         'listTasks': listTasks,
         'projectId': projectId,
-        'phraseDescription': phraseName
+        'phraseDescription': phraseName,
+        'timestamp': ServerValue.timestamp
       });
       Fluttertoast.showToast(msg: 'New phrase has been created successfully');
     }
@@ -42,10 +43,29 @@ class PhraseServices {
   Future<Map> getPhraseMap(String projectId) async {
     DatabaseReference phraseRef =
         FirebaseDatabase.instance.ref().child('phrases').child(projectId);
-    DatabaseEvent databaseEvent = await phraseRef.once();
+    DatabaseEvent databaseEvent =
+        await phraseRef.orderByChild('timestamp').once();
     Map<dynamic, dynamic> phraseMap = {};
     if (databaseEvent.snapshot.value != null) {
       phraseMap = Map.from(databaseEvent.snapshot.value as dynamic);
+      List<MapEntry<dynamic, dynamic>> sortedEntries =
+          phraseMap.entries.toList();
+      sortedEntries.sort((a, b) {
+        return (a.value['timestamp'] as int).compareTo(b.value['timestamp']);
+      });
+      phraseMap = Map.fromEntries(sortedEntries.map((entry) {
+        return MapEntry(
+          entry.key,
+          {
+            'timestamp': entry.value['timestamp'],
+            'phraseId': entry.value['phraseId'],
+            'phraseName': entry.value['phraseName'],
+            'listTasks': entry.value['listTasks'],
+            'phraseDescription': entry.value['phraseDescription'],
+            'projectId': entry.value['projectId'],
+          },
+        );
+      }));
     }
 //    _getProjectDetails();
     return phraseMap;
@@ -88,6 +108,24 @@ class PhraseServices {
       mapName[num] = phraseModel.phraseName;
       num++;
     }
+    print(mapName);
     return mapName;
   }
+
+  // Map<int, String> getMapPhraseIndex(Map<dynamic, dynamic> phraseMap) {
+  //   List<MapEntry<int, String>> sortedEntries = [];
+  //   int num = 0;
+
+  //   for (var phrase in phraseMap.values) {
+  //     PhraseModel phraseModel =
+  //         PhraseModel.fromMap(Map<String, dynamic>.from(phrase));
+  //     sortedEntries.add(MapEntry(num, phraseModel.phraseName));
+  //     num++;
+  //   }
+
+  //   sortedEntries.sort((a, b) => b.value.compareTo(a.value));
+
+  //   Map<int, String> sortedMap = LinkedHashMap.fromEntries(sortedEntries);
+  //   return sortedMap;
+  // }
 }
