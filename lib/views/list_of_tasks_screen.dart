@@ -14,12 +14,14 @@ import 'package:table_calendar/table_calendar.dart';
 class ListOfTasks extends StatefulWidget {
   final ProjectModel projectModel;
   final Map<dynamic, dynamic> projectMap;
+  final Map<dynamic, dynamic> taskMap;
   final UserModel userModel;
   const ListOfTasks(
       {super.key,
       required this.projectModel,
       required this.projectMap,
-      required this.userModel});
+      required this.userModel,
+      required this.taskMap});
 
   @override
   State<ListOfTasks> createState() => _ListOfTasksState();
@@ -44,6 +46,7 @@ class _ListOfTasksState extends State<ListOfTasks> {
   late Map<dynamic, dynamic> projectMap;
   late List<ProjectModel> listProjects;
   late Map phraseMap = {};
+  late Map taskMap = {};
   PhraseServices phraseServices = PhraseServices();
   @override
   void initState() {
@@ -52,7 +55,7 @@ class _ListOfTasksState extends State<ListOfTasks> {
     projectMap = widget.projectMap;
     _userModel = widget.userModel;
     listProjects = getData(projectMap);
-
+    taskMap = widget.taskMap;
     _getPhraseData();
   }
 
@@ -261,6 +264,7 @@ class _ListOfTasksState extends State<ListOfTasks> {
                 projectMap: projectMap,
                 phraseMap: phraseMap,
                 userModel: _userModel,
+                taskMap: taskMap,
               ),
             );
           }
@@ -278,10 +282,14 @@ class _ListOfTasksState extends State<ListOfTasks> {
           } else {
             userMap = snapshot.data ?? {};
             return Expanded(
-                child: TaskCreateScreen(
-                    projectMap: projectMap,
-                    currentUserModel: _userModel,
-                    userMap: userMap));
+              child: TaskCreateScreen(
+                projectMap: projectMap,
+                currentUserModel: _userModel,
+                userMap: userMap,
+                projectModel: projectModel,
+                phraseMap: phraseMap,
+              ),
+            );
           }
         });
   }
@@ -328,9 +336,11 @@ class _ListOfTasksState extends State<ListOfTasks> {
                       onTap: () {
                         Navigator.of(context).pushReplacement(MaterialPageRoute(
                             builder: (context) => ListOfTasks(
-                                userModel: _userModel,
-                                projectModel: project,
-                                projectMap: projectMap)));
+                                  userModel: _userModel,
+                                  projectModel: project,
+                                  projectMap: projectMap,
+                                  taskMap: taskMap,
+                                )));
                       },
                     ),
                     const Divider(height: 0),

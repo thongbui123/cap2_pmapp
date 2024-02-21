@@ -14,7 +14,6 @@ class PhraseServices {
     }
     User? user = FirebaseAuth.instance.currentUser;
     if (user != null) {
-      String uid = user.uid;
       DatabaseReference phraseRef =
           FirebaseDatabase.instance.ref().child('phrases').child(projectId);
       String? phraseId = phraseRef.push().key;
@@ -38,6 +37,17 @@ class PhraseServices {
       'phraseName': currentPhrase,
     });
     Fluttertoast.showToast(msg: 'Phrase name has been changed successfully');
+  }
+
+  Future<void> updatePhraseTaskList(
+      String projectId, String phraseId, List<String> listTasks) async {
+    DatabaseReference phraseRef =
+        FirebaseDatabase.instance.ref().child('phrases');
+    phraseRef.child(projectId).child(phraseId).update({
+      'listTasks': listTasks,
+    });
+    Fluttertoast.showToast(
+        msg: 'Phrase task list has been updated successfully');
   }
 
   Future<Map> getPhraseMap(String projectId) async {

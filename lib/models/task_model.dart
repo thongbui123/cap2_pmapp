@@ -11,6 +11,7 @@ class TaskModel {
   String taskPriority;
   String taskStartDate;
   String taskEndDate;
+  String assignById;
   String projectId;
   String phraseId;
   List<String> taskMembers;
@@ -22,6 +23,7 @@ class TaskModel {
     required this.taskPriority,
     required this.taskStartDate,
     required this.taskEndDate,
+    required this.assignById,
     required this.projectId,
     required this.phraseId,
     required this.taskMembers,
@@ -35,6 +37,7 @@ class TaskModel {
     String? taskPriority,
     String? taskStartDate,
     String? taskEndDate,
+    String? createById,
     String? projectId,
     String? phraseId,
     List<String>? taskMembers,
@@ -47,6 +50,7 @@ class TaskModel {
       taskPriority: taskPriority ?? this.taskPriority,
       taskStartDate: taskStartDate ?? this.taskStartDate,
       taskEndDate: taskEndDate ?? this.taskEndDate,
+      assignById: createById ?? this.assignById,
       projectId: projectId ?? this.projectId,
       phraseId: phraseId ?? this.phraseId,
       taskMembers: taskMembers ?? this.taskMembers,
@@ -62,6 +66,7 @@ class TaskModel {
       'taskPriority': taskPriority,
       'taskStartDate': taskStartDate,
       'taskEndDate': taskEndDate,
+      'assignById': assignById,
       'projectId': projectId,
       'phraseId': phraseId,
       'taskMembers': taskMembers,
@@ -77,6 +82,7 @@ class TaskModel {
       taskPriority: map['taskPriority'] as String,
       taskStartDate: map['taskStartDate'] as String,
       taskEndDate: map['taskEndDate'] as String,
+      assignById: map['assignById'] as String,
       projectId: map['projectId'] as String,
       phraseId: map['phraseId'] as String,
       taskMembers: List<String>.from(
@@ -95,7 +101,7 @@ class TaskModel {
 
   @override
   String toString() {
-    return 'TaskModel(taskId: $taskId, taskName: $taskName, taskDescription: $taskDescription, taskStatus: $taskStatus, taskPriority: $taskPriority, taskStartDate: $taskStartDate, taskEndDate: $taskEndDate, projectId: $projectId, phraseId: $phraseId, taskMembers: $taskMembers)';
+    return 'TaskModel(taskId: $taskId, taskName: $taskName, taskDescription: $taskDescription, taskStatus: $taskStatus, taskPriority: $taskPriority, taskStartDate: $taskStartDate, taskEndDate: $taskEndDate, createById: $assignById, projectId: $projectId, phraseId: $phraseId, taskMembers: $taskMembers)';
   }
 
   @override
@@ -109,6 +115,7 @@ class TaskModel {
         other.taskPriority == taskPriority &&
         other.taskStartDate == taskStartDate &&
         other.taskEndDate == taskEndDate &&
+        other.assignById == assignById &&
         other.projectId == projectId &&
         other.phraseId == phraseId &&
         listEquals(other.taskMembers, taskMembers);
@@ -123,6 +130,7 @@ class TaskModel {
         taskPriority.hashCode ^
         taskStartDate.hashCode ^
         taskEndDate.hashCode ^
+        assignById.hashCode ^
         projectId.hashCode ^
         phraseId.hashCode ^
         taskMembers.hashCode;

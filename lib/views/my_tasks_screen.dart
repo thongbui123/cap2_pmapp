@@ -5,7 +5,7 @@ import 'package:capstone2_project_management_app/services/user_services.dart';
 import 'package:capstone2_project_management_app/views/project_detail_screen.dart';
 import 'package:capstone2_project_management_app/views/stats/stats.dart';
 import 'package:capstone2_project_management_app/views/subs/db_side_menu.dart';
-import 'package:capstone2_project_management_app/views/subs/sub_widgets.dart';
+import 'package:capstone2_project_management_app/views/task_create_screen.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -13,8 +13,12 @@ import 'package:table_calendar/table_calendar.dart';
 class MyTaskScreen extends StatefulWidget {
   final UserModel userModel;
   final Map projectMap;
+  final Map taskMap;
   const MyTaskScreen(
-      {super.key, required this.userModel, required this.projectMap});
+      {super.key,
+      required this.userModel,
+      required this.projectMap,
+      required this.taskMap});
 
   @override
   State<MyTaskScreen> createState() => _MyTaskScreenState();
@@ -39,6 +43,7 @@ class _MyTaskScreenState extends State<MyTaskScreen> {
   late Map<dynamic, dynamic> projectMap;
   late List<ProjectModel> listJoinedProjects;
   late Map phraseMap = {};
+  late Map taskMap;
   UserServices userServices = UserServices();
   ProjectServices projectServices = ProjectServices();
   @override
@@ -242,10 +247,13 @@ class _MyTaskScreenState extends State<MyTaskScreen> {
         } else {
           userMap = snapshot.data ?? {};
           return Expanded(
-            child: TaskCreateWidget(
-                projectMap: projectMap,
-                currentUserModel: currentUserModel,
-                userMap: userMap),
+            child: TaskCreateScreen(
+              projectMap: projectMap,
+              currentUserModel: currentUserModel,
+              userMap: userMap,
+              projectModel: projectModel,
+              phraseMap: phraseMap,
+            ),
           );
         }
       },
@@ -271,6 +279,7 @@ class _MyTaskScreenState extends State<MyTaskScreen> {
               userModel: currentUserModel,
               projectMap: projectMap,
               phraseMap: phraseMap,
+              taskMap: taskMap,
             ),
           );
         }

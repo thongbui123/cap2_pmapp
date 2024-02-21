@@ -1,6 +1,7 @@
 import 'package:capstone2_project_management_app/models/project_model.dart';
 import 'package:capstone2_project_management_app/models/user_model.dart';
 import 'package:capstone2_project_management_app/services/project_services.dart';
+import 'package:capstone2_project_management_app/services/task_services.dart';
 import 'package:capstone2_project_management_app/views/list_of_project_screen.dart';
 import 'package:capstone2_project_management_app/views/my_tasks_screen.dart';
 import 'package:capstone2_project_management_app/views/stats/stats.dart';
@@ -12,8 +13,12 @@ import 'package:intl/intl.dart';
 class DashboardMainV1 extends StatefulWidget {
   final UserModel? currentUserModel;
   final Map<dynamic, dynamic> projectMap;
+  final Map<dynamic, dynamic> taskMap;
   const DashboardMainV1(
-      {Key? key, required this.currentUserModel, required this.projectMap})
+      {Key? key,
+      required this.currentUserModel,
+      required this.projectMap,
+      required this.taskMap})
       : super(key: key);
 
   @override
@@ -22,14 +27,15 @@ class DashboardMainV1 extends StatefulWidget {
 
 class _DashboardMainV1State extends State<DashboardMainV1> {
   ProjectServices projectServices = ProjectServices();
+  TaskService taskService = TaskService();
   UserModel? currentUserModel;
   final databaseReference = FirebaseDatabase.instance.ref();
   DatabaseReference? projectRef;
   Map<dynamic, dynamic> projectMap = {};
-
+  Map<dynamic, dynamic> taskMap = {};
   List<ProjectModel> allProjects = [];
   List<ProjectModel> joinedProjects = [];
-  int count_overduo = 0;
+  int overdouProjectNumber = 0;
 
   Future<void> getProjectMap() async {
     DatabaseEvent databaseEvent =
@@ -52,7 +58,7 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
         DateFormat format = DateFormat('yyyy-MM-dd');
         DateTime getEndDate = format.parse(projectModel.endDate);
         if (DateTime.now().isAfter(getEndDate)) {
-          count_overduo++;
+          overdouProjectNumber++;
         }
       }
     }
@@ -63,7 +69,7 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
     super.initState();
     currentUserModel = widget.currentUserModel;
     projectMap = widget.projectMap;
-
+    taskMap = widget.taskMap;
     _getData();
     //_getProjectDetails();
   }
@@ -174,6 +180,7 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
                                           return MyTaskScreen(
                                             userModel: currentUserModel!,
                                             projectMap: projectMap,
+                                            taskMap: taskMap,
                                           );
                                         }));
                                       },
@@ -198,10 +205,10 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
                                   ],
                                 ),
                                 const Divider(),
-                                const Row(
+                                Row(
                                   children: <Widget>[
                                     Text(
-                                      '4 Task in Progress',
+                                      '${TaskService().getJoinedTaskNumber(taskMap, currentUserModel!.userId)} Task in Progress',
                                       style: TextStyle(
                                           fontSize: 12, fontFamily: 'MontMed'),
                                     )
@@ -236,10 +243,11 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
                                       Navigator.of(context).push(
                                         MaterialPageRoute(
                                           builder: (context) {
-                                            return listOfProjects(
+                                            return ListOfProjectScreen(
                                               currentUserModel:
                                                   currentUserModel,
                                               projectMap: projectMap,
+                                              taskMap: taskMap,
                                             );
                                           },
                                         ),
@@ -328,9 +336,9 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
                                       onPressed: () {
                                         // Add the action you want to perform when the TextButton is pressed
                                       },
-                                      child: const Text(
-                                        '12 Tasks Overdue',
-                                        style: TextStyle(
+                                      child: Text(
+                                        '${taskService.getOverdouTaskNumber(taskMap, currentUserModel!.userId)} Task(s) Overdue',
+                                        style: const TextStyle(
                                           fontFamily: 'MontMed',
                                           fontWeight: FontWeight.normal,
                                           color: Colors.black,
@@ -348,7 +356,7 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
                                         // Add the action you want to perform when the TextButton is pressed
                                       },
                                       child: Text(
-                                        '$count_overduo Project(s) Overdue',
+                                        '$overdouProjectNumber Project(s) Overdue',
                                         style: const TextStyle(
                                           fontFamily: 'MontMed',
                                           fontWeight: FontWeight.normal,
@@ -411,9 +419,9 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
                                       onPressed: () {
                                         // Add the action you want to perform when the TextButton is pressed
                                       },
-                                      child: const Text(
-                                        '12 Tasks Finalized',
-                                        style: TextStyle(
+                                      child: Text(
+                                        '${taskService.getCompleteTaskNumber(taskMap, currentUserModel!.userId)} Task(s) Finalized',
+                                        style: const TextStyle(
                                           fontFamily: 'MontMed',
                                           fontWeight: FontWeight.normal,
                                           color: Colors.black,
@@ -430,9 +438,9 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
                                       onPressed: () {
                                         // Add the action you want to perform when the TextButton is pressed
                                       },
-                                      child: const Text(
-                                        '2 Projects Finalized',
-                                        style: TextStyle(
+                                      child: Text(
+                                        '${projectServices.getCompleteProjectNumber(projectMap, currentUserModel!.userId)} Project(s) Finalized',
+                                        style: const TextStyle(
                                           fontFamily: 'MontMed',
                                           fontWeight: FontWeight.normal,
                                           color: Colors.black,

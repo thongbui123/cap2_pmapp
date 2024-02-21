@@ -17,7 +17,7 @@ class ProjectDetailScreen extends StatefulWidget {
   final Map<String, dynamic> userMap;
   final Map<dynamic, dynamic> projectMap;
   final Map<dynamic, dynamic> phraseMap;
-
+  final Map<dynamic, dynamic> taskMap;
   const ProjectDetailScreen({
     Key? key,
     required this.userModel,
@@ -25,6 +25,7 @@ class ProjectDetailScreen extends StatefulWidget {
     required this.userMap,
     required this.projectMap,
     required this.phraseMap,
+    required this.taskMap,
   }) : super(key: key);
 
   @override
@@ -51,6 +52,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
   late String currentPhraseId;
   late int selectedIndex;
   late Map phraseMap;
+  late Map taskMap;
   Map<int, String> mapPhraseIndex = {};
   late int memberLength;
   @override
@@ -60,6 +62,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
     userMap = widget.userMap;
     _userModel = widget.userModel;
     projectMap = widget.projectMap;
+    taskMap = widget.taskMap;
     currentPhraseName = _projectModel.projectStatus;
     phraseMap = widget.phraseMap;
     memberLength = _projectModel.projectMembers.length;
@@ -92,9 +95,11 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                                 Navigator.of(context).pushReplacement(
                                   MaterialPageRoute(
                                       builder: (context) => ListOfTasks(
-                                          projectModel: _projectModel,
-                                          projectMap: projectMap,
-                                          userModel: _userModel)),
+                                            projectModel: _projectModel,
+                                            projectMap: projectMap,
+                                            userModel: _userModel,
+                                            taskMap: taskMap,
+                                          )),
                                 );
                               }),
                           const Text(

@@ -45,6 +45,19 @@ class ProjectServices {
     return count;
   }
 
+  int getCompleteProjectNumber(Map<dynamic, dynamic> projectMap, String id) {
+    int count = 0;
+    for (var project in projectMap.values) {
+      ProjectModel projectModel =
+          ProjectModel.fromMap(Map<String, dynamic>.from(project));
+      if (projectModel.projectMembers.contains(id) &&
+          projectModel.projectStatus == 'Completed') {
+        count++;
+      }
+    }
+    return count;
+  }
+
   Future<void> addProject(
       String projectName,
       String projectDescription,

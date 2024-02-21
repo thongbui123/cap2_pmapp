@@ -1,16 +1,29 @@
+import 'package:capstone2_project_management_app/models/phrase_model.dart';
+import 'package:capstone2_project_management_app/models/project_model.dart';
 import 'package:capstone2_project_management_app/models/user_model.dart';
+import 'package:capstone2_project_management_app/services/phrase_services.dart';
+import 'package:capstone2_project_management_app/services/project_services.dart';
+import 'package:capstone2_project_management_app/services/task_services.dart';
+import 'package:capstone2_project_management_app/services/user_services.dart';
+import 'package:capstone2_project_management_app/views/list_of_tasks_screen.dart';
 import 'package:capstone2_project_management_app/views/stats/stats.dart';
+import 'package:capstone2_project_management_app/views/subs/sub_widgets.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 
 class TaskCreateScreen extends StatefulWidget {
   final Map projectMap;
+  final Map phraseMap;
   final UserModel currentUserModel;
-  final Map userMap;
+  final Map<String, dynamic> userMap;
+  final ProjectModel projectModel;
   const TaskCreateScreen(
       {super.key,
       required this.projectMap,
       required this.currentUserModel,
-      required this.userMap});
+      required this.userMap,
+      required this.projectModel,
+      required this.phraseMap});
 
   @override
   State<TaskCreateScreen> createState() => _TaskCreateScreenState();
@@ -31,27 +44,43 @@ List<String> allProjects = [
 
 class _TaskCreateScreenState extends State<TaskCreateScreen> {
   late Map projectMap;
+  late Map phraseMap;
+  late Map taskMap;
   late UserModel currentUserModel;
-  late Map userMap;
+  late PhraseModel currentPhraseModel;
+  late ProjectModel projectModel;
+  late Map<String, dynamic> userMap;
   var taskNameController = TextEditingController();
   var taskDescriptionController = TextEditingController();
   var endDateController = TextEditingController();
-  String _selectedValue = 'Option 1';
-  List<String> _allMembers = [
-    'User 1',
-    'User 2',
-    'User 3',
-  ];
-
+  String _selectedValue = 'Low';
+  late List<String> allMembers;
+  UserServices userServices = UserServices();
+  ProjectServices projectServices = ProjectServices();
   List<String> currentList = [];
-
+  String taskStartDate = DateTime.now().toString().split(" ")[0];
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     projectMap = widget.projectMap;
+    phraseMap = widget.phraseMap;
     currentUserModel = widget.currentUserModel;
     userMap = widget.userMap;
+    projectModel = widget.projectModel;
+    allMembers = projectModel.projectMembers;
+    _getPhraseModel();
+  }
+
+  _getPhraseModel() {
+    String currentPhraseName = projectModel.projectStatus;
+    for (var phrase in phraseMap.values) {
+      PhraseModel phraseModel =
+          PhraseModel.fromMap(Map<String, dynamic>.from(phrase));
+      if (phraseModel.phraseName == currentPhraseName) {
+        currentPhraseModel = phraseModel;
+      }
+    }
   }
 
   @override
@@ -85,6 +114,7 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
           children: [
             Expanded(
               child: TextField(
+                controller: taskNameController,
                 style: const TextStyle(
                   color: Colors.black,
                   fontFamily: 'MontMed',
@@ -120,6 +150,7 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
             Expanded(
                 child: Container(
               child: TextField(
+                controller: taskDescriptionController,
                 maxLines: null,
                 style: const TextStyle(
                   color: Colors.black,
@@ -150,24 +181,22 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
             )),
           ],
         ),
-        SizedBox(height: 5),
-        Divider(),
+        const SizedBox(height: 5),
+        const Divider(),
         Row(
           children: [
             Expanded(
               child: ListTile(
-                leading: CircleAvatar(
-                    child: Text(
-                  'T',
-                  style: TextStyle(fontFamily: 'MontMed'),
-                )),
-                title: Text('Assigned by:',
+                leading: avatar(userMap, currentUserModel.userId),
+                title: const Text('Assigned by:',
                     style: TextStyle(
                         fontFamily: 'MontMed',
                         fontSize: 12,
                         color: Colors.black54)),
-                subtitle: Text('THONG B',
-                    style: TextStyle(fontFamily: 'MontMed', fontSize: 14)),
+                subtitle: Text(
+                    '${currentUserModel.userFirstName} ${currentUserModel.userLastName}',
+                    style:
+                        const TextStyle(fontFamily: 'MontMed', fontSize: 14)),
               ),
             ),
             Expanded(
@@ -201,40 +230,48 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
                     )),
                 readOnly: true,
                 onTap: () {
-                  _selectDate(endDateController,
-                      DateTime.now().subtract(const Duration(days: 60)));
+                  DateTime endDate = DateTime.parse(projectModel.endDate);
+                  DateTime now = DateTime.now();
+                  _selectDate(endDateController, now, endDate);
                 },
               ),
             )),
           ],
         ),
-        Divider(),
+        const Divider(),
         Row(
           children: [
             Expanded(
               child: ListTile(
-                leading: CircleAvatar(
+                leading: const CircleAvatar(
                     child: Icon(Icons.folder, color: Colors.orangeAccent)),
-                title: Text('Project :',
+                title: const Text('Project Name:',
                     style: TextStyle(
                         fontFamily: 'MontMed',
-                        fontSize: 12,
+                        fontSize: 14,
                         color: Colors.black54)),
-                subtitle: Text('PROJECT B',
-                    style: TextStyle(fontFamily: 'MontMed', fontSize: 14)),
-                trailing: TextButton(
-                  onPressed: () {
-                    _showProjectSelectionDialog();
-                  },
-                  child: Text('Switch',
-                      style: TextStyle(fontFamily: 'MontMed', fontSize: 14)),
+                subtitle: Text(projectModel.projectName.toUpperCase(),
+                    style:
+                        const TextStyle(fontFamily: 'MontMed', fontSize: 14)),
+                trailing: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text('Number of tasks: ',
+                        style: TextStyle(
+                            fontFamily: 'MontMed',
+                            fontSize: 14,
+                            color: Colors.black54)),
+                    Text('${currentPhraseModel.listTasks.length}',
+                        style: const TextStyle(
+                            fontFamily: 'MontMed', fontSize: 18)),
+                  ],
                 ),
               ),
             ),
           ],
         ),
-        Divider(),
-        Text('Priority:',
+        const Divider(),
+        const Text('Priority:',
             style: TextStyle(fontFamily: 'MontMed', fontSize: 14)),
         Row(
           children: [
@@ -243,7 +280,7 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
                     height: 50,
                     child: Row(children: [
                       Radio<String>(
-                        value: 'Option 1',
+                        value: 'Low',
                         groupValue: _selectedValue,
                         onChanged: (value) {
                           setState(() {
@@ -251,14 +288,14 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
                           });
                         },
                       ),
-                      Text('LOW',
+                      const Text('LOW',
                           style: TextStyle(
                               fontFamily: 'MontMed', color: Colors.blue)),
-                      SizedBox(width: 15),
+                      const SizedBox(width: 15),
                       Container(height: 25, width: 2, color: Colors.grey),
-                      SizedBox(width: 15),
+                      const SizedBox(width: 15),
                       Radio<String>(
-                        value: 'Option 2',
+                        value: 'Medium',
                         groupValue: _selectedValue,
                         onChanged: (value) {
                           setState(() {
@@ -266,14 +303,14 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
                           });
                         },
                       ),
-                      Text('MEDIUM',
+                      const Text('MEDIUM',
                           style: TextStyle(
                               fontFamily: 'MontMed', color: Colors.orange)),
-                      SizedBox(width: 15),
+                      const SizedBox(width: 15),
                       Container(height: 25, width: 2, color: Colors.grey),
-                      SizedBox(width: 15),
+                      const SizedBox(width: 15),
                       Radio<String>(
-                        value: 'Option 3',
+                        value: 'High',
                         groupValue: _selectedValue,
                         onChanged: (value) {
                           setState(() {
@@ -281,29 +318,26 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
                           });
                         },
                       ),
-                      Text('HIGH',
+                      const Text('HIGH',
                           style: TextStyle(
                               fontFamily: 'MontMed', color: Colors.redAccent)),
                     ]))),
           ],
         ),
-        SizedBox(height: 5),
-        Divider(),
-        Text('Participant(s):',
+        const SizedBox(height: 5),
+        const Divider(),
+        const Text('Participant(s):',
             style: TextStyle(fontFamily: 'MontMed', fontSize: 14)),
         Container(
           child: Column(
             children: currentList.map((member) {
               return ListTile(
-                leading: const CircleAvatar(
-                    child: Text(
-                  'A',
-                  style: TextStyle(fontFamily: 'MontMed'),
-                )),
-                title: Text(member,
-                    style: TextStyle(fontFamily: 'MontMed', fontSize: 13)),
+                leading: avatar(userMap, member),
+                title: Text(userServices.getNameFromId(userMap, member),
+                    style:
+                        const TextStyle(fontFamily: 'MontMed', fontSize: 13)),
                 subtitle: Text(
-                  '2 Projects',
+                  '${projectServices.getJoinedProjectNumber(projectMap, member)} Project(s)',
                   style: const TextStyle(fontFamily: 'MontMed', fontSize: 12),
                 ),
                 trailing: Ink(
@@ -323,9 +357,9 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
             }).toList(),
           ),
         ),
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
         Container(
-            margin: EdgeInsets.fromLTRB(10, 0, 0, 0),
+            margin: const EdgeInsets.fromLTRB(10, 0, 0, 0),
             child: TextButton(
               onPressed: _showMemberSelectionDialog,
               child: const Row(
@@ -342,9 +376,20 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
         Container(
             height: 50,
             child: TextButton(
-              onPressed: () {},
+              onPressed: () {
+                _addTask();
+                Navigator.of(context)
+                    .pushReplacement(MaterialPageRoute(builder: (context) {
+                  return ListOfTasks(
+                    projectModel: projectModel,
+                    projectMap: projectMap,
+                    userModel: currentUserModel,
+                    taskMap: taskMap,
+                  );
+                }));
+              },
               child: Container(
-                child: Row(
+                child: const Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Text(
@@ -361,15 +406,49 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
     )));
   }
 
-  Future<void> _selectDate(
-      TextEditingController textEditingController, DateTime dateTime) async {
-    DateTime? _picked = await showDatePicker(
+  Future<void> _addTask() async {
+    TaskService taskService = TaskService();
+    taskService.addTask(
+        taskNameController.text,
+        taskDescriptionController.text,
+        _selectedValue,
+        taskStartDate,
+        endDateController.text,
+        projectModel.projectId,
+        currentUserModel.userId,
+        currentPhraseModel.phraseId,
+        currentList);
+    currentPhraseModel.listTasks.add(taskService.realTaskId);
+    PhraseServices().updatePhraseTaskList(projectModel.projectId,
+        currentPhraseModel.phraseId, currentPhraseModel.listTasks);
+    DatabaseEvent taskDatabaseEvent = await taskService.taskRef.once();
+    if (taskDatabaseEvent.snapshot.value != null &&
+        taskDatabaseEvent.snapshot.value is Map) {
+      taskMap = Map.from(taskDatabaseEvent.snapshot.value as dynamic);
+    }
+
+    // DatabaseReference phraseRef = FirebaseDatabase.instance
+    //     .ref()
+    //     .child('phrases')
+    //     .child(projectModel.projectId);
+    // DatabaseEvent phraseDatabaseEvent = await phraseRef.once();
+    // if (phraseDatabaseEvent.snapshot.value != null &&
+    //     phraseDatabaseEvent.snapshot.value is Map) {
+    //   setState(() {
+    //     phraseMap = Map.from(phraseDatabaseEvent.snapshot.value as dynamic);
+    //   });
+    // }
+  }
+
+  Future<void> _selectDate(TextEditingController textEditingController,
+      DateTime dateTime, DateTime endDate) async {
+    DateTime? picked = await showDatePicker(
         context: context,
         initialDate: dateTime,
         firstDate: dateTime,
-        lastDate: DateTime(2030));
-    if (_picked != null) {
-      textEditingController.text = _picked.toString().split(" ")[0];
+        lastDate: endDate);
+    if (picked != null) {
+      textEditingController.text = picked.toString().split(" ")[0];
     }
   }
 
@@ -384,19 +463,15 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
           ),
           content: SingleChildScrollView(
             child: Column(
-              children: _allMembers.map((user) {
+              children: allMembers.map((user) {
                 return Column(
                   children: <Widget>[
                     ListTile(
-                      leading: const CircleAvatar(
-                          child: Text(
-                        'A',
-                        style: TextStyle(fontFamily: 'MontMed'),
-                      )),
-                      title: Text(user),
+                      leading: avatar(userMap, user),
+                      title: Text(UserServices().getNameFromId(userMap, user)),
                       subtitle: Text(
-                        '2 Projects Involved',
-                        style: TextStyle(fontFamily: 'MontMed'),
+                        '${ProjectServices().getJoinedProjectNumber(projectMap, user)} Projects Involved',
+                        style: const TextStyle(fontFamily: 'MontMed'),
                       ),
                       onTap: () {
                         _addMember(user);
@@ -428,60 +503,15 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
   void _removeMember(String member) {
     setState(() {
       currentList.remove(member);
+      allMembers.add(member);
     });
   }
 
   void _addMember(String member) {
     setState(() {
       currentList.add(member);
+      allMembers.remove(member);
     });
-  }
-
-  Future<void> _showProjectSelectionDialog() async {
-    await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text(
-            'PROJECTS',
-            style: TextStyle(fontFamily: 'Anurati'),
-          ),
-          content: SingleChildScrollView(
-            child: Column(
-              children: allProjects.map((project) {
-                return Column(
-                  children: <Widget>[
-                    ListTile(
-                      leading:
-                          CircleAvatar(child: Icon(Icons.keyboard_arrow_down)),
-                      title: Text(project,
-                          style: TextStyle(fontFamily: 'MontMed')),
-                      subtitle: Text(
-                        "Members",
-                        style: const TextStyle(fontFamily: 'MontMed'),
-                      ),
-                      onTap: () {},
-                    ),
-                    const Divider(height: 0),
-                  ],
-                );
-              }).toList(),
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text(
-                'Cancel',
-                style: TextStyle(fontFamily: 'MontMed'),
-              ),
-            ),
-          ],
-        );
-      },
-    );
   }
 }
 
@@ -511,10 +541,10 @@ class _DropdownButtonExampleState extends State<DropdownButtonExample> {
             child: Row(
               children: [
                 Container(width: 15, height: 15, color: Colors.redAccent),
-                SizedBox(width: 5),
+                const SizedBox(width: 5),
                 Text(
                   value,
-                  style: TextStyle(fontFamily: 'MontMed'),
+                  style: const TextStyle(fontFamily: 'MontMed'),
                 )
               ],
             ));

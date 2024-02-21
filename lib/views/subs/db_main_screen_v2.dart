@@ -11,9 +11,12 @@ import 'package:intl/intl.dart';
 class DashboardMainV2 extends StatefulWidget {
   final UserModel? userModel;
   final Map<dynamic, dynamic> projectMap;
-
+  final Map<dynamic, dynamic> taskMap;
   const DashboardMainV2(
-      {super.key, required this.userModel, required this.projectMap});
+      {super.key,
+      required this.userModel,
+      required this.projectMap,
+      required this.taskMap});
 
   @override
   State<DashboardMainV2> createState() => _DashboardMainV2State();
@@ -25,6 +28,7 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
   DatabaseReference? userRef;
   ProjectServices projectServices = ProjectServices();
   late Map projectMap;
+  late Map taskMap;
   List<Project> projects = [
     Project(name: 'Project A', numOfPeople: 5, color: Colors.blue),
     Project(name: 'Project B', numOfPeople: 3, color: Colors.green),
@@ -53,6 +57,7 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
     super.initState();
     currentUserModel = widget.userModel;
     projectMap = widget.projectMap;
+    taskMap = widget.taskMap;
   }
 
   @override
@@ -205,7 +210,7 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                                       Navigator.of(context).push(
                                         MaterialPageRoute(
                                           builder: (context) {
-                                            return listOfProjects(
+                                            return ListOfProjectScreen(
                                               currentUserModel:
                                                   currentUserModel,
                                               projectMap: projectMap,

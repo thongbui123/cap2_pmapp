@@ -7,21 +7,26 @@ import 'package:capstone2_project_management_app/views/subs/project_create_step1
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-class listOfProjects extends StatefulWidget {
+class ListOfProjectScreen extends StatefulWidget {
   final Map<dynamic, dynamic> projectMap;
+  final Map<dynamic, dynamic> taskMap;
   final UserModel? currentUserModel;
-  const listOfProjects(
-      {Key? key, required this.projectMap, required this.currentUserModel})
+  const ListOfProjectScreen(
+      {Key? key,
+      required this.projectMap,
+      required this.currentUserModel,
+      required this.taskMap})
       : super(key: key);
 
   @override
-  State<listOfProjects> createState() => _listOfProjectsState();
+  State<ListOfProjectScreen> createState() => _ListOfProjectScreenState();
 }
 
-class _listOfProjectsState extends State<listOfProjects>
+class _ListOfProjectScreenState extends State<ListOfProjectScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   late Map<dynamic, dynamic> projectMap;
+  late Map<dynamic, dynamic> taskMap;
   late Map<String, dynamic> userMap;
   List<ProjectModel> allProjects = [];
   late UserModel? userModel;
@@ -31,6 +36,7 @@ class _listOfProjectsState extends State<listOfProjects>
     super.initState();
     user = FirebaseAuth.instance.currentUser;
     projectMap = widget.projectMap;
+    taskMap = widget.taskMap;
     userModel = widget.currentUserModel;
     allProjects = _getData();
     _tabController = TabController(length: 2, vsync: this);
@@ -205,6 +211,7 @@ class _listOfProjectsState extends State<listOfProjects>
                                               projectModel: project,
                                               projectMap: projectMap,
                                               userModel: userModel!,
+                                              taskMap: taskMap,
                                             );
                                           }));
                                         },
