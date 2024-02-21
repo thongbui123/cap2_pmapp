@@ -474,6 +474,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
           projectModel: _projectModel,
           phraseMap: phraseMap,
           userModel: _userModel,
+          taskMap: taskMap,
         );
       },
     );

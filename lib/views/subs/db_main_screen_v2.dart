@@ -214,6 +214,7 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                                               currentUserModel:
                                                   currentUserModel,
                                               projectMap: projectMap,
+                                              taskMap: taskMap,
                                             );
                                           },
                                         ),
