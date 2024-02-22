@@ -1,4 +1,6 @@
 import 'package:capstone2_project_management_app/models/user_model.dart';
+import 'package:capstone2_project_management_app/services/project_services.dart';
+import 'package:capstone2_project_management_app/views/list_of_project_screen.dart';
 import 'package:capstone2_project_management_app/views/stats/stats.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -7,7 +9,14 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class DashboardMainV2 extends StatefulWidget {
-  const DashboardMainV2({Key? key}) : super(key: key);
+  final UserModel? userModel;
+  final Map<dynamic, dynamic> projectMap;
+  final Map<dynamic, dynamic> taskMap;
+  const DashboardMainV2(
+      {super.key,
+      required this.userModel,
+      required this.projectMap,
+      required this.taskMap});
 
   @override
   State<DashboardMainV2> createState() => _DashboardMainV2State();
@@ -15,9 +24,11 @@ class DashboardMainV2 extends StatefulWidget {
 
 class _DashboardMainV2State extends State<DashboardMainV2> {
   User? user;
-  UserModel? userModel;
+  UserModel? currentUserModel;
   DatabaseReference? userRef;
-
+  ProjectServices projectServices = ProjectServices();
+  late Map projectMap;
+  late Map taskMap;
   List<Project> projects = [
     Project(name: 'Project A', numOfPeople: 5, color: Colors.blue),
     Project(name: 'Project B', numOfPeople: 3, color: Colors.green),
@@ -44,23 +55,14 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
   @override
   void initState() {
     super.initState();
-    user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      userRef = FirebaseDatabase.instance.ref().child('users').child(user!.uid);
-    }
-    _getUserDetail();
-  }
-
-  _getUserDetail() async {
-    DatabaseEvent snapshot = await userRef!.once();
-    userModel = UserModel.fromMap(
-        Map<String, dynamic>.from(snapshot.snapshot.value as dynamic));
-    setState(() {});
+    currentUserModel = widget.userModel;
+    projectMap = widget.projectMap;
+    taskMap = widget.taskMap;
   }
 
   @override
   Widget build(BuildContext context) {
-    return userModel == null
+    return currentUserModel == null
         ? const Center(child: CircularProgressIndicator())
         : SafeArea(
             child: SingleChildScrollView(
@@ -70,7 +72,7 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                 Row(
                   children: [
                     Text(
-                      'WELCOME BACK, ${userModel?.userFirstName.toUpperCase()}',
+                      'WELCOME BACK, ${currentUserModel?.userFirstName.toUpperCase()}',
                       style: TextStyle(
                         fontFamily: 'MontMed',
                         fontWeight: FontWeight.bold,
@@ -86,7 +88,7 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Expanded(
+                        const Expanded(
                           child: TextField(
                             style: TextStyle(
                               color: Colors.black,
@@ -114,7 +116,7 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                             ),
                           ),
                         ),
-                        SizedBox(width: 10),
+                        const SizedBox(width: 10),
                         Container(
                           height: 50,
                           child: ElevatedButton(
@@ -204,7 +206,20 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                               Row(
                                 children: <Widget>[
                                   IconButton(
-                                    onPressed: () {},
+                                    onPressed: () {
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (context) {
+                                            return ListOfProjectScreen(
+                                              currentUserModel:
+                                                  currentUserModel,
+                                              projectMap: projectMap,
+                                              taskMap: taskMap,
+                                            );
+                                          },
+                                        ),
+                                      );
+                                    },
                                     icon: Icon(
                                       Icons.folder,
                                       color: Colors.deepOrangeAccent,
@@ -229,7 +244,7 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                               Row(
                                 children: <Widget>[
                                   Text(
-                                    '2 Projects Joined',
+                                    '${projectServices.getJoinedProjectNumber(projectMap, currentUserModel!.userId)} Project(s) Joined',
                                     style: TextStyle(
                                         fontSize: 12, fontFamily: 'MontMed'),
                                   )

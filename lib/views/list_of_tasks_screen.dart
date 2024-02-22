@@ -1,9 +1,11 @@
 import 'package:capstone2_project_management_app/models/project_model.dart';
+import 'package:capstone2_project_management_app/models/user_model.dart';
 import 'package:capstone2_project_management_app/services/phrase_services.dart';
 import 'package:capstone2_project_management_app/services/user_services.dart';
 import 'package:capstone2_project_management_app/views/project_detail_screen.dart';
 import 'package:capstone2_project_management_app/views/stats/stats.dart';
 import 'package:capstone2_project_management_app/views/subs/db_side_menu.dart';
+import 'package:capstone2_project_management_app/views/task_create_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -12,8 +14,14 @@ import 'package:table_calendar/table_calendar.dart';
 class ListOfTasks extends StatefulWidget {
   final ProjectModel projectModel;
   final Map<dynamic, dynamic> projectMap;
+  final Map<dynamic, dynamic> taskMap;
+  final UserModel userModel;
   const ListOfTasks(
-      {super.key, required this.projectModel, required this.projectMap});
+      {super.key,
+      required this.projectModel,
+      required this.projectMap,
+      required this.userModel,
+      required this.taskMap});
 
   @override
   State<ListOfTasks> createState() => _ListOfTasksState();
@@ -33,17 +41,21 @@ List<String> allProjects = [
 
 class _ListOfTasksState extends State<ListOfTasks> {
   late ProjectModel projectModel;
+  late UserModel _userModel;
   late Map<String, dynamic> userMap;
   late Map<dynamic, dynamic> projectMap;
   late List<ProjectModel> listProjects;
   late Map phraseMap = {};
+  late Map taskMap = {};
   PhraseServices phraseServices = PhraseServices();
   @override
   void initState() {
     super.initState();
     projectModel = widget.projectModel;
     projectMap = widget.projectMap;
+    _userModel = widget.userModel;
     listProjects = getData(projectMap);
+    taskMap = widget.taskMap;
     _getPhraseData();
   }
 
@@ -65,10 +77,28 @@ class _ListOfTasksState extends State<ListOfTasks> {
         .ref()
         .child('phrases')
         .child(projectModel.projectId);
-    DatabaseEvent snapshot = await phraseRef.once();
+    DatabaseEvent snapshot = await phraseRef.orderByChild('timestamp').once();
     if (snapshot.snapshot.value != null && snapshot.snapshot.value is Map) {
       setState(() {
         phraseMap = Map.from(snapshot.snapshot.value as dynamic);
+        List<MapEntry<dynamic, dynamic>> sortedEntries =
+            phraseMap.entries.toList();
+        sortedEntries.sort((a, b) {
+          return (a.value['timestamp'] as int).compareTo(b.value['timestamp']);
+        });
+        phraseMap = Map.fromEntries(sortedEntries.map((entry) {
+          return MapEntry(
+            entry.key,
+            {
+              'timestamp': entry.value['timestamp'],
+              'phraseId': entry.value['phraseId'],
+              'phraseName': entry.value['phraseName'],
+              'listTasks': entry.value['listTasks'],
+              'phraseDescription': entry.value['phraseDescription'],
+              'projectId': entry.value['projectId'],
+            },
+          );
+        }));
       });
     }
   }
@@ -77,8 +107,13 @@ class _ListOfTasksState extends State<ListOfTasks> {
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButton: Visibility(
+        visible: _userModel.userRole != 'User',
         child: FloatingActionButton(
-          onPressed: () {},
+          onPressed: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => _getTaskCreateScreen()),
+            );
+          },
           backgroundColor: Colors.blueAccent,
           tooltip: 'Add Project', // Optional tooltip text shown on long-press
           child: const Icon(
@@ -92,19 +127,6 @@ class _ListOfTasksState extends State<ListOfTasks> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             db_side_menu(),
-            // FutureBuilder(
-            //   future: phraseServices.getPhraseMap(projectModel.projectId),
-            //   builder: (context, snapshot) {
-            //     if (snapshot.connectionState == ConnectionState.waiting) {
-            //       return const Center(child: CircularProgressIndicator());
-            //     } else if (snapshot.hasError) {
-            //       return Text('Error: ${snapshot.error}');
-            //     } else {
-            //       phraseMap = snapshot.data ?? {};
-            //       return const SizedBox.shrink();
-            //     }
-            //   },
-            // ),
             Expanded(
                 child: Padding(
                     padding: const EdgeInsets.all(defaultPadding),
@@ -131,29 +153,7 @@ class _ListOfTasksState extends State<ListOfTasks> {
                           onTap: () {
                             Navigator.of(context)
                                 .push(MaterialPageRoute(builder: (context) {
-                              return FutureBuilder(
-                                  future: UserServices().getUserDataMap(),
-                                  builder: (context, snapshot) {
-                                    if (snapshot.connectionState ==
-                                        ConnectionState.waiting) {
-                                      return const Center(
-                                          child: CircularProgressIndicator());
-                                    } else if (snapshot.hasError) {
-                                      return Center(
-                                          child:
-                                              Text('Error: ${snapshot.error}'));
-                                    } else {
-                                      userMap = snapshot.data ?? {};
-                                      return Expanded(
-                                        child: projectDetailScreen(
-                                          projectModel: projectModel,
-                                          userMap: userMap,
-                                          projectMap: projectMap,
-                                          phraseMap: phraseMap,
-                                        ),
-                                      );
-                                    }
-                                  });
+                              return _getProjectDetailScreen();
                             }));
                           },
                           title: Text('${projectModel.projectName}',
@@ -164,13 +164,16 @@ class _ListOfTasksState extends State<ListOfTasks> {
                             style:
                                 TextStyle(fontFamily: 'MontMed', fontSize: 12),
                           ),
-                          trailing: TextButton(
-                            onPressed: () {
-                              _showProjectSelectionDialog();
-                            },
-                            child: const Text('Switch',
-                                style: TextStyle(
-                                    fontFamily: 'MontMed', fontSize: 12)),
+                          trailing: Visibility(
+                            visible: listProjects.length > 1,
+                            child: TextButton(
+                              onPressed: () {
+                                _showProjectSelectionDialog();
+                              },
+                              child: const Text('Switch',
+                                  style: TextStyle(
+                                      fontFamily: 'MontMed', fontSize: 12)),
+                            ),
                           ),
                         ),
                         const SizedBox(height: 5),
@@ -244,6 +247,53 @@ class _ListOfTasksState extends State<ListOfTasks> {
     );
   }
 
+  FutureBuilder<Map<String, dynamic>> _getProjectDetailScreen() {
+    return FutureBuilder(
+        future: UserServices().getUserDataMap(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else {
+            userMap = snapshot.data ?? {};
+            return Expanded(
+              child: ProjectDetailScreen(
+                projectModel: projectModel,
+                userMap: userMap,
+                projectMap: projectMap,
+                phraseMap: phraseMap,
+                userModel: _userModel,
+                taskMap: taskMap,
+              ),
+            );
+          }
+        });
+  }
+
+  FutureBuilder<Map<String, dynamic>> _getTaskCreateScreen() {
+    return FutureBuilder(
+        future: UserServices().getUserDataMap(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else {
+            userMap = snapshot.data ?? {};
+            return Expanded(
+              child: TaskCreateScreen(
+                projectMap: projectMap,
+                currentUserModel: _userModel,
+                userMap: userMap,
+                projectModel: projectModel,
+                phraseMap: phraseMap,
+              ),
+            );
+          }
+        });
+  }
+
   Future<void> _showProjectSelectionDialog() async {
     await showDialog(
       context: context,
@@ -286,8 +336,11 @@ class _ListOfTasksState extends State<ListOfTasks> {
                       onTap: () {
                         Navigator.of(context).pushReplacement(MaterialPageRoute(
                             builder: (context) => ListOfTasks(
-                                projectModel: project,
-                                projectMap: projectMap)));
+                                  userModel: _userModel,
+                                  projectModel: project,
+                                  projectMap: projectMap,
+                                  taskMap: taskMap,
+                                )));
                       },
                     ),
                     const Divider(height: 0),

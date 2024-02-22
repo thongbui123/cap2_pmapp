@@ -21,6 +21,7 @@ class _dashboard_screenState extends State<dashboard_screen> {
   DatabaseReference? userRef;
   DatabaseReference? projectRef;
   late Map<String, dynamic> projectMap;
+  late Map<String, dynamic> taskMap;
   final databaseReference = FirebaseDatabase.instance.ref();
   _getUserDetails() async {
     DatabaseEvent snapshot = await userRef!.once();
@@ -34,6 +35,14 @@ class _dashboard_screenState extends State<dashboard_screen> {
   Future<Map<String, dynamic>> _getProjectValues() async {
     DatabaseEvent databaseEvent =
         await databaseReference.child('projects').once();
+    if (databaseEvent.snapshot.value != null) {
+      return Map.from(databaseEvent.snapshot.value as dynamic);
+    }
+    return {};
+  }
+
+  Future<Map<String, dynamic>> _getTaskValues() async {
+    DatabaseEvent databaseEvent = await databaseReference.child('tasks').once();
     if (databaseEvent.snapshot.value != null) {
       return Map.from(databaseEvent.snapshot.value as dynamic);
     }
@@ -66,8 +75,9 @@ class _dashboard_screenState extends State<dashboard_screen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     db_side_menu(),
-                    FutureBuilder(
-                      future: _getProjectValues(),
+                    FutureBuilder<List<Map<String, dynamic>>>(
+                      future:
+                          Future.wait([_getProjectValues(), _getTaskValues()]),
                       builder: (context, snapshot) {
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {
@@ -76,13 +86,20 @@ class _dashboard_screenState extends State<dashboard_screen> {
                           return Center(
                               child: Text('Error: ${snapshot.error}'));
                         } else {
-                          projectMap = snapshot.data ?? {};
+                          projectMap = snapshot.data![0];
+                          taskMap = snapshot.data![1];
                           return Expanded(
                             child: userModel?.userRole == "User"
-                                ? const DashboardMainV2()
+                                ? DashboardMainV2(
+                                    userModel: userModel,
+                                    projectMap: projectMap,
+                                    taskMap: taskMap,
+                                  )
                                 : DashboardMainV1(
                                     currentUserModel: userModel,
-                                    projectMap: projectMap),
+                                    projectMap: projectMap,
+                                    taskMap: taskMap,
+                                  ),
                           );
                         }
                       },
@@ -102,7 +119,7 @@ class _dashboard_screenState extends State<dashboard_screen> {
           child: FloatingActionButton(
             onPressed: () {
               Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-                return projectCreateStep1(
+                return ProjectCreateStep1(
                   currentUserModel: userModel,
                   projectMap: projectMap,
                 );

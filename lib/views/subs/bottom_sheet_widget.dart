@@ -1,4 +1,5 @@
 import 'package:capstone2_project_management_app/models/project_model.dart';
+import 'package:capstone2_project_management_app/models/user_model.dart';
 import 'package:capstone2_project_management_app/services/project_services.dart';
 import 'package:capstone2_project_management_app/services/user_services.dart';
 import 'package:capstone2_project_management_app/views/project_detail_screen.dart';
@@ -8,6 +9,7 @@ import 'package:flutter/material.dart';
 
 class StatefulBottomSheetWidget extends StatefulWidget {
   final ProjectModel projectModel;
+  final UserModel userModel;
   final String message;
   final List<String> allMembers;
   final List<String> currentList;
@@ -21,7 +23,8 @@ class StatefulBottomSheetWidget extends StatefulWidget {
       required this.userMap,
       required this.projectMap,
       required this.projectModel,
-      required this.phraseMap});
+      required this.phraseMap,
+      required this.userModel});
 
   @override
   _StatefulBottomSheetWidgetState createState() =>
@@ -30,8 +33,10 @@ class StatefulBottomSheetWidget extends StatefulWidget {
 
 class _StatefulBottomSheetWidgetState extends State<StatefulBottomSheetWidget> {
   late ProjectModel projectModel;
+  late UserModel currentUserModel;
   late List<String> allMembers;
   late List<String> allLeader;
+  late List<String> allStaff;
   late List<String> currentList;
   late Map<String, dynamic> userMap;
   Map<String, String> mapName = {};
@@ -46,6 +51,7 @@ class _StatefulBottomSheetWidgetState extends State<StatefulBottomSheetWidget> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    currentUserModel = widget.userModel;
     allMembers = widget.allMembers;
     userMap = widget.userMap;
     currentList = widget.currentList;
@@ -57,6 +63,7 @@ class _StatefulBottomSheetWidgetState extends State<StatefulBottomSheetWidget> {
         .child('projects')
         .child(projectModel.projectId);
     allLeader = userServices.getAllLeaderStringList(userMap);
+    allStaff = userServices.getAllUserStringList(userMap);
     selectedMember = projectModel.projectMembers.first;
   }
 
@@ -69,7 +76,7 @@ class _StatefulBottomSheetWidgetState extends State<StatefulBottomSheetWidget> {
           const SizedBox(height: 10),
           Container(
               child: TextButton(
-            onPressed: () => _showMemberSelectionDialog(allMembers),
+            onPressed: () => _showMemberSelectionDialog(allStaff),
             child: const Row(
               children: [
                 Icon(
@@ -132,10 +139,11 @@ class _StatefulBottomSheetWidgetState extends State<StatefulBottomSheetWidget> {
           ),
           TextButton(
               onPressed: () async {
-                DatabaseReference projectRef =
-                    FirebaseDatabase.instance.ref().child('projects');
-
-                projectRef.child(projectModel.projectId).update({
+                DatabaseReference projectRef = FirebaseDatabase.instance
+                    .ref()
+                    .child('projects')
+                    .child(projectModel.projectId);
+                projectRef.update({
                   'projectMembers': currentList,
                 });
                 DatabaseEvent snapshot = await projectRef.once();
@@ -148,11 +156,12 @@ class _StatefulBottomSheetWidgetState extends State<StatefulBottomSheetWidget> {
                 //Navigator.of(context).pop();
                 Navigator.of(context).pushReplacement(
                   MaterialPageRoute(
-                    builder: (context) => projectDetailScreen(
+                    builder: (context) => ProjectDetailScreen(
                       projectModel: projectModel,
                       userMap: userMap,
                       projectMap: projectMap,
                       phraseMap: phraseMap,
+                      userModel: currentUserModel,
                     ),
                   ),
                 );
@@ -187,7 +196,7 @@ class _StatefulBottomSheetWidgetState extends State<StatefulBottomSheetWidget> {
                       onTap: () async {
                         setState(() {
                           currentList.add(user);
-                          allMembers.remove(user);
+                          allStaff.remove(user);
                         });
 
                         Navigator.of(context).pop();
@@ -286,7 +295,7 @@ class _StatefulBottomSheetWidgetState extends State<StatefulBottomSheetWidget> {
               onPressed: () {
                 setState(() {
                   currentList.remove(member);
-                  allMembers.add(member);
+                  allStaff.add(member);
                 });
                 Navigator.of(context).pop();
                 // Navigator.of(context).pushReplacement(

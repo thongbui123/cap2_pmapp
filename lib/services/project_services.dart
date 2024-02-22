@@ -20,13 +20,13 @@ class ProjectServices {
     return projectMap;
   }
 
-  Future<List<ProjectModel>> getJoinedProjectList(
-      Map<dynamic, dynamic> projectMap, User? currentUserModel) async {
+  List<ProjectModel> getJoinedProjectList(
+      Map<dynamic, dynamic> projectMap, UserModel currentUserModel) {
     List<ProjectModel> joinedProjects = [];
     for (var project in projectMap.values) {
       ProjectModel projectModel =
           ProjectModel.fromMap(Map<String, dynamic>.from(project));
-      if (projectModel.leaderId == currentUserModel?.uid) {
+      if (projectModel.projectMembers.contains(currentUserModel.userId)) {
         joinedProjects.add(projectModel);
       }
     }
@@ -39,6 +39,19 @@ class ProjectServices {
       ProjectModel projectModel =
           ProjectModel.fromMap(Map<String, dynamic>.from(project));
       if (projectModel.projectMembers.contains(id)) {
+        count++;
+      }
+    }
+    return count;
+  }
+
+  int getCompleteProjectNumber(Map<dynamic, dynamic> projectMap, String id) {
+    int count = 0;
+    for (var project in projectMap.values) {
+      ProjectModel projectModel =
+          ProjectModel.fromMap(Map<String, dynamic>.from(project));
+      if (projectModel.projectMembers.contains(id) &&
+          projectModel.projectStatus == 'Completed') {
         count++;
       }
     }

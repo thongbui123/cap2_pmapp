@@ -1,13 +1,24 @@
 import 'package:capstone2_project_management_app/models/project_model.dart';
+import 'package:capstone2_project_management_app/models/user_model.dart';
+import 'package:capstone2_project_management_app/services/project_services.dart';
 import 'package:capstone2_project_management_app/services/user_services.dart';
 import 'package:capstone2_project_management_app/views/project_detail_screen.dart';
 import 'package:capstone2_project_management_app/views/stats/stats.dart';
 import 'package:capstone2_project_management_app/views/subs/db_side_menu.dart';
+import 'package:capstone2_project_management_app/views/task_create_screen.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class MyTaskScreen extends StatefulWidget {
-  const MyTaskScreen({super.key});
+  final UserModel userModel;
+  final Map projectMap;
+  final Map taskMap;
+  const MyTaskScreen(
+      {super.key,
+      required this.userModel,
+      required this.projectMap,
+      required this.taskMap});
 
   @override
   State<MyTaskScreen> createState() => _MyTaskScreenState();
@@ -26,20 +37,70 @@ List<String> allProjects = [
 ];
 
 class _MyTaskScreenState extends State<MyTaskScreen> {
+  late UserModel currentUserModel;
   late ProjectModel projectModel;
   late Map<String, dynamic> userMap;
   late Map<dynamic, dynamic> projectMap;
+  late List<ProjectModel> listJoinedProjects;
+  late Map phraseMap = {};
+  late Map taskMap;
+  UserServices userServices = UserServices();
+  ProjectServices projectServices = ProjectServices();
   @override
   void initState() {
+    currentUserModel = widget.userModel;
+    projectMap = widget.projectMap;
+    listJoinedProjects =
+        projectServices.getJoinedProjectList(projectMap, currentUserModel);
+    projectModel = listJoinedProjects.last;
+    _getPhraseData();
     super.initState();
+  }
+
+  Future<void> _getPhraseData() async {
+    DatabaseReference phraseRef = FirebaseDatabase.instance
+        .ref()
+        .child('phrases')
+        .child(projectModel.projectId);
+    DatabaseEvent snapshot = await phraseRef.orderByChild('timestamp').once();
+    if (snapshot.snapshot.value != null && snapshot.snapshot.value is Map) {
+      setState(() {
+        phraseMap = Map.from(snapshot.snapshot.value as dynamic);
+        List<MapEntry<dynamic, dynamic>> sortedEntries =
+            phraseMap.entries.toList();
+        sortedEntries.sort((a, b) {
+          return (a.value['timestamp'] as int).compareTo(b.value['timestamp']);
+        });
+        phraseMap = Map.fromEntries(sortedEntries.map((entry) {
+          return MapEntry(
+            entry.key,
+            {
+              'timestamp': entry.value['timestamp'],
+              'phraseId': entry.value['phraseId'],
+              'phraseName': entry.value['phraseName'],
+              'listTasks': entry.value['listTasks'],
+              'phraseDescription': entry.value['phraseDescription'],
+              'projectId': entry.value['projectId'],
+            },
+          );
+        }));
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButton: Visibility(
+        visible: currentUserModel.userRole != 'User',
         child: FloatingActionButton(
-          onPressed: () {},
+          onPressed: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => _getTaskCreateScreen(),
+              ),
+            );
+          },
           backgroundColor: Colors.blueAccent,
           tooltip: 'Add Project', // Optional tooltip text shown on long-press
           child: const Icon(
@@ -77,32 +138,13 @@ class _MyTaskScreenState extends State<MyTaskScreen> {
                               child:
                                   Icon(Icons.folder, color: Colors.blueAccent)),
                           onTap: () {
-                            Navigator.of(context)
-                                .push(MaterialPageRoute(builder: (context) {
-                              return FutureBuilder(
-                                  future: UserServices().getUserDataMap(),
-                                  builder: (context, snapshot) {
-                                    if (snapshot.connectionState ==
-                                        ConnectionState.waiting) {
-                                      return const Center(
-                                          child: CircularProgressIndicator());
-                                    } else if (snapshot.hasError) {
-                                      return Center(
-                                          child:
-                                              Text('Error: ${snapshot.error}'));
-                                    } else {
-                                      userMap = snapshot.data ?? {};
-                                      return Expanded(
-                                        child: projectDetailScreen(
-                                          projectModel: projectModel,
-                                          userMap: userMap,
-                                          projectMap: projectMap,
-                                          phraseMap: {},
-                                        ),
-                                      );
-                                    }
-                                  });
-                            }));
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) {
+                                  return _getProjectDetailScreen();
+                                },
+                              ),
+                            );
                           },
                           title: Text(projectModel.projectName,
                               style: const TextStyle(
@@ -192,6 +234,59 @@ class _MyTaskScreenState extends State<MyTaskScreen> {
     );
   }
 
+  FutureBuilder<Map<String, dynamic>> _getTaskCreateScreen() {
+    return FutureBuilder(
+      future: userServices.getUserDataMap(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        } else {
+          userMap = snapshot.data ?? {};
+          return Expanded(
+            child: TaskCreateScreen(
+              projectMap: projectMap,
+              currentUserModel: currentUserModel,
+              userMap: userMap,
+              projectModel: projectModel,
+              phraseMap: phraseMap,
+            ),
+          );
+        }
+      },
+    );
+  }
+
+  FutureBuilder<Map<String, dynamic>> _getProjectDetailScreen() {
+    return FutureBuilder(
+      future: userServices.getUserDataMap(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        } else {
+          userMap = snapshot.data ?? {};
+          return Expanded(
+            child: ProjectDetailScreen(
+              projectModel: projectModel,
+              userMap: userMap,
+              userModel: currentUserModel,
+              projectMap: projectMap,
+              phraseMap: phraseMap,
+              taskMap: taskMap,
+            ),
+          );
+        }
+      },
+    );
+  }
+
   Future<void> _showProjectSelectionDialog() async {
     await showDialog(
       context: context,
@@ -203,19 +298,24 @@ class _MyTaskScreenState extends State<MyTaskScreen> {
           ),
           content: SingleChildScrollView(
             child: Column(
-              children: allProjects.map((project) {
+              children: listJoinedProjects.map((project) {
                 return Column(
                   children: <Widget>[
                     ListTile(
                       leading: const CircleAvatar(
                           child: Icon(Icons.keyboard_arrow_down)),
-                      title: Text(project,
+                      title: Text(project.projectName,
                           style: const TextStyle(fontFamily: 'MontMed')),
-                      subtitle: const Text(
-                        "Members",
-                        style: TextStyle(fontFamily: 'MontMed'),
+                      subtitle: Text(
+                        "Members: ${project.projectMembers.length}",
+                        style: const TextStyle(fontFamily: 'MontMed'),
                       ),
-                      onTap: () {},
+                      onTap: () {
+                        setState(() {
+                          projectModel = project;
+                        });
+                        Navigator.of(context).pop();
+                      },
                     ),
                     const Divider(height: 0),
                   ],
