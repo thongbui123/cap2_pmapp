@@ -16,15 +16,18 @@ class StatefulBottomSheetWidget extends StatefulWidget {
   final Map<String, dynamic> userMap;
   final Map<dynamic, dynamic> projectMap;
   final Map<dynamic, dynamic> phraseMap;
+  final Map<dynamic, dynamic> taskMap;
   const StatefulBottomSheetWidget(
-      {required this.message,
+      {super.key,
+      required this.message,
       required this.allMembers,
       required this.currentList,
       required this.userMap,
       required this.projectMap,
       required this.projectModel,
       required this.phraseMap,
-      required this.userModel});
+      required this.userModel,
+      required this.taskMap});
 
   @override
   _StatefulBottomSheetWidgetState createState() =>
@@ -43,6 +46,7 @@ class _StatefulBottomSheetWidgetState extends State<StatefulBottomSheetWidget> {
   UserServices userServices = UserServices();
   late Map<dynamic, dynamic> projectMap;
   late Map<dynamic, dynamic> phraseMap;
+  late Map<dynamic, dynamic> taskMap;
   late int joinProjectNumber;
   ProjectServices projectServices = ProjectServices();
   late DatabaseReference projectRef;
@@ -58,6 +62,7 @@ class _StatefulBottomSheetWidgetState extends State<StatefulBottomSheetWidget> {
     projectMap = widget.projectMap;
     projectModel = widget.projectModel;
     phraseMap = widget.phraseMap;
+    taskMap = widget.taskMap;
     projectRef = FirebaseDatabase.instance
         .ref()
         .child('projects')
@@ -139,11 +144,9 @@ class _StatefulBottomSheetWidgetState extends State<StatefulBottomSheetWidget> {
           ),
           TextButton(
               onPressed: () async {
-                DatabaseReference projectRef = FirebaseDatabase.instance
-                    .ref()
-                    .child('projects')
-                    .child(projectModel.projectId);
-                projectRef.update({
+                DatabaseReference projectRef =
+                    FirebaseDatabase.instance.ref().child('projects');
+                projectRef.child(projectModel.projectId).update({
                   'projectMembers': currentList,
                 });
                 DatabaseEvent snapshot = await projectRef.once();
@@ -162,6 +165,7 @@ class _StatefulBottomSheetWidgetState extends State<StatefulBottomSheetWidget> {
                       projectMap: projectMap,
                       phraseMap: phraseMap,
                       userModel: currentUserModel,
+                      taskMap: taskMap,
                     ),
                   ),
                 );

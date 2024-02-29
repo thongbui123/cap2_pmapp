@@ -34,7 +34,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
 
   void _onIntroEnd(context) {
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => const dashboard_screen()),
+      MaterialPageRoute(builder: (_) => const Dashboard_screen()),
     );
   }
 

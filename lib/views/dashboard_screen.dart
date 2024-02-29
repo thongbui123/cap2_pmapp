@@ -8,14 +8,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 
-class dashboard_screen extends StatefulWidget {
-  const dashboard_screen({Key? key}) : super(key: key);
+class Dashboard_screen extends StatefulWidget {
+  const Dashboard_screen({Key? key}) : super(key: key);
 
   @override
-  State<dashboard_screen> createState() => _dashboard_screenState();
+  State<Dashboard_screen> createState() => _Dashboard_screenState();
 }
 
-class _dashboard_screenState extends State<dashboard_screen> {
+class _Dashboard_screenState extends State<Dashboard_screen> {
   User? user;
   UserModel? userModel;
   DatabaseReference? userRef;

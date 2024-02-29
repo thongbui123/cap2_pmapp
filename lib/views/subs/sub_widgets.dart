@@ -39,3 +39,24 @@ CircleAvatar avatar(Map<String, dynamic> userMap, String member) {
           ),
   );
 }
+
+Future<void> showDateDialog(
+    DateTime selectedDate, BuildContext buildContext) async {
+  return showDialog<void>(
+    context: buildContext,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text('Selected Date'),
+        content: Text('You selected: $selectedDate'),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: Text('OK'),
+          ),
+        ],
+      );
+    },
+  );
+}

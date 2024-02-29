@@ -1,104 +1,138 @@
+import 'dart:collection';
+
+import 'package:capstone2_project_management_app/models/phrase_model.dart';
 import 'package:capstone2_project_management_app/models/project_model.dart';
+import 'package:capstone2_project_management_app/models/task_model.dart';
 import 'package:capstone2_project_management_app/models/user_model.dart';
 import 'package:capstone2_project_management_app/services/phrase_services.dart';
+import 'package:capstone2_project_management_app/services/project_services.dart';
+import 'package:capstone2_project_management_app/services/task_services.dart';
 import 'package:capstone2_project_management_app/services/user_services.dart';
 import 'package:capstone2_project_management_app/views/project_detail_screen.dart';
 import 'package:capstone2_project_management_app/views/stats/stats.dart';
 import 'package:capstone2_project_management_app/views/subs/db_side_menu.dart';
+import 'package:capstone2_project_management_app/views/subs/sub_widgets.dart';
 import 'package:capstone2_project_management_app/views/task_create_screen.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 
-class ListOfTasks extends StatefulWidget {
-  final ProjectModel projectModel;
-  final Map<dynamic, dynamic> projectMap;
-  final Map<dynamic, dynamic> taskMap;
+class ListOfTaskScreen extends StatefulWidget {
+  final ProjectModel? projectModel;
   final UserModel userModel;
-  const ListOfTasks(
-      {super.key,
-      required this.projectModel,
-      required this.projectMap,
-      required this.userModel,
-      required this.taskMap});
+  final Map projectMap;
+  final Map taskMap;
+  const ListOfTaskScreen({
+    super.key,
+    required this.userModel,
+    required this.projectMap,
+    required this.taskMap,
+    this.projectModel,
+  });
 
   @override
-  State<ListOfTasks> createState() => _ListOfTasksState();
+  State<ListOfTaskScreen> createState() => _ListOfTaskScreenState();
 }
 
-List<String> allTasks = [
-  'Task A01',
-  'Task B02',
-  'Task B01',
-];
-
-List<String> allProjects = [
-  'Project A01',
-  'Project B02',
-  'Project B01',
-];
-
-class _ListOfTasksState extends State<ListOfTasks> {
-  late ProjectModel projectModel;
-  late UserModel _userModel;
+class _ListOfTaskScreenState extends State<ListOfTaskScreen> {
+  late UserModel currentUserModel;
+  late ProjectModel? projectModel;
+  late PhraseModel? phraseModel;
   late Map<String, dynamic> userMap;
   late Map<dynamic, dynamic> projectMap;
-  late List<ProjectModel> listProjects;
+  late List<ProjectModel> listJoinedProjects;
+  late List<TaskModel> listJoinedTasks;
+  late List<TaskModel> listOverdueTasks;
   late Map phraseMap = {};
-  late Map taskMap = {};
+  late Map taskMap;
+  late int taskLength;
+  late Map<DateTime, List<TaskModel>> calendarTaskEvents;
+  UserServices userServices = UserServices();
+  TaskService taskService = TaskService();
   PhraseServices phraseServices = PhraseServices();
+  ProjectServices projectServices = ProjectServices();
   @override
   void initState() {
-    super.initState();
-    projectModel = widget.projectModel;
+    currentUserModel = widget.userModel;
     projectMap = widget.projectMap;
-    _userModel = widget.userModel;
-    listProjects = getData(projectMap);
+    listJoinedProjects =
+        projectServices.getJoinedProjectList(projectMap, currentUserModel);
+    projectModel = (widget.projectModel == null)
+        ? listJoinedProjects.first
+        : widget.projectModel;
     taskMap = widget.taskMap;
+    listJoinedTasks = taskService.getJoinedTaskList(
+        taskMap, currentUserModel.userId, projectModel!.projectId);
+    listOverdueTasks =
+        taskService.getOverdouTaskList(taskMap, currentUserModel.userId);
+    taskLength = taskService.getJoinedTaskNumberFromProject(
+        taskMap, currentUserModel.userId, projectModel!.projectId);
     _getPhraseData();
+    _fetchCalendarEvents();
+    super.initState();
   }
 
-  List<ProjectModel> getData(Map<dynamic, dynamic> projectMap) {
-    List<ProjectModel> results = [];
-    User? user = FirebaseAuth.instance.currentUser;
-    for (var project in projectMap.values) {
-      ProjectModel projectModel =
-          ProjectModel.fromMap(Map<String, dynamic>.from(project));
-      if (projectModel.projectMembers.contains(user?.uid)) {
-        results.add(projectModel);
+  int getHashCode(DateTime key) {
+    return key.day * 1000000 + key.month * 10000 + key.year;
+  }
+
+  _fetchCalendarEvents() {
+    List<TaskModel> listTasks = listJoinedTasks;
+    calendarTaskEvents =
+        LinkedHashMap(equals: isSameDay, hashCode: getHashCode);
+    for (var task in listTasks) {
+      //DateTime convertDate_1 = DateTime.parse(task.taskStartDate.toString());
+      DateTime convertEndDate = DateTime.parse(task.taskEndDate.toString());
+      // DateTime date_1 = DateTime.utc(
+      //     convertDate_1.year, convertDate_1.month, convertDate_1.day);
+      DateTime endDate = DateTime.utc(
+          convertEndDate.year, convertEndDate.month, convertEndDate.day);
+      // if (calendarTaskEvents[date_1] == null) {
+      //   calendarTaskEvents[date_1] = [];
+      // }
+      if (calendarTaskEvents[endDate] == null) {
+        calendarTaskEvents[endDate] = [];
       }
+      //calendarTaskEvents[date_1]!.add(task);
+      calendarTaskEvents[endDate]!.add(task);
     }
-    return results;
   }
 
   Future<void> _getPhraseData() async {
     DatabaseReference phraseRef = FirebaseDatabase.instance
         .ref()
         .child('phrases')
-        .child(projectModel.projectId);
+        .child(projectModel!.projectId);
     DatabaseEvent snapshot = await phraseRef.orderByChild('timestamp').once();
     if (snapshot.snapshot.value != null && snapshot.snapshot.value is Map) {
       setState(() {
         phraseMap = Map.from(snapshot.snapshot.value as dynamic);
+        phraseModel = PhraseServices()
+            .getPhraseModelFromName(phraseMap, projectModel!.projectStatus);
+        //taskLength = phraseModel!.listTasks.length;
         List<MapEntry<dynamic, dynamic>> sortedEntries =
             phraseMap.entries.toList();
         sortedEntries.sort((a, b) {
-          return (a.value['timestamp'] as int).compareTo(b.value['timestamp']);
+          return (a.value['timestamp'] as int)
+              .compareTo(b.value['timestamp'] as int);
         });
-        phraseMap = Map.fromEntries(sortedEntries.map((entry) {
-          return MapEntry(
-            entry.key,
-            {
-              'timestamp': entry.value['timestamp'],
-              'phraseId': entry.value['phraseId'],
-              'phraseName': entry.value['phraseName'],
-              'listTasks': entry.value['listTasks'],
-              'phraseDescription': entry.value['phraseDescription'],
-              'projectId': entry.value['projectId'],
-            },
-          );
-        }));
+        setState(() {
+          phraseMap = Map.fromEntries(sortedEntries.map((entry) {
+            return MapEntry(
+              entry.key,
+              {
+                'timestamp': entry.value['timestamp'],
+                'phraseId': entry.value['phraseId'],
+                'phraseName': entry.value['phraseName'],
+                'listTasks': entry.value['listTasks'],
+                'phraseDescription': entry.value['phraseDescription'],
+                'projectId': entry.value['projectId'],
+              },
+            );
+          }));
+          phraseModel = phraseServices.getCurrentPhraseModelFromProject(
+              phraseMap, projectModel!.projectId);
+        });
       });
     }
   }
@@ -107,11 +141,13 @@ class _ListOfTasksState extends State<ListOfTasks> {
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButton: Visibility(
-        visible: _userModel.userRole != 'User',
+        visible: currentUserModel.userRole != 'User',
         child: FloatingActionButton(
           onPressed: () {
             Navigator.of(context).push(
-              MaterialPageRoute(builder: (context) => _getTaskCreateScreen()),
+              MaterialPageRoute(
+                builder: (context) => _getTaskCreateScreen(),
+              ),
             );
           },
           backgroundColor: Colors.blueAccent,
@@ -151,29 +187,29 @@ class _ListOfTasksState extends State<ListOfTasks> {
                               child:
                                   Icon(Icons.folder, color: Colors.blueAccent)),
                           onTap: () {
-                            Navigator.of(context)
-                                .push(MaterialPageRoute(builder: (context) {
-                              return _getProjectDetailScreen();
-                            }));
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) {
+                                  return _getProjectDetailScreen();
+                                },
+                              ),
+                            );
                           },
-                          title: Text('${projectModel.projectName}',
+                          title: Text(projectModel!.projectName,
                               style: const TextStyle(
                                   fontFamily: 'MontMed', fontSize: 13)),
-                          subtitle: const Text(
-                            '2 Tasks',
-                            style:
-                                TextStyle(fontFamily: 'MontMed', fontSize: 12),
+                          subtitle: Text(
+                            '$taskLength Task(s)',
+                            style: const TextStyle(
+                                fontFamily: 'MontMed', fontSize: 12),
                           ),
-                          trailing: Visibility(
-                            visible: listProjects.length > 1,
-                            child: TextButton(
-                              onPressed: () {
-                                _showProjectSelectionDialog();
-                              },
-                              child: const Text('Switch',
-                                  style: TextStyle(
-                                      fontFamily: 'MontMed', fontSize: 12)),
-                            ),
+                          trailing: TextButton(
+                            onPressed: () {
+                              _showProjectSelectionDialog();
+                            },
+                            child: const Text('Switch',
+                                style: TextStyle(
+                                    fontFamily: 'MontMed', fontSize: 12)),
                           ),
                         ),
                         const SizedBox(height: 5),
@@ -238,7 +274,13 @@ class _ListOfTasksState extends State<ListOfTasks> {
                         ),
                         const SizedBox(height: 5),
                         const Divider(),
-                        const ExpansionTileTasks(),
+                        ExpansionTileTasks(
+                          projectMap: projectMap,
+                          taskMap: taskMap,
+                          currentUserModel: currentUserModel,
+                          projectModel: projectModel!,
+                          taskCalendarEvents: calendarTaskEvents,
+                        ),
                       ],
                     ))))
           ],
@@ -247,51 +289,58 @@ class _ListOfTasksState extends State<ListOfTasks> {
     );
   }
 
-  FutureBuilder<Map<String, dynamic>> _getProjectDetailScreen() {
-    return FutureBuilder(
-        future: UserServices().getUserDataMap(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else {
-            userMap = snapshot.data ?? {};
-            return Expanded(
-              child: ProjectDetailScreen(
-                projectModel: projectModel,
-                userMap: userMap,
-                projectMap: projectMap,
-                phraseMap: phraseMap,
-                userModel: _userModel,
-                taskMap: taskMap,
-              ),
-            );
-          }
-        });
-  }
-
   FutureBuilder<Map<String, dynamic>> _getTaskCreateScreen() {
     return FutureBuilder(
-        future: UserServices().getUserDataMap(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else {
-            userMap = snapshot.data ?? {};
-            return Expanded(
-              child: TaskCreateScreen(
-                projectMap: projectMap,
-                currentUserModel: _userModel,
-                userMap: userMap,
-                projectModel: projectModel,
-                phraseMap: phraseMap,
-              ),
-            );
-          }
-        });
+      future: userServices.getUserDataMap(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        } else {
+          userMap = snapshot.data ?? {};
+          return Expanded(
+            child: TaskCreateScreen(
+              projectMap: projectMap,
+              currentUserModel: currentUserModel,
+              userMap: userMap,
+              projectModel: projectModel!,
+              phraseMap: phraseMap,
+              taskMap: taskMap,
+            ),
+          );
+        }
+      },
+    );
+  }
+
+  FutureBuilder<Map<String, dynamic>> _getProjectDetailScreen() {
+    return FutureBuilder(
+      future: userServices.getUserDataMap(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        } else {
+          userMap = snapshot.data ?? {};
+          return Expanded(
+            child: ProjectDetailScreen(
+              projectModel: projectModel!,
+              userMap: userMap,
+              userModel: currentUserModel,
+              projectMap: projectMap,
+              phraseMap: phraseMap,
+              taskMap: taskMap,
+            ),
+          );
+        }
+      },
+    );
   }
 
   Future<void> _showProjectSelectionDialog() async {
@@ -305,42 +354,23 @@ class _ListOfTasksState extends State<ListOfTasks> {
           ),
           content: SingleChildScrollView(
             child: Column(
-              children: listProjects.map((project) {
+              children: listJoinedProjects.map((project) {
                 return Column(
                   children: <Widget>[
-                    FutureBuilder(
-                      future:
-                          phraseServices.getPhraseMap(projectModel.projectId),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const Center(
-                              child: CircularProgressIndicator());
-                        } else if (snapshot.hasError) {
-                          return Text('Error: ${snapshot.error}');
-                        } else {
-                          phraseMap = snapshot.data ?? {};
-                          return const SizedBox.shrink();
-                        }
-                      },
-                    ),
                     ListTile(
                       leading: const CircleAvatar(
                           child: Icon(Icons.keyboard_arrow_down)),
                       title: Text(project.projectName,
                           style: const TextStyle(fontFamily: 'MontMed')),
                       subtitle: Text(
-                        "Members: ${project.projectMembers.length}",
+                        "Task numbers: ${taskService.getJoinedTaskNumberFromProject(taskMap, currentUserModel.userId, project.projectId)}",
                         style: const TextStyle(fontFamily: 'MontMed'),
                       ),
                       onTap: () {
-                        Navigator.of(context).pushReplacement(MaterialPageRoute(
-                            builder: (context) => ListOfTasks(
-                                  userModel: _userModel,
-                                  projectModel: project,
-                                  projectMap: projectMap,
-                                  taskMap: taskMap,
-                                )));
+                        setState(() {
+                          projectModel = project;
+                        });
+                        Navigator.of(context).pop();
                       },
                     ),
                     const Divider(height: 0),
@@ -557,7 +587,18 @@ class _ListOfTasksState extends State<ListOfTasks> {
 }
 
 class ExpansionTileTasks extends StatefulWidget {
-  const ExpansionTileTasks({super.key});
+  final Map taskMap;
+  final Map projectMap;
+  final UserModel currentUserModel;
+  final ProjectModel projectModel;
+  final Map<DateTime, List<TaskModel>> taskCalendarEvents;
+  const ExpansionTileTasks(
+      {super.key,
+      required this.taskMap,
+      required this.currentUserModel,
+      required this.projectMap,
+      required this.projectModel,
+      required this.taskCalendarEvents});
 
   @override
   State<ExpansionTileTasks> createState() => _ExpansionTileTasksState();
@@ -568,11 +609,45 @@ class _ExpansionTileTasksState extends State<ExpansionTileTasks> {
   bool _customTileExpanded1 = false;
   bool _customTileExpanded2 = false;
   bool _customTileExpanded3 = false;
-
+  TaskService taskService = TaskService();
+  ProjectServices projectServices = ProjectServices();
+  late List<TaskModel> listJoinedTasks;
+  late List<TaskModel> listOverdueTasks;
+  late UserModel currentUserModel;
+  late Map taskMap;
+  late Map projectMap;
+  late ProjectModel projectModel;
+  late Map<DateTime, List<TaskModel>> groupEvents;
   DateTime today = DateTime.now();
+  DateTime _focusedDay = DateTime.now();
+  DateTime _selectedDay = DateTime.now();
+  late Color markerColor;
+  CalendarFormat _calendarFormat = CalendarFormat.month;
+
+  @override
+  void initState() {
+    projectMap = widget.projectMap;
+    taskMap = widget.taskMap;
+    currentUserModel = widget.currentUserModel;
+    projectModel = widget.projectModel;
+    listJoinedTasks = taskService.getJoinedTaskList(
+        taskMap, currentUserModel.userId, projectModel.projectId);
+    listOverdueTasks =
+        taskService.getOverdouTaskList(taskMap, currentUserModel.userId);
+    groupEvents = widget.taskCalendarEvents;
+    super.initState();
+  }
+
+  List<TaskModel> _getEventFromDay(DateTime date) {
+    return groupEvents[date] ?? [];
+  }
+
   void _onDaySelected(DateTime day, DateTime focusedDay) {
     setState(() {
       today = day;
+      if (groupEvents[today] != null) {
+        showDateDialog(today, context);
+      }
     });
   }
 
@@ -589,7 +664,7 @@ class _ExpansionTileTasksState extends State<ExpansionTileTasks> {
             children: [
               const Icon(Icons.calendar_month),
               const SizedBox(width: 10),
-              Text('Selected Day: ' + today.toString().split(' ')[0],
+              Text('Selected Day: ${_selectedDay.toString().split(' ')[0]}',
                   style: const TextStyle(fontFamily: 'MontMed', fontSize: 13)),
             ],
           ),
@@ -600,22 +675,104 @@ class _ExpansionTileTasksState extends State<ExpansionTileTasks> {
           ),
           children: [
             const Divider(),
-            TableCalendar(
-                rowHeight: 50,
-                headerStyle: const HeaderStyle(
-                    formatButtonVisible: false,
-                    titleCentered: true,
-                    titleTextStyle: TextStyle(fontFamily: 'MontMed')),
-                daysOfWeekStyle: const DaysOfWeekStyle(
-                    weekdayStyle: TextStyle(fontFamily: 'MontMed')),
-                calendarStyle: const CalendarStyle(
-                    defaultTextStyle: TextStyle(fontFamily: 'MontMed')),
-                availableGestures: AvailableGestures.all,
-                selectedDayPredicate: (day) => isSameDay(day, today),
-                onDaySelected: _onDaySelected,
-                focusedDay: today,
-                firstDay: DateTime.utc(2000, 1, 1),
-                lastDay: DateTime.utc(2025, 1, 1)),
+            Container(
+              child: TableCalendar(
+                  eventLoader: _getEventFromDay,
+                  calendarBuilders: CalendarBuilders(
+                    markerBuilder: (BuildContext context, date, events) {
+                      if (events.isEmpty) return SizedBox();
+                      return ListView.builder(
+                          shrinkWrap: true,
+                          scrollDirection: Axis.horizontal,
+                          itemCount: events.length,
+                          itemBuilder: (context, index) {
+                            return Container(
+                              margin: const EdgeInsets.only(top: 20),
+                              padding: const EdgeInsets.all(1),
+                              child: Container(
+                                // height: 7,
+                                width: 5,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.green,
+                                  // color: Colors.primaries[Random()
+                                  //     .nextInt(Colors.primaries.length)],
+                                ),
+                              ),
+                            );
+                          });
+                    },
+                  ),
+                  rowHeight: 50,
+                  headerStyle: const HeaderStyle(
+                      formatButtonVisible: false,
+                      titleCentered: true,
+                      titleTextStyle: TextStyle(fontFamily: 'MontMed')),
+                  daysOfWeekStyle: const DaysOfWeekStyle(
+                      weekdayStyle: TextStyle(fontFamily: 'MontMed')),
+                  //onDaySelected: _onDaySelected,
+                  onDaySelected: (selectedDay, focusedDay) {
+                    if (!isSameDay(_selectedDay, selectedDay)) {
+                      // Call `setState()` when updating the selected day
+                      setState(() {
+                        _selectedDay = selectedDay;
+                        _focusedDay = focusedDay;
+                        if (groupEvents[selectedDay] != null) {
+                          showDateDialog(selectedDay, context);
+                          for (var event in groupEvents[selectedDay]!) {
+                            DateTime dateTimeParse =
+                                DateTime.parse(event.taskEndDate);
+                            if (dateTimeParse.isBefore(DateTime.now())) {}
+                          }
+                        }
+                      });
+                    }
+                  },
+                  selectedDayPredicate: (day) {
+                    return isSameDay(_selectedDay, day);
+                  },
+                  focusedDay: today,
+                  onPageChanged: (focusedDay) {
+                    // No need to call `setState()` here
+                    _focusedDay = focusedDay;
+                  },
+                  onFormatChanged: (format) {
+                    if (_calendarFormat != format) {
+                      // Call `setState()` when updating calendar format
+                      setState(() {
+                        _calendarFormat = format;
+                      });
+                    }
+                  },
+                  calendarStyle: CalendarStyle(
+                    isTodayHighlighted: true,
+                    selectedDecoration: const BoxDecoration(
+                      color: Colors.blue,
+                      shape: BoxShape.circle,
+                      //borderRadius: BorderRadius.circular(5.0),
+                    ),
+                    selectedTextStyle: const TextStyle(color: Colors.white),
+                    todayDecoration: const BoxDecoration(
+                      color: Colors.purpleAccent,
+                      shape: BoxShape.circle,
+                      //borderRadius: BorderRadius.circular(5.0),
+                    ),
+                    defaultDecoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      //borderRadius: BorderRadius.circular(5.0),
+                    ),
+                    weekendDecoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        //borderRadius: BorderRadius.circular(5.0),
+                        color: Colors.black.withOpacity(0.05)),
+                    markerDecoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  availableGestures: AvailableGestures.all,
+                  firstDay: DateTime.utc(2000, 1, 1),
+                  lastDay: DateTime.utc(2025, 1, 1)),
+            ),
           ],
           onExpansionChanged: (bool expanded) {
             setState(() {
@@ -630,12 +787,12 @@ class _ExpansionTileTasksState extends State<ExpansionTileTasks> {
             borderRadius: BorderRadius.zero,
           ),
           initiallyExpanded: true,
-          title: const Row(
+          title: Row(
             children: [
-              Icon(Icons.list_alt),
-              SizedBox(width: 10),
-              Text('All Tasks (3)',
-                  style: TextStyle(fontFamily: 'MontMed', fontSize: 13)),
+              const Icon(Icons.list_alt),
+              const SizedBox(width: 10),
+              Text('All Tasks (${listJoinedTasks.length})',
+                  style: const TextStyle(fontFamily: 'MontMed', fontSize: 13)),
             ],
           ),
           trailing: Icon(
@@ -646,49 +803,7 @@ class _ExpansionTileTasksState extends State<ExpansionTileTasks> {
           children: [
             const Divider(),
             Container(
-              child: Column(
-                children: allTasks.map((project) {
-                  return ListTile(
-                    leading: const CircleAvatar(
-                        child: Icon(Icons.layers, color: Colors.blue)),
-                    title: Text('Task Name: ${project}',
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                            fontFamily: 'MontMed', fontSize: 13)),
-                    subtitle: const Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.folder_open_sharp,
-                              size: 13,
-                            ),
-                            SizedBox(width: 5),
-                            Text('Project:...',
-                                style: TextStyle(
-                                    fontFamily: 'MontMed', fontSize: 12))
-                          ],
-                        ),
-                      ],
-                    ),
-                    trailing: const Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text('Priority: ',
-                            style:
-                                TextStyle(fontFamily: 'MontMed', fontSize: 12)),
-                        Text('HIGH',
-                            style: TextStyle(
-                                fontFamily: 'MontMed',
-                                fontSize: 13,
-                                color: Colors.red))
-                      ],
-                    ),
-                  );
-                }).toList(),
-              ),
+              child: _showTaskList(listJoinedTasks),
             ),
           ],
           onExpansionChanged: (bool expanded) {
@@ -703,10 +818,10 @@ class _ExpansionTileTasksState extends State<ExpansionTileTasks> {
             borderRadius: BorderRadius.zero,
           ),
           initiallyExpanded: true,
-          title: const Row(
+          title: Row(
             children: [
-              Text('Recent Tasks (3)',
-                  style: TextStyle(fontFamily: 'MontMed', fontSize: 13)),
+              Text('Recent Tasks (${listJoinedTasks.length})',
+                  style: const TextStyle(fontFamily: 'MontMed', fontSize: 13)),
             ],
           ),
           trailing: Icon(
@@ -717,49 +832,7 @@ class _ExpansionTileTasksState extends State<ExpansionTileTasks> {
           children: [
             const Divider(),
             Container(
-              child: Column(
-                children: allTasks.map((project) {
-                  return ListTile(
-                    leading: const CircleAvatar(
-                        child: Icon(Icons.layers, color: Colors.blue)),
-                    title: Text('Task Name: ${project}',
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                            fontFamily: 'MontMed', fontSize: 13)),
-                    subtitle: const Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.folder_open_sharp,
-                              size: 13,
-                            ),
-                            SizedBox(width: 5),
-                            Text('Project:...',
-                                style: TextStyle(
-                                    fontFamily: 'MontMed', fontSize: 12))
-                          ],
-                        ),
-                      ],
-                    ),
-                    trailing: const Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text('Priority: ',
-                            style:
-                                TextStyle(fontFamily: 'MontMed', fontSize: 12)),
-                        Text('HIGH',
-                            style: TextStyle(
-                                fontFamily: 'MontMed',
-                                fontSize: 13,
-                                color: Colors.red))
-                      ],
-                    ),
-                  );
-                }).toList(),
-              ),
+              child: _showTaskList(listJoinedTasks),
             ),
           ],
           onExpansionChanged: (bool expanded) {
@@ -773,10 +846,10 @@ class _ExpansionTileTasksState extends State<ExpansionTileTasks> {
           shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.zero,
           ),
-          title: const Row(
+          title: Row(
             children: [
-              Text('Overdue Tasks (4)',
-                  style: TextStyle(fontFamily: 'MontMed', fontSize: 13)),
+              Text('Overdue Tasks (${listOverdueTasks.length})',
+                  style: const TextStyle(fontFamily: 'MontMed', fontSize: 13)),
             ],
           ),
           trailing: Icon(
@@ -787,49 +860,7 @@ class _ExpansionTileTasksState extends State<ExpansionTileTasks> {
           children: [
             const Divider(),
             Container(
-              child: Column(
-                children: allTasks.map((project) {
-                  return ListTile(
-                    leading: const CircleAvatar(
-                        child: Icon(Icons.layers, color: Colors.blue)),
-                    title: Text('Task Name: ${project}',
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                            fontFamily: 'MontMed', fontSize: 13)),
-                    subtitle: const Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.folder_open_sharp,
-                              size: 13,
-                            ),
-                            SizedBox(width: 5),
-                            Text('Project:...',
-                                style: TextStyle(
-                                    fontFamily: 'MontMed', fontSize: 12))
-                          ],
-                        ),
-                      ],
-                    ),
-                    trailing: const Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text('Priority: ',
-                            style:
-                                TextStyle(fontFamily: 'MontMed', fontSize: 12)),
-                        Text('HIGH',
-                            style: TextStyle(
-                                fontFamily: 'MontMed',
-                                fontSize: 13,
-                                color: Colors.red))
-                      ],
-                    ),
-                  );
-                }).toList(),
-              ),
+              child: _showTaskList(listOverdueTasks),
             ),
           ],
           onExpansionChanged: (bool expanded) {
@@ -838,10 +869,63 @@ class _ExpansionTileTasksState extends State<ExpansionTileTasks> {
             });
           },
         ),
-        const Divider(
-          height: 0,
-        ),
+        const Divider(),
       ],
+    );
+  }
+
+  Column _showTaskList(List<TaskModel> listOfJoinedTasks) {
+    return Column(
+      children: listOfJoinedTasks.map((task) {
+        return ListTile(
+          leading:
+              const CircleAvatar(child: Icon(Icons.layers, color: Colors.blue)),
+          title: Text('Task Name: ${task.taskName}',
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontFamily: 'MontMed', fontSize: 13)),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(
+                    Icons.folder_open_sharp,
+                    size: 13,
+                  ),
+                  const SizedBox(width: 5),
+                  Expanded(
+                    child: Text(
+                        'Project: ${projectServices.getProjectNameFromId(projectMap, task.projectId)}',
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                            fontFamily: 'MontMed', fontSize: 12)),
+                  )
+                ],
+              ),
+            ],
+          ),
+          trailing: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text('Priority: ',
+                  style: TextStyle(fontFamily: 'MontMed', fontSize: 12)),
+              Text(
+                task.taskPriority.toUpperCase(),
+                style: TextStyle(
+                  fontFamily: 'MontMed',
+                  fontSize: 13,
+                  color: task.taskPriority == 'High'
+                      ? Colors.red
+                      : (task.taskPriority == 'Medium'
+                          ? Colors.yellow
+                          : Colors.blueAccent),
+                ),
+              ),
+            ],
+          ),
+        );
+      }).toList(),
     );
   }
 }

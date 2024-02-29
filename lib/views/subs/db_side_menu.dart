@@ -26,7 +26,7 @@ class db_side_menu extends StatelessWidget {
             leading: const Icon(Icons.dashboard, color: Colors.white),
             onTap: () {
               Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-                return const dashboard_screen();
+                return const Dashboard_screen();
               }));
               // Handle menu item tap
             },

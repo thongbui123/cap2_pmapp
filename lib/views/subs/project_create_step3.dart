@@ -196,7 +196,7 @@ class _ProjectCreateStep3State extends State<ProjectCreateStep3> {
                           context,
                           MaterialPageRoute<void>(
                             builder: (BuildContext context) =>
-                                const dashboard_screen(),
+                                const Dashboard_screen(),
                           ),
                         );
                         ProjectServices projectServices = ProjectServices();

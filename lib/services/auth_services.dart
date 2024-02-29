@@ -25,7 +25,7 @@ class AuthServices {
         progressDialog.dismiss();
         // ignore: use_build_context_synchronously
         Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-          return const dashboard_screen();
+          return const Dashboard_screen();
         }));
       }
       progressDialog.dismiss();

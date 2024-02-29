@@ -14,6 +14,7 @@ import 'package:flutter/material.dart';
 class TaskCreateScreen extends StatefulWidget {
   final Map projectMap;
   final Map phraseMap;
+  final Map taskMap;
   final UserModel currentUserModel;
   final Map<String, dynamic> userMap;
   final ProjectModel projectModel;
@@ -23,24 +24,25 @@ class TaskCreateScreen extends StatefulWidget {
       required this.currentUserModel,
       required this.userMap,
       required this.projectModel,
-      required this.phraseMap});
+      required this.phraseMap,
+      required this.taskMap});
 
   @override
   State<TaskCreateScreen> createState() => _TaskCreateScreenState();
 }
 
 List<String> list = <String>['HIGH', 'MEDIUM', 'LOW'];
-List<String> allTasks = [
-  'Task A01',
-  'Task B02',
-  'Task B01',
-];
+// List<String> allTasks = [
+//   'Task A01',
+//   'Task B02',
+//   'Task B01',
+// ];
 
-List<String> allProjects = [
-  'Project A01',
-  'Project B02',
-  'Project B01',
-];
+// List<String> allProjects = [
+//   'Project A01',
+//   'Project B02',
+//   'Project B01',
+// ];
 
 class _TaskCreateScreenState extends State<TaskCreateScreen> {
   late Map projectMap;
@@ -65,10 +67,11 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
     super.initState();
     projectMap = widget.projectMap;
     phraseMap = widget.phraseMap;
+    taskMap = widget.taskMap;
     currentUserModel = widget.currentUserModel;
     userMap = widget.userMap;
     projectModel = widget.projectModel;
-    allMembers = projectModel.projectMembers;
+    allMembers = projectModel!.projectMembers;
     _getPhraseModel();
   }
 
@@ -230,7 +233,7 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
                     )),
                 readOnly: true,
                 onTap: () {
-                  DateTime endDate = DateTime.parse(projectModel.endDate);
+                  DateTime endDate = DateTime.parse(projectModel!.endDate);
                   DateTime now = DateTime.now();
                   _selectDate(endDateController, now, endDate);
                 },
@@ -250,7 +253,7 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
                         fontFamily: 'MontMed',
                         fontSize: 14,
                         color: Colors.black54)),
-                subtitle: Text(projectModel.projectName.toUpperCase(),
+                subtitle: Text(projectModel!.projectName.toUpperCase(),
                     style:
                         const TextStyle(fontFamily: 'MontMed', fontSize: 14)),
                 trailing: Column(
@@ -380,8 +383,8 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
                 _addTask();
                 Navigator.of(context)
                     .pushReplacement(MaterialPageRoute(builder: (context) {
-                  return ListOfTasks(
-                    projectModel: projectModel,
+                  return ListOfTaskScreen(
+                    projectModel: projectModel!,
                     projectMap: projectMap,
                     userModel: currentUserModel,
                     taskMap: taskMap,
@@ -414,12 +417,12 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
         _selectedValue,
         taskStartDate,
         endDateController.text,
-        projectModel.projectId,
+        projectModel!.projectId,
         currentUserModel.userId,
         currentPhraseModel.phraseId,
         currentList);
     currentPhraseModel.listTasks.add(taskService.realTaskId);
-    PhraseServices().updatePhraseTaskList(projectModel.projectId,
+    PhraseServices().updatePhraseTaskList(projectModel!.projectId,
         currentPhraseModel.phraseId, currentPhraseModel.listTasks);
     DatabaseEvent taskDatabaseEvent = await taskService.taskRef.once();
     if (taskDatabaseEvent.snapshot.value != null &&

@@ -207,7 +207,7 @@ class _ListOfProjectScreenState extends State<ListOfProjectScreen>
                                           Navigator.of(context).push(
                                               MaterialPageRoute(
                                                   builder: (context) {
-                                            return ListOfTasks(
+                                            return ListOfTaskScreen(
                                               projectModel: project,
                                               projectMap: projectMap,
                                               userModel: userModel!,

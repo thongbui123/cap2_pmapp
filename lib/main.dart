@@ -21,6 +21,6 @@ class MyApp extends StatelessWidget {
         ),
         home: FirebaseAuth.instance.currentUser == null
             ? const LoginScreen()
-            : const dashboard_screen());
+            : const Dashboard_screen());
   }
 }

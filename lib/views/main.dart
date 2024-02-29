@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:table_calendar/table_calendar.dart';
 
 void main() {
   runApp(MyApp());
@@ -19,48 +20,81 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  List<String> itemList = ['Item 1', 'Item 2', 'Item 3', 'Item 4'];
+  Map<DateTime, List<String>> _events = {};
+
+  @override
+  void initState() {
+    super.initState();
+    // Set up your events
+    _loadEvents();
+  }
+
+  // Simulating an event loader function
+  void _loadEvents() {
+    _events = {
+      DateTime(2024, 2, 28): ['Event 1'],
+      DateTime(2024, 3, 1): ['Event 2'],
+      DateTime(2024, 3, 2): ['Event 3'],
+    };
+  }
+
+  List<String> _getEventFromDay(DateTime date) {
+    return _events[date] ?? [];
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Delete Items Example'),
+        title: Text('Table Calendar Marker Example'),
       ),
-      body: ListView.builder(
-        itemCount: itemList.length,
-        itemBuilder: (context, index) {
-          return index == 0
-              ? ListTile(
-                  title: Text(itemList[index]),
-                )
-              : Dismissible(
-                  key: Key(itemList[index]),
-                  onDismissed: (direction) {
-                    // Remove the item from the list
-                    setState(() {
-                      itemList.removeAt(index);
-                    });
-                    SnackBar snackBar = SnackBar(
-                      content: Text('${itemList[index]} dismissed'),
-                    );
+      body: TableCalendar(
+        eventLoader: _getEventFromDay,
+        calendarBuilders: CalendarBuilders(
+          markerBuilder: (context, date, events) {
+            // Customize marker for each event
+            List<Widget> markers = [];
 
-// Find the ScaffoldMessenger in the widget tree
-// and use it to show a SnackBar.
-                    ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                    // Show a snackbar with the item name
-                  },
-                  background: Container(
-                    color: Colors.red,
-                    child: Icon(Icons.delete, color: Colors.white),
-                    alignment: Alignment.centerRight,
-                    padding: EdgeInsets.only(right: 16.0),
+            for (var event in events) {
+              // Define marker color for each event
+              Color markerColor;
+              if (event == 'Event 1') {
+                markerColor = Colors.red;
+              } else if (event == 'Event 2') {
+                markerColor = Colors.blue;
+              } else {
+                markerColor = Colors.green;
+              }
+
+              markers.add(
+                Positioned(
+                  right: 1,
+                  bottom: 1,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: markerColor,
+                    ),
+                    width: 16,
+                    height: 16,
+                    child: Center(
+                      child: Text(
+                        '●', // You can use any symbol or text as a marker
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
                   ),
-                  child: ListTile(
-                    title: Text(itemList[index]),
-                  ),
-                );
-        },
+                ),
+              );
+            }
+          },
+        ),
+        focusedDay: DateTime.now(),
+        firstDay: DateTime.utc(2000, 1, 1),
+        lastDay: DateTime.utc(2025, 1, 1),
       ),
     );
   }

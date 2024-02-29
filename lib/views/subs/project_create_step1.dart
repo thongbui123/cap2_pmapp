@@ -351,49 +351,8 @@ class _ProjectCreateStep1State extends State<ProjectCreateStep1> {
                             ),
                       const SizedBox(height: 5),
                       const Divider(),
-                      // Column(
-                      //   children: currentList.map((member) {
-                      //     return ListTile(
-                      //       leading: CircleAvatar(
-                      //           child: userAvatarMap[member] == ''
-                      //               ? Text(
-                      //                   getFirstLetter(
-                      //                       leaderIdMap[member].toString()),
-                      //                   style: const TextStyle(
-                      //                       fontFamily: 'MontMed'),
-                      //                 )
-                      //               : CircleAvatar(
-                      //                   backgroundColor: Colors.white,
-                      //                   backgroundImage: showLocalFile
-                      //                       ? FileImage(imageFile!)
-                      //                           as ImageProvider
-                      //                       : NetworkImage(
-                      //                           userAvatarMap[member]!))),
-                      //       title: Text(leaderIdMap[member]!),
-                      //       subtitle: Text(
-                      //         "Handling: ${countProjectMap[member].toString()} project(s)",
-                      //         style: const TextStyle(fontFamily: 'MontMed'),
-                      //       ),
-                      //       trailing: Ink(
-                      //         decoration: const ShapeDecoration(
-                      //           color: Colors.transparent,
-                      //           shape: CircleBorder(),
-                      //         ),
-                      //         child: IconButton(
-                      //           icon: const Icon(Icons.remove_circle),
-                      //           color: Colors.redAccent,
-                      //           onPressed: () {
-                      //             _removeMember(member);
-                      //           },
-                      //         ),
-                      //       ),
-                      //     );
-                      //   }).toList(),
-                      // ),
-                      //const SizedBox(height: 5),
-                      //const Divider(),
                       const SizedBox(height: 5),
-                      Container(
+                      SizedBox(
                           height: 50,
                           child: TextButton(
                             onPressed: () {
@@ -439,10 +398,16 @@ class _ProjectCreateStep1State extends State<ProjectCreateStep1> {
 
   Future<void> _selectDate(
       TextEditingController textEditingController, DateTime dateTime) async {
+    DateTime firstDateTime;
+    if (startDateController.text == "") {
+      firstDateTime = dateTime;
+    } else {
+      firstDateTime = DateTime.parse(startDateController.text);
+    }
     DateTime? _picked = await showDatePicker(
         context: context,
         initialDate: dateTime,
-        firstDate: dateTime,
+        firstDate: firstDateTime,
         lastDate: DateTime(2030));
     if (_picked != null) {
       textEditingController.text = _picked.toString().split(" ")[0];

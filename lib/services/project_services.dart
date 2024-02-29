@@ -33,6 +33,30 @@ class ProjectServices {
     return joinedProjects;
   }
 
+  String getProjectNameFromId(Map<dynamic, dynamic> projectMap, String id) {
+    for (var project in projectMap.values) {
+      ProjectModel projectModel =
+          ProjectModel.fromMap(Map<String, dynamic>.from(project));
+      if (projectModel.projectId == id) {
+        return projectModel.projectName;
+      }
+    }
+    return "";
+  }
+
+  ProjectModel? getProjectModelFromId(
+      Map<dynamic, dynamic> projectMap, String id) {
+    ProjectModel? result;
+    for (var project in projectMap.values) {
+      ProjectModel projectModel =
+          ProjectModel.fromMap(Map<String, dynamic>.from(project));
+      if (projectModel.projectId == id) {
+        result = projectModel;
+      }
+    }
+    return result;
+  }
+
   int getJoinedProjectNumber(Map<dynamic, dynamic> projectMap, String id) {
     int count = 0;
     for (var project in projectMap.values) {

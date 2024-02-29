@@ -3,7 +3,7 @@ import 'package:capstone2_project_management_app/models/user_model.dart';
 import 'package:capstone2_project_management_app/services/project_services.dart';
 import 'package:capstone2_project_management_app/services/task_services.dart';
 import 'package:capstone2_project_management_app/views/list_of_project_screen.dart';
-import 'package:capstone2_project_management_app/views/my_tasks_screen.dart';
+import 'package:capstone2_project_management_app/views/list_of_tasks_screen.dart';
 import 'package:capstone2_project_management_app/views/stats/stats.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -177,7 +177,7 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
                                         Navigator.of(context).push(
                                             MaterialPageRoute(
                                                 builder: (context) {
-                                          return MyTaskScreen(
+                                          return ListOfTaskScreen(
                                             userModel: currentUserModel!,
                                             projectMap: projectMap,
                                             taskMap: taskMap,
@@ -208,8 +208,8 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
                                 Row(
                                   children: <Widget>[
                                     Text(
-                                      '${TaskService().getJoinedTaskNumber(taskMap, currentUserModel!.userId)} Task in Progress',
-                                      style: TextStyle(
+                                      '${TaskService().getJoinedTaskNumber(taskMap, currentUserModel!.userId)} on going',
+                                      style: const TextStyle(
                                           fontSize: 12, fontFamily: 'MontMed'),
                                     )
                                   ],

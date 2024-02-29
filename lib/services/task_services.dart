@@ -44,15 +44,66 @@ class TaskService {
     }
   }
 
-  int getJoinedTaskNumber(Map<dynamic, dynamic> taskMap, String id) {
+  List<TaskModel> getJoinedTaskList(
+      Map<dynamic, dynamic> taskMap, String memberId, String projectId) {
+    List<TaskModel> listAllTasks = [];
+    for (var task in taskMap.values) {
+      TaskModel taskModel = TaskModel.fromMap(Map<String, dynamic>.from(task));
+      if (taskModel.taskMembers.contains(memberId) &&
+          taskModel.projectId == projectId) {
+        listAllTasks.add(taskModel);
+      }
+    }
+    return listAllTasks;
+  }
+
+  int getTaskNumberHasFromProject(
+      Map<dynamic, dynamic> taskMap, String projectId) {
     int count = 0;
     for (var task in taskMap.values) {
       TaskModel taskModel = TaskModel.fromMap(Map<String, dynamic>.from(task));
-      if (taskModel.taskMembers.contains(id)) {
+      if (taskModel.taskMembers.contains(projectId)) {
         count++;
       }
     }
     return count;
+  }
+
+  int getJoinedTaskNumber(Map<dynamic, dynamic> taskMap, String memberId) {
+    int count = 0;
+    for (var task in taskMap.values) {
+      TaskModel taskModel = TaskModel.fromMap(Map<String, dynamic>.from(task));
+      if (taskModel.taskMembers.contains(memberId)) {
+        count++;
+      }
+    }
+    return count;
+  }
+
+  int getJoinedTaskNumberFromProject(
+      Map<dynamic, dynamic> taskMap, String memberId, String projectId) {
+    int count = 0;
+    for (var task in taskMap.values) {
+      TaskModel taskModel = TaskModel.fromMap(Map<String, dynamic>.from(task));
+      if (taskModel.taskMembers.contains(memberId) &&
+          taskModel.projectId == projectId) {
+        count++;
+      }
+    }
+    return count;
+  }
+
+  List<TaskModel> getOverdouTaskList(Map<dynamic, dynamic> taskMap, String id) {
+    List<TaskModel> listOverdou = [];
+    for (var task in taskMap.values) {
+      TaskModel taskModel = TaskModel.fromMap(Map<String, dynamic>.from(task));
+      DateTime now = DateTime.now();
+      DateTime endDate = DateTime.parse(taskModel.taskEndDate);
+      if (taskModel.taskMembers.contains(id) && endDate.isAfter(now)) {
+        listOverdou.add(taskModel);
+      }
+    }
+    return listOverdou;
   }
 
   int getOverdouTaskNumber(Map<dynamic, dynamic> taskMap, String id) {

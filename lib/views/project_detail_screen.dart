@@ -94,7 +94,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                               onPressed: () {
                                 Navigator.of(context).pushReplacement(
                                   MaterialPageRoute(
-                                      builder: (context) => ListOfTasks(
+                                      builder: (context) => ListOfTaskScreen(
                                             projectModel: _projectModel,
                                             projectMap: projectMap,
                                             userModel: _userModel,
@@ -122,7 +122,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                                 color: Colors.black,
                                 fontSize: 13)),
                         subtitle: Text(
-                          'Current State: $currentPhraseName',
+                          'Current State: ${(currentPhraseName == "Maintenance" ? currentPhraseName : "Under Development")}',
                           style: const TextStyle(
                               fontFamily: 'MontMed', fontSize: 12),
                         ),
@@ -276,58 +276,6 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
           ],
         ),
       ),
-    );
-  }
-
-  Future<void> _showMemberSelectionDialog() async {
-    await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text(
-            'MEMBERS',
-            style: TextStyle(fontFamily: 'Anurati'),
-          ),
-          content: SingleChildScrollView(
-            child: Column(
-              children: allMembers.map((user) {
-                return Column(
-                  children: <Widget>[
-                    ListTile(
-                      leading: const CircleAvatar(
-                          child: Text(
-                        'A',
-                        style: TextStyle(fontFamily: 'MontMed'),
-                      )),
-                      title: Text(user.userId),
-                      subtitle: const Text(
-                        '2 Projects Involved',
-                        style: TextStyle(fontFamily: 'MontMed'),
-                      ),
-                      onTap: () {
-                        _addMember(user);
-                        Navigator.of(context).pop(); // Close the dialog
-                      },
-                    ),
-                    const Divider(height: 0),
-                  ],
-                );
-              }).toList(),
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text(
-                'Cancel',
-                style: TextStyle(fontFamily: 'MontMed'),
-              ),
-            ),
-          ],
-        );
-      },
     );
   }
 

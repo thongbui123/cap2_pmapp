@@ -109,6 +109,32 @@ class PhraseServices {
     return 0;
   }
 
+  PhraseModel? getPhraseModelFromName(
+      Map<dynamic, dynamic> phraseMap, String phraseName) {
+    PhraseModel? result;
+    for (var phrase in phraseMap.values) {
+      PhraseModel phraseModel =
+          PhraseModel.fromMap(Map<String, dynamic>.from(phrase));
+      if (phraseModel.phraseName == phraseName) {
+        result = phraseModel;
+      }
+    }
+    return result;
+  }
+
+  PhraseModel? getCurrentPhraseModelFromProject(
+      Map<dynamic, dynamic> phraseMap, String projectId) {
+    PhraseModel? result;
+    for (var phrase in phraseMap.values) {
+      PhraseModel phraseModel =
+          PhraseModel.fromMap(Map<String, dynamic>.from(phrase));
+      if (phraseModel.projectId == projectId) {
+        result = phraseModel;
+      }
+    }
+    return result;
+  }
+
   Map<int, String> getMapPhraseIndex(Map<dynamic, dynamic> phraseMap) {
     Map<int, String> mapName = {};
     int num = 0;
