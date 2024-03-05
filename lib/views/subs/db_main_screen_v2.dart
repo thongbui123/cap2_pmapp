@@ -29,27 +29,19 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
   ProjectServices projectServices = ProjectServices();
   late Map projectMap;
   late Map taskMap;
+
+  bool _customTileExpanded0 = true;
+  bool _customTileExpanded1 = true;
+
   List<Project> projects = [
     Project(name: 'Project A', numOfPeople: 5, color: Colors.blue),
     Project(name: 'Project B', numOfPeople: 3, color: Colors.green),
   ];
-  List<Task> tasks = [
-    Task(
-        name: 'Users Story',
-        description:
-            'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce id velit vel mauris feugiat convallis et ac lorem. Morbi id dignissim neque, id sollicitudin neque. Aliquam tincidunt neque lectus, sed elementum sem venenatis at. Nam hendrerit ligula quis venenatis maximus. Suspendisse potenti.',
-        level: Colors.red,
-        priority: 'HIGH',
-        date: DateTime(2023, 10, 2),
-        currentState: 'Overdue'),
-    Task(
-        name: 'Collects Requirements',
-        description:
-            'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce id velit vel mauris feugiat convallis et ac lorem. Morbi id dignissim neque, id sollicitudin neque. Aliquam tincidunt neque lectus, sed elementum sem venenatis at. Nam hendrerit ligula quis venenatis maximus. Suspendisse potenti.',
-        level: Colors.blue,
-        priority: 'LOW',
-        date: DateTime(2023, 10, 5),
-        currentState: 'Overdue'),
+
+  List<String> allTasks = [
+    'Task A01',
+    'Task B02',
+    'Task B01',
   ];
 
   @override
@@ -259,208 +251,130 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                 ),
                 SizedBox(height: 5),
                 Divider(),
-                SizedBox(height: 5),
-                Row(children: [
-                  Icon(
-                    Icons.sentiment_dissatisfied,
-                    color: Colors.redAccent,
+                ExpansionTile(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.zero,
                   ),
-                  SizedBox(width: 10),
-                  Text(
-                    'OVERDUE TASKS (2)',
-                    style: TextStyle(fontFamily: 'MontMed'),
-                  )
-                ]),
-                SizedBox(height: 10),
-                Container(
-                  height: 220 * tasks.length.toDouble(),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  initiallyExpanded: true,
+                  title: Row(
                     children: [
-                      Expanded(
-                        child: ListView.separated(
-                          shrinkWrap: true,
-                          itemCount: tasks.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            final task = tasks[index];
-                            String message =
-                                DateFormat('yyyy-MM-dd').format(task.date);
-                            message += ' (' +
-                                calculateDeadlineStatus(
-                                    task.date, DateTime.now()) +
-                                ')';
-                            return Container(
-                              padding: EdgeInsets.all(20),
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: Colors.grey,
-                                  width: 1.0,
-                                ),
-                                borderRadius: BorderRadius.circular(
-                                    5.0), // Set the border radius
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  ListTile(
-                                    leading: CircleAvatar(
-                                      child: Icon(
-                                        Icons.layers,
-                                        color: Colors.black,
-                                      ),
-                                    ),
-                                    title: Text('Task name: ',
-                                        style: TextStyle(
-                                            fontFamily: 'MontMed',
-                                            fontSize: 12,
-                                            color: Colors.black54)),
-                                    subtitle: Text(task.name,
-                                        style: TextStyle(
-                                            fontFamily: 'MontMed',
-                                            fontSize: 14)),
-                                  ),
-                                  Divider(),
-                                  Text(
-                                    task.description.length > 50
-                                        ? '${task.description.substring(0, 50)}...'
-                                        : task.description,
-                                    style: TextStyle(
-                                        fontFamily: 'MontMed', fontSize: 12),
-                                    overflow: TextOverflow.ellipsis,
-                                    maxLines: 2,
-                                  ),
-                                  SizedBox(height: 10),
-                                  Row(
-                                    children: [
-                                      Container(
-                                          width: 15,
-                                          height: 15,
-                                          color: task.level),
-                                      SizedBox(width: 10),
-                                      Text('${task.priority} PRIORITY',
-                                          style: TextStyle(
-                                            fontFamily: 'MontMed',
-                                            color: task.level,
-                                          ))
-                                    ],
-                                  ),
-                                  SizedBox(height: 10),
-                                  Text(
-                                    'Deadline: ${message}',
-                                    style: TextStyle(
-                                        fontFamily: 'MontMed', fontSize: 12),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                          separatorBuilder: (BuildContext context, int index) =>
-                              const SizedBox(height: 10),
-                        ),
-                      ),
+                      Icon(Icons.sim_card_alert_outlined, color: Colors.red,),
+                      SizedBox(width: 10),
+                      Text('Overdue Tasks (3)', style: TextStyle(fontFamily: 'MontMed', fontSize: 13)),
                     ],
                   ),
-                ),
-                SizedBox(height: 10),
-                Row(children: [
-                  Icon(
-                    Icons.sentiment_neutral,
-                    color: Colors.orange,
+                  trailing: Icon(
+                    _customTileExpanded0
+                        ? Icons.arrow_drop_down_circle
+                        : Icons.arrow_drop_down,
                   ),
-                  SizedBox(width: 10),
-                  Text('RECENT TASKS (2)',
-                      style: TextStyle(fontFamily: 'MontMed'))
-                ]),
-                SizedBox(height: 10),
-                Container(
-                  height: 215 * tasks.length.toDouble(),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: ListView.separated(
-                          shrinkWrap: true,
-                          itemCount: tasks.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            final task = tasks[index];
-                            String message =
-                                DateFormat('yyyy-MM-dd').format(task.date);
-                            message += ' (' +
-                                calculateDeadlineStatus(
-                                    task.date, DateTime.now()) +
-                                ')';
-                            return Container(
-                              padding: EdgeInsets.all(20),
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: Colors.grey,
-                                  width: 1.0,
+                  children: [
+                    Divider(),
+                    Container(
+                      child: Column(
+                        children: allTasks.map((project) {
+                          return ListTile(
+                            leading: const CircleAvatar(
+                                child: Icon(
+                                    Icons.layers,
+                                    color: Colors.blue
+                                )
+                            ),
+                            title: Text('Task Name: ${project}', maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: 'MontMed', fontSize: 13)),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(Icons.folder_open_sharp, size: 13,),
+                                    SizedBox(width: 5),
+                                    Text('Project:...', style: TextStyle(fontFamily: 'MontMed', fontSize: 12))
+                                  ],
                                 ),
-                                borderRadius: BorderRadius.circular(
-                                    5.0), // Set the border radius
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  ListTile(
-                                    leading: CircleAvatar(
-                                      child: Icon(
-                                        Icons.layers,
-                                        color: Colors.black,
-                                      ),
-                                    ),
-                                    title: Text('Task name: ',
-                                        style: TextStyle(
-                                            fontFamily: 'MontMed',
-                                            fontSize: 12,
-                                            color: Colors.black54)),
-                                    subtitle: Text(task.name,
-                                        style: TextStyle(
-                                            fontFamily: 'MontMed',
-                                            fontSize: 14)),
-                                  ),
-                                  Divider(),
-                                  Text(
-                                    task.description.length > 50
-                                        ? '${task.description.substring(0, 50)}...'
-                                        : task.description,
-                                    style: TextStyle(
-                                        fontFamily: 'MontMed', fontSize: 12),
-                                    overflow: TextOverflow.ellipsis,
-                                    maxLines: 2,
-                                  ),
-                                  SizedBox(height: 10),
-                                  Row(
-                                    children: [
-                                      Container(
-                                          width: 15,
-                                          height: 15,
-                                          color: task.level),
-                                      SizedBox(width: 10),
-                                      Text('${task.priority} PRIORITY',
-                                          style: TextStyle(
-                                            fontFamily: 'MontMed',
-                                            color: task.level,
-                                          ))
-                                    ],
-                                  ),
-                                  SizedBox(height: 10),
-                                  Text(
-                                    'Deadline: ${message}',
-                                    style: TextStyle(
-                                        fontFamily: 'MontMed', fontSize: 12),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                          separatorBuilder: (BuildContext context, int index) =>
-                              const SizedBox(height: 10),
-                        ),
+                              ],
+                            ),
+                            trailing: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text('Priority: ', style: TextStyle(fontFamily: 'MontMed', fontSize: 12)),
+                                Text('HIGH', style: TextStyle(fontFamily: 'MontMed', fontSize: 13, color: Colors.red))
+                              ],
+                            ),
+                          );
+                        }).toList(),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
+                  onExpansionChanged: (bool expanded) {
+                    setState(() {
+                      _customTileExpanded0 = expanded;
+                    });
+                  },
                 ),
+                Divider(),
+                ExpansionTile(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.zero,
+                  ),
+                  initiallyExpanded: true,
+                  title: Container(
+                    child: Row(
+                      children: [
+                        Icon(Icons.task_outlined, color: Colors.blue,),
+                        SizedBox(width: 10),
+                        Text('Recent Tasks (3)', style: TextStyle(fontFamily: 'MontMed', fontSize: 13)),
+                      ],
+                    ),
+                  ),
+                  trailing: Icon(
+                    _customTileExpanded1
+                        ? Icons.arrow_drop_down_circle
+                        : Icons.arrow_drop_down,
+                  ),
+                  children: [
+                    Divider(),
+                    Container(
+                      child: Column(
+                        children: allTasks.map((project) {
+                          return ListTile(
+                            leading: const CircleAvatar(
+                                child: Icon(
+                                    Icons.layers,
+                                    color: Colors.blue
+                                )
+                            ),
+                            title: Text('Task Name: ${project}', maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: 'MontMed', fontSize: 13)),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(Icons.folder_open_sharp, size: 13,),
+                                    SizedBox(width: 5),
+                                    Text('Project:...', style: TextStyle(fontFamily: 'MontMed', fontSize: 12))
+                                  ],
+                                ),
+                              ],
+                            ),
+                            trailing: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text('Priority: ', style: TextStyle(fontFamily: 'MontMed', fontSize: 12)),
+                                Text('HIGH', style: TextStyle(fontFamily: 'MontMed', fontSize: 13, color: Colors.red))
+                              ],
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                  ],
+                  onExpansionChanged: (bool expanded) {
+                    setState(() {
+                      _customTileExpanded1 = expanded;
+                    });
+                  },
+                ),
+                Divider(),
                 SizedBox(height: 5),
                 Container(
                   child: Container(
@@ -515,7 +429,8 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                 ),
               ],
             ),
-          ));
+          )
+    );
   }
 }
 
