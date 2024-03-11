@@ -141,10 +141,11 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
                         ),
                         const SizedBox(width: 10),
                         Container(
-                          height: 50,
-                          child: ElevatedButton(
-                              onPressed: () {},
-                              child: const Icon(Icons.search_rounded)),
+                            height: 50,
+                            child: IconButton(
+                              onPressed: (){},
+                              icon: Icon(Icons.search),
+                            )
                         ),
                       ],
                     ),
