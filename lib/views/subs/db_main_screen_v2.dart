@@ -110,10 +110,11 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                         ),
                         const SizedBox(width: 10),
                         Container(
-                          height: 50,
-                          child: ElevatedButton(
-                              onPressed: () {},
-                              child: Icon(Icons.search_rounded)),
+                            height: 50,
+                            child: IconButton(
+                              onPressed: (){},
+                              icon: Icon(Icons.search),
+                            )
                         ),
                       ],
                     ),
@@ -126,12 +127,8 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                     Expanded(
                       child: Container(
                           decoration: BoxDecoration(
-                            border: Border.all(
-                              color: Colors.grey,
-                              width: 1.0,
-                            ),
-                            borderRadius: BorderRadius.circular(
-                                5.0), // Set the border radius
+                            color: Colors.indigo[50],
+                            borderRadius: BorderRadius.circular(5.0),  // Set the border radius
                           ),
                           child: Padding(
                             padding: EdgeInsets.all(15),
@@ -142,7 +139,8 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                                 Row(
                                   children: <Widget>[
                                     IconButton(
-                                      onPressed: () {},
+                                      onPressed: (){
+                                      },
                                       icon: Icon(
                                         Icons.layers,
                                         color: Colors.blueAccent,
@@ -166,27 +164,20 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                                 Divider(),
                                 Row(
                                   children: <Widget>[
-                                    Text(
-                                      '4 Task in Progress',
-                                      style: TextStyle(
-                                          fontSize: 12, fontFamily: 'MontMed'),
-                                    )
+                                    Text('4 Task in Progress', style: TextStyle(fontSize: 12, fontFamily: 'MontMed'),)
                                   ],
                                 ),
                               ],
                             ),
-                          )),
+                          )
+                      ),
                     ),
                     SizedBox(width: 10),
                     Expanded(
                       child: Container(
                         decoration: BoxDecoration(
-                          border: Border.all(
-                            color: Colors.grey,
-                            width: 1.0,
-                          ),
-                          borderRadius: BorderRadius.circular(
-                              5.0), // Set the border radius
+                          color: Colors.deepOrange[50],
+                          borderRadius: BorderRadius.circular(5.0),  // Set the border radius
                         ),
                         //height: 125,
                         child: Padding(
@@ -198,13 +189,13 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                               Row(
                                 children: <Widget>[
                                   IconButton(
-                                    onPressed: () {
+                                    onPressed: (){
                                       Navigator.of(context).push(
                                         MaterialPageRoute(
                                           builder: (context) {
                                             return ListOfProjectScreen(
                                               currentUserModel:
-                                                  currentUserModel,
+                                              currentUserModel,
                                               projectMap: projectMap,
                                               taskMap: taskMap,
                                             );
@@ -227,7 +218,8 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                                       'PROJECTS',
                                       style: TextStyle(
                                           fontFamily: 'MontMed',
-                                          fontWeight: FontWeight.w900),
+                                          fontWeight: FontWeight.w900
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -236,9 +228,8 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                               Row(
                                 children: <Widget>[
                                   Text(
-                                    '${projectServices.getJoinedProjectNumber(projectMap, currentUserModel!.userId)} Project(s) Joined',
-                                    style: TextStyle(
-                                        fontSize: 12, fontFamily: 'MontMed'),
+                                    '${projectServices.getJoinedProjectNumber(projectMap, currentUserModel!.userId)} Project(s) Joined'
+                                    , style: TextStyle(fontSize: 12, fontFamily: 'MontMed'),
                                   )
                                 ],
                               ),
@@ -249,142 +240,151 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                     ),
                   ],
                 ),
-                SizedBox(height: 5),
-                Divider(),
-                ExpansionTile(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.zero,
+                SizedBox(height: 10),
+                Container(
+                  padding: EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.indigo[50],
+                    borderRadius: BorderRadius.circular(5.0),  // Set the border radius
                   ),
-                  initiallyExpanded: true,
-                  title: Row(
-                    children: [
-                      Icon(Icons.sim_card_alert_outlined, color: Colors.red,),
-                      SizedBox(width: 10),
-                      Text('Overdue Tasks (3)', style: TextStyle(fontFamily: 'MontMed', fontSize: 13)),
-                    ],
-                  ),
-                  trailing: Icon(
-                    _customTileExpanded0
-                        ? Icons.arrow_drop_down_circle
-                        : Icons.arrow_drop_down,
-                  ),
-                  children: [
-                    Divider(),
-                    Container(
-                      child: Column(
-                        children: allTasks.map((project) {
-                          return ListTile(
-                            leading: const CircleAvatar(
-                                child: Icon(
-                                    Icons.layers,
-                                    color: Colors.blue
-                                )
-                            ),
-                            title: Text('Task Name: ${project}', maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: 'MontMed', fontSize: 13)),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Icon(Icons.folder_open_sharp, size: 13,),
-                                    SizedBox(width: 5),
-                                    Text('Project:...', style: TextStyle(fontFamily: 'MontMed', fontSize: 12))
-                                  ],
-                                ),
-                              ],
-                            ),
-                            trailing: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text('Priority: ', style: TextStyle(fontFamily: 'MontMed', fontSize: 12)),
-                                Text('HIGH', style: TextStyle(fontFamily: 'MontMed', fontSize: 13, color: Colors.red))
-                              ],
-                            ),
-                          );
-                        }).toList(),
-                      ),
+                  child: ExpansionTile(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.zero,
                     ),
-                  ],
-                  onExpansionChanged: (bool expanded) {
-                    setState(() {
-                      _customTileExpanded0 = expanded;
-                    });
-                  },
-                ),
-                Divider(),
-                ExpansionTile(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.zero,
-                  ),
-                  initiallyExpanded: true,
-                  title: Container(
-                    child: Row(
+                    initiallyExpanded: true,
+                    title: Row(
                       children: [
-                        Icon(Icons.task_outlined, color: Colors.blue,),
+                        Icon(Icons.sim_card_alert_outlined, color: Colors.red,),
                         SizedBox(width: 10),
-                        Text('Recent Tasks (3)', style: TextStyle(fontFamily: 'MontMed', fontSize: 13)),
+                        Text('Overdue Tasks (3)', style: TextStyle(fontFamily: 'MontMed', fontSize: 13)),
                       ],
                     ),
+                    trailing: Icon(
+                      _customTileExpanded0
+                          ? Icons.arrow_drop_down_circle
+                          : Icons.arrow_drop_down,
+                    ),
+                    children: [
+                      Divider(),
+                      Container(
+
+                        child: Column(
+                          children: allTasks.map((project) {
+                            return ListTile(
+                              leading: const CircleAvatar(
+                                  child: Icon(
+                                      Icons.layers,
+                                      color: Colors.blue
+                                  )
+                              ),
+                              title: Text('Task Name: ${project}', maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: 'MontMed', fontSize: 13)),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Icon(Icons.folder_open_sharp, size: 13,),
+                                      SizedBox(width: 5),
+                                      Text('Project:...', style: TextStyle(fontFamily: 'MontMed', fontSize: 12))
+                                    ],
+                                  ),
+                                ],
+                              ),
+                              trailing: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text('Priority: ', style: TextStyle(fontFamily: 'MontMed', fontSize: 12)),
+                                  Text('HIGH', style: TextStyle(fontFamily: 'MontMed', fontSize: 13, color: Colors.red))
+                                ],
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                    ],
+                    onExpansionChanged: (bool expanded) {
+                      setState(() {
+                        _customTileExpanded0 = expanded;
+                      });
+                    },
                   ),
-                  trailing: Icon(
-                    _customTileExpanded1
-                        ? Icons.arrow_drop_down_circle
-                        : Icons.arrow_drop_down,
+                ),
+                SizedBox(height: 10),
+                Container(
+                  padding: EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.indigo[50],
+                    borderRadius: BorderRadius.circular(5.0),  // Set the border radius
                   ),
-                  children: [
-                    Divider(),
-                    Container(
-                      child: Column(
-                        children: allTasks.map((project) {
-                          return ListTile(
-                            leading: const CircleAvatar(
-                                child: Icon(
-                                    Icons.layers,
-                                    color: Colors.blue
-                                )
-                            ),
-                            title: Text('Task Name: ${project}', maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: 'MontMed', fontSize: 13)),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Icon(Icons.folder_open_sharp, size: 13,),
-                                    SizedBox(width: 5),
-                                    Text('Project:...', style: TextStyle(fontFamily: 'MontMed', fontSize: 12))
-                                  ],
-                                ),
-                              ],
-                            ),
-                            trailing: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text('Priority: ', style: TextStyle(fontFamily: 'MontMed', fontSize: 12)),
-                                Text('HIGH', style: TextStyle(fontFamily: 'MontMed', fontSize: 13, color: Colors.red))
-                              ],
-                            ),
-                          );
-                        }).toList(),
+                  child: ExpansionTile(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.zero,
+                    ),
+                    initiallyExpanded: true,
+                    title: Container(
+                      child: Row(
+                        children: [
+                          Icon(Icons.task_outlined, color: Colors.blue,),
+                          SizedBox(width: 10),
+                          Text('Recent Tasks (3)', style: TextStyle(fontFamily: 'MontMed', fontSize: 13)),
+                        ],
                       ),
                     ),
-                  ],
-                  onExpansionChanged: (bool expanded) {
-                    setState(() {
-                      _customTileExpanded1 = expanded;
-                    });
-                  },
+                    trailing: Icon(
+                      _customTileExpanded1
+                          ? Icons.arrow_drop_down_circle
+                          : Icons.arrow_drop_down,
+                    ),
+                    children: [
+                      Divider(),
+                      Container(
+                        child: Column(
+                          children: allTasks.map((project) {
+                            return ListTile(
+                              leading: const CircleAvatar(
+                                  child: Icon(
+                                      Icons.layers,
+                                      color: Colors.blue
+                                  )
+                              ),
+                              title: Text('Task Name: ${project}', maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: 'MontMed', fontSize: 13)),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Icon(Icons.folder_open_sharp, size: 13,),
+                                      SizedBox(width: 5),
+                                      Text('Project:...', style: TextStyle(fontFamily: 'MontMed', fontSize: 12))
+                                    ],
+                                  ),
+                                ],
+                              ),
+                              trailing: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text('Priority: ', style: TextStyle(fontFamily: 'MontMed', fontSize: 12)),
+                                  Text('HIGH', style: TextStyle(fontFamily: 'MontMed', fontSize: 13, color: Colors.red))
+                                ],
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                    ],
+                    onExpansionChanged: (bool expanded) {
+                      setState(() {
+                        _customTileExpanded1 = expanded;
+                      });
+                    },
+                  ),
                 ),
-                Divider(),
-                SizedBox(height: 5),
+                SizedBox(height: 10),
                 Container(
+                  color: Colors.orange[50],
                   child: Container(
                     decoration: BoxDecoration(
-                      border: Border.all(
-                        color: Colors.grey,
-                        width: 1.0,
-                      ),
-                      borderRadius:
-                          BorderRadius.circular(5.0), // Set the border radius
+                      borderRadius: BorderRadius.circular(5.0),  // Set the border radius
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,

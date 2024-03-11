@@ -157,45 +157,43 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
                     Expanded(
                       child: Container(
                           decoration: BoxDecoration(
-                            border: Border.all(
-                              color: Colors.grey,
-                              width: 1.0,
-                            ),
-                            borderRadius: BorderRadius.circular(
-                                5.0), // Set the border radius
+                            color: Colors.indigo[50],
+                            borderRadius: BorderRadius.circular(5.0),  // Set the border radius
                           ),
                           child: Padding(
-                            padding: const EdgeInsets.all(15),
+                            padding: EdgeInsets.all(15),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: <Widget>[
-                                const SizedBox(height: 5),
+                                SizedBox(height: 5),
                                 Row(
                                   children: <Widget>[
                                     IconButton(
-                                      onPressed: () {
+                                      onPressed: (){
                                         Navigator.of(context).push(
                                             MaterialPageRoute(
                                                 builder: (context) {
-                                          return ListOfTaskScreen(
-                                            userModel: currentUserModel!,
-                                            projectMap: projectMap,
-                                            taskMap: taskMap,
-                                          );
-                                        }));
+                                                  return ListOfTaskScreen(
+                                                    userModel: currentUserModel!,
+                                                    projectMap: projectMap,
+                                                    taskMap: taskMap,
+                                                  );
+                                                },
+                                            ),
+                                        );
                                       },
-                                      icon: const Icon(
+                                      icon: Icon(
                                         Icons.layers,
                                         color: Colors.blueAccent,
                                       ),
                                     ),
                                   ],
                                 ),
-                                const SizedBox(height: 5),
+                                SizedBox(height: 5),
                                 Row(
                                   children: <Widget>[
                                     Container(
-                                      child: const Text(
+                                      child: Text(
                                         'TASKS',
                                         style: TextStyle(
                                             fontFamily: 'MontMed',
@@ -204,48 +202,44 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
                                     ),
                                   ],
                                 ),
-                                const Divider(),
+                                Divider(),
                                 Row(
                                   children: <Widget>[
                                     Text(
                                       '${TaskService().getJoinedTaskNumber(taskMap, currentUserModel!.userId)} on going',
-                                      style: const TextStyle(
-                                          fontSize: 12, fontFamily: 'MontMed'),
+                                      style: TextStyle(fontSize: 12, fontFamily: 'MontMed'),
                                     )
                                   ],
                                 ),
                               ],
                             ),
-                          )),
+                          )
+                      ),
                     ),
-                    const SizedBox(width: 10),
+                    SizedBox(width: 10),
                     Expanded(
                       child: Container(
                         decoration: BoxDecoration(
-                          border: Border.all(
-                            color: Colors.grey,
-                            width: 1.0,
-                          ),
-                          borderRadius: BorderRadius.circular(
-                              5.0), // Set the border radius
+                          color: Colors.deepOrange[50],
+                          borderRadius: BorderRadius.circular(5.0),  // Set the border radius
                         ),
                         //height: 125,
                         child: Padding(
-                          padding: const EdgeInsets.all(15),
+                          padding: EdgeInsets.all(15),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
-                              const SizedBox(height: 5),
+                              SizedBox(height: 5),
                               Row(
                                 children: <Widget>[
                                   IconButton(
-                                    onPressed: () {
+                                    onPressed: (){
                                       Navigator.of(context).push(
                                         MaterialPageRoute(
                                           builder: (context) {
                                             return ListOfProjectScreen(
                                               currentUserModel:
-                                                  currentUserModel,
+                                              currentUserModel,
                                               projectMap: projectMap,
                                               taskMap: taskMap,
                                             );
@@ -253,18 +247,18 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
                                         ),
                                       );
                                     },
-                                    icon: const Icon(
+                                    icon: Icon(
                                       Icons.folder,
                                       color: Colors.deepOrangeAccent,
                                     ),
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 5),
+                              SizedBox(height: 5),
                               Row(
                                 children: <Widget>[
                                   Container(
-                                    child: const Text(
+                                    child: Text(
                                       'PROJECTS',
                                       style: TextStyle(
                                           fontFamily: 'MontMed',
@@ -273,13 +267,12 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
                                   ),
                                 ],
                               ),
-                              const Divider(),
+                              Divider(),
                               Row(
                                 children: <Widget>[
                                   Text(
                                     '${joinedProjects.length.toString()} on going',
-                                    style: const TextStyle(
-                                        fontSize: 12, fontFamily: 'MontMed'),
+                                    style: TextStyle(fontSize: 12, fontFamily: 'MontMed'),
                                   )
                                 ],
                               ),
@@ -291,268 +284,196 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
                   ],
                 ),
                 const SizedBox(height: 10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Expanded(
-                      child: Container(
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: Colors.grey,
-                              width: 1.0,
-                            ),
-                            borderRadius: BorderRadius.circular(
-                                5.0), // Set the border radius
+                Container(
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          padding: EdgeInsets.all(15),
+                          color: Colors.indigo[50],
+                          child: Row(
+                            children: [
+                              Icon(Icons.playlist_remove_rounded, size: 30, color: Colors.redAccent),
+                              SizedBox(width: 10),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('Overdue Tasks: ', style: TextStyle(fontFamily: 'MontMed', fontSize: 11)),
+                                  Text(
+                                      '${taskService.getOverdouTaskNumber(taskMap, currentUserModel!.userId)} Task(s)'
+                                      , style: TextStyle(fontFamily: 'MontMed'
+                                      )
+                                  )
+                                ],
+                              ),
+                            ],
                           ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(15),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: <Widget>[
-                                const SizedBox(height: 5),
-                                Row(
-                                  children: <Widget>[
-                                    Container(
-                                      child: const Icon(
-                                        Icons.mood_bad,
-                                        color: Colors.red,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 10),
-                                    const Text(
-                                      'CAUTION',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontFamily: 'MontMed',
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 5),
-                                const Divider(),
-                                Row(
-                                  children: <Widget>[
-                                    TextButton(
-                                      onPressed: () {
-                                        // Add the action you want to perform when the TextButton is pressed
-                                      },
-                                      child: Text(
-                                        '${taskService.getOverdouTaskNumber(taskMap, currentUserModel!.userId)} Task(s) Overdue',
-                                        style: const TextStyle(
-                                          fontFamily: 'MontMed',
-                                          fontWeight: FontWeight.normal,
-                                          color: Colors.black,
-                                          fontSize: 12,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const Divider(),
-                                Row(
-                                  children: <Widget>[
-                                    TextButton(
-                                      onPressed: () {
-                                        // Add the action you want to perform when the TextButton is pressed
-                                      },
-                                      child: Text(
-                                        '$overdouProjectNumber Project(s) Overdue',
-                                        style: const TextStyle(
-                                          fontFamily: 'MontMed',
-                                          fontWeight: FontWeight.normal,
-                                          color: Colors.black,
-                                          fontSize: 12,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          )),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Expanded(
-                      child: Container(
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: Colors.grey,
-                              width: 1.0,
-                            ),
-                            borderRadius: BorderRadius.circular(
-                                5.0), // Set the border radius
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(15),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: <Widget>[
-                                const SizedBox(height: 5),
-                                Row(
-                                  children: <Widget>[
-                                    Container(
-                                      child: const Icon(
-                                        Icons.mood,
-                                        color: Colors.green,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 10),
-                                    const Text(
-                                      'FINALIZED',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontFamily: 'MontMed',
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 5),
-                                const Divider(),
-                                Row(
-                                  children: <Widget>[
-                                    TextButton(
-                                      onPressed: () {
-                                        // Add the action you want to perform when the TextButton is pressed
-                                      },
-                                      child: Text(
-                                        '${taskService.getCompleteTaskNumber(taskMap, currentUserModel!.userId)} Task(s) Finalized',
-                                        style: const TextStyle(
-                                          fontFamily: 'MontMed',
-                                          fontWeight: FontWeight.normal,
-                                          color: Colors.black,
-                                          fontSize: 12,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const Divider(),
-                                Row(
-                                  children: <Widget>[
-                                    TextButton(
-                                      onPressed: () {
-                                        // Add the action you want to perform when the TextButton is pressed
-                                      },
-                                      child: Text(
-                                        '${projectServices.getCompleteProjectNumber(projectMap, currentUserModel!.userId)} Project(s) Finalized',
-                                        style: const TextStyle(
-                                          fontFamily: 'MontMed',
-                                          fontWeight: FontWeight.normal,
-                                          color: Colors.black,
-                                          fontSize: 12,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          )),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: Colors.grey,
-                            width: 1.0,
-                          ),
-                          borderRadius: BorderRadius.circular(
-                              5.0), // Set the border radius
                         ),
-                        height: 200,
-                        child: const Dashboard_chart(),
                       ),
-                    ),
-                    const SizedBox(width: 12),
-                    Container(
-                      width: 150,
-                      height: 200,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const SizedBox(height: 45),
-                          const Text(
-                            'THIS WEEK TASKS',
-                            style: TextStyle(
-                              fontFamily: 'MontMed',
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 15),
-                          Row(
+                      SizedBox(width: 10),
+                      Expanded(
+                        child: Container(
+                          padding: EdgeInsets.all(15),
+                          color: Colors.deepOrange[50],
+                          child: Row(
                             children: [
-                              Container(
-                                width: 14,
-                                height: 14,
-                                color: Colors.redAccent,
-                              ),
-                              const SizedBox(width: 10),
-                              const Text(
-                                'Overdue',
-                                style: TextStyle(
-                                    fontFamily: 'MontMed', fontSize: 12),
+                              Icon(Icons.rule_folder_sharp, size: 30, color: Colors.redAccent),
+                              SizedBox(width: 10),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('Overdue Project: ', style: TextStyle(fontFamily: 'MontMed', fontSize: 11)),
+                                  Text('$overdouProjectNumber Project(s)', style: TextStyle(fontFamily: 'MontMed'))
+                                ],
                               ),
                             ],
                           ),
-                          const SizedBox(height: 10),
-                          Row(
-                            children: [
-                              Container(
-                                width: 14,
-                                height: 14,
-                                color: Colors.blueAccent,
-                              ),
-                              const SizedBox(width: 10),
-                              const Text(
-                                'In Progress',
-                                style: TextStyle(
-                                    fontFamily: 'MontMed', fontSize: 12),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 10),
-                          Row(
-                            children: [
-                              Container(
-                                width: 14,
-                                height: 14,
-                                color: Colors.green,
-                              ),
-                              const SizedBox(width: 10),
-                              const Text(
-                                'Done',
-                                style: TextStyle(
-                                    fontFamily: 'MontMed', fontSize: 12),
-                              ),
-                            ],
-                          ),
-                        ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
+                ),
+                SizedBox(height: 10),
+                Container(
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          padding: EdgeInsets.all(15),
+                          color: Colors.indigo[50],
+                          child: Row(
+                            children: [
+                              Icon(Icons.layers, size: 30, color: Colors.blueAccent),
+                              SizedBox(width: 10),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('Finalized Tasks: ', style: TextStyle(fontFamily: 'MontMed', fontSize: 11)),
+                                  Text(
+                                      '${taskService.getCompleteTaskNumber(taskMap, currentUserModel!.userId)} Task(s)'
+                                      ,style: TextStyle(fontFamily: 'MontMed')
+                                  )
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 10),
+                      Expanded(
+                        child: Container(
+                          padding: EdgeInsets.all(15),
+                          color: Colors.deepOrange[50],
+                          child: Row(
+                            children: [
+                              Icon(Icons.folder_special, size: 30, color: Colors.green),
+                              SizedBox(width: 10),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('Finalized Project: ', style: TextStyle(fontFamily: 'MontMed', fontSize: 11)),
+                                  Text(
+                                      '${projectServices.getCompleteProjectNumber(projectMap, currentUserModel!.userId)} Project(s)'
+                                      ,style: TextStyle(fontFamily: 'MontMed')
+                                  )
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 10),
                 Container(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: Colors.grey,
-                        width: 1.0,
+                  padding: EdgeInsets.all(5),
+                  color: Colors.green[50],
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(5.0),  // Set the border radius
+                          ),
+                          height: 200,
+                          child: const Dashboard_chart(),
+                        ),
                       ),
-                      borderRadius:
-                          BorderRadius.circular(5.0), // Set the border radius
-                    ),
+                      const SizedBox(width: 12),
+                      Container(
+                        width: 150,
+                        height: 200,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(height: 45),
+                            const Text(
+                              'THIS WEEK TASKS',
+                              style: TextStyle(
+                                fontFamily: 'MontMed',
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 15),
+                            Row(
+                              children: [
+                                Container(
+                                  width: 14,
+                                  height: 14,
+                                  color: Colors.redAccent,
+                                ),
+                                const SizedBox(width: 10),
+                                const Text(
+                                  'Overdue',
+                                  style: TextStyle(
+                                      fontFamily: 'MontMed', fontSize: 12),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 10),
+                            Row(
+                              children: [
+                                Container(
+                                  width: 14,
+                                  height: 14,
+                                  color: Colors.blueAccent,
+                                ),
+                                const SizedBox(width: 10),
+                                const Text(
+                                  'In Progress',
+                                  style: TextStyle(
+                                      fontFamily: 'MontMed', fontSize: 12),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 10),
+                            Row(
+                              children: [
+                                Container(
+                                  width: 14,
+                                  height: 14,
+                                  color: Colors.green,
+                                ),
+                                const SizedBox(width: 10),
+                                const Text(
+                                  'Done',
+                                  style: TextStyle(
+                                      fontFamily: 'MontMed', fontSize: 12),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Container(
+                  color: Colors.orange[50],
+                  child: Container(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -599,7 +520,8 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
                 ),
               ],
             ),
-          ));
+          )
+    );
   }
 
   DateTime? stringToDateTime(
