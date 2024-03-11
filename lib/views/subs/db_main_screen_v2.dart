@@ -381,7 +381,7 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                 ),
                 SizedBox(height: 10),
                 Container(
-                  color: Colors.orange[50],
+                  color: Colors.deepOrange[50],
                   child: Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(5.0),  // Set the border radius

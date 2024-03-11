@@ -472,7 +472,7 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
                 ),
                 const SizedBox(height: 10),
                 Container(
-                  color: Colors.orange[50],
+                  color: Colors.deepOrange[50],
                   child: Container(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
