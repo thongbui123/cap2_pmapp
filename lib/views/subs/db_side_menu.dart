@@ -40,11 +40,38 @@ class db_side_menu extends StatelessWidget {
               // Handle menu item tap
             },
           ),
-          ListTile(
-            leading: const Icon(Icons.notifications, color: Colors.white),
-            onTap: () {
-              // Handle menu item tap
-            },
+          Stack(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.notifications, color: Colors.white),
+                onTap: () {
+                  // Handle menu item tap
+                },
+              ),
+              Positioned(
+                bottom: 0,
+                right: 20,
+                child: Container(
+                  padding: EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: Colors.red,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  constraints: BoxConstraints(
+                    minWidth: 15,
+                    minHeight: 15,
+                  ),
+                  child: Text(
+                    '2',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+            ],
           ),
           ListTile(
             leading: const Icon(Icons.settings, color: Colors.white),
