@@ -44,13 +44,25 @@ class TaskService {
     }
   }
 
-  List<TaskModel> getJoinedTaskList(
+  List<TaskModel> getJoinedTaskListFromProject(
       Map<dynamic, dynamic> taskMap, String memberId, String projectId) {
     List<TaskModel> listAllTasks = [];
     for (var task in taskMap.values) {
       TaskModel taskModel = TaskModel.fromMap(Map<String, dynamic>.from(task));
       if (taskModel.taskMembers.contains(memberId) &&
           taskModel.projectId == projectId) {
+        listAllTasks.add(taskModel);
+      }
+    }
+    return listAllTasks;
+  }
+
+  List<TaskModel> getJoinedTaskListFromUser(
+      Map<dynamic, dynamic> taskMap, String memberId) {
+    List<TaskModel> listAllTasks = [];
+    for (var task in taskMap.values) {
+      TaskModel taskModel = TaskModel.fromMap(Map<String, dynamic>.from(task));
+      if (taskModel.taskMembers.contains(memberId)) {
         listAllTasks.add(taskModel);
       }
     }
@@ -99,8 +111,24 @@ class TaskService {
       TaskModel taskModel = TaskModel.fromMap(Map<String, dynamic>.from(task));
       DateTime now = DateTime.now();
       DateTime endDate = DateTime.parse(taskModel.taskEndDate);
-      if (taskModel.taskMembers.contains(id) && endDate.isAfter(now)) {
-        listOverdou.add(taskModel);
+      if (taskModel.taskMembers.contains(id) && endDate.isBefore(now)) {
+        if (taskModel.taskStatus == 'Incomplete') {
+          listOverdou.add(taskModel);
+        }
+      }
+    }
+    return listOverdou;
+  }
+
+  List<TaskModel> getCompleteTaskList(
+      Map<dynamic, dynamic> taskMap, String id) {
+    List<TaskModel> listOverdou = [];
+    for (var task in taskMap.values) {
+      TaskModel taskModel = TaskModel.fromMap(Map<String, dynamic>.from(task));
+      if (taskModel.taskMembers.contains(id)) {
+        if (taskModel.taskStatus == 'Complete') {
+          listOverdou.add(taskModel);
+        }
       }
     }
     return listOverdou;
@@ -129,5 +157,23 @@ class TaskService {
       }
     }
     return count;
+  }
+
+  Future<void> updateTaskList(
+      String projectId, String phraseId, List<String> listTasks) async {
+    DatabaseReference taskRef = FirebaseDatabase.instance.ref().child('tasks');
+    taskRef.child(projectId).child(phraseId).update({
+      'listTasks': listTasks,
+    });
+    Fluttertoast.showToast(
+        msg: 'Phrase task list has been updated successfully');
+  }
+
+  Future<void> updateTaskSubmit(String taskId) async {
+    DatabaseReference taskRef = FirebaseDatabase.instance.ref().child('tasks');
+    taskRef.child(taskId).update({
+      'taskStatus': 'Complete',
+    });
+    Fluttertoast.showToast(msg: 'This task has been submited successfully');
   }
 }

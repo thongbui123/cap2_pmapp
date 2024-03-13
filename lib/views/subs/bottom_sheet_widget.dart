@@ -302,16 +302,6 @@ class _StatefulBottomSheetWidgetState extends State<StatefulBottomSheetWidget> {
                   allStaff.add(member);
                 });
                 Navigator.of(context).pop();
-                // Navigator.of(context).pushReplacement(
-                //   MaterialPageRoute(
-                //     builder: (context) => projectDetailScreen(
-                //       projectModel: projectModel,
-                //       userMap: userMap,
-                //       projectMap: projectMap,
-                //       phraseMap: phraseMap,
-                //     ),
-                //   ),
-                // );
               },
             ),
             TextButton(

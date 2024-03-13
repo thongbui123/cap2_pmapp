@@ -13,6 +13,7 @@ import 'package:capstone2_project_management_app/views/stats/stats.dart';
 import 'package:capstone2_project_management_app/views/subs/db_side_menu.dart';
 import 'package:capstone2_project_management_app/views/subs/sub_widgets.dart';
 import 'package:capstone2_project_management_app/views/task_create_screen.dart';
+import 'package:capstone2_project_management_app/views/task_detail_screen.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -61,7 +62,7 @@ class _ListOfTaskScreenState extends State<ListOfTaskScreen> {
         ? listJoinedProjects.first
         : widget.projectModel;
     taskMap = widget.taskMap;
-    listJoinedTasks = taskService.getJoinedTaskList(
+    listJoinedTasks = taskService.getJoinedTaskListFromProject(
         taskMap, currentUserModel.userId, projectModel!.projectId);
     listOverdueTasks =
         taskService.getOverdouTaskList(taskMap, currentUserModel.userId);
@@ -630,7 +631,7 @@ class _ExpansionTileTasksState extends State<ExpansionTileTasks> {
     taskMap = widget.taskMap;
     currentUserModel = widget.currentUserModel;
     projectModel = widget.projectModel;
-    listJoinedTasks = taskService.getJoinedTaskList(
+    listJoinedTasks = taskService.getJoinedTaskListFromProject(
         taskMap, currentUserModel.userId, projectModel.projectId);
     listOverdueTasks =
         taskService.getOverdouTaskList(taskMap, currentUserModel.userId);
@@ -875,9 +876,38 @@ class _ExpansionTileTasksState extends State<ExpansionTileTasks> {
   }
 
   Column _showTaskList(List<TaskModel> listOfJoinedTasks) {
+    Map<String, dynamic> userMap;
     return Column(
       children: listOfJoinedTasks.map((task) {
         return ListTile(
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) {
+                  return FutureBuilder<Map<String, dynamic>>(
+                    future: UserServices().getUserDataMap(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Expanded(
+                            child: Center(
+                          child: CircularProgressIndicator(),
+                        ));
+                      } else if (snapshot.hasError) {
+                        return Center(child: Text('Error: ${snapshot.error}'));
+                      } else {
+                        userMap = snapshot.data!;
+                        return TaskDetailScreen(
+                          taskModel: task,
+                          userMap: userMap,
+                          taskMap: taskMap,
+                        );
+                      }
+                    },
+                  );
+                },
+              ),
+            );
+          },
           leading:
               const CircleAvatar(child: Icon(Icons.layers, color: Colors.blue)),
           title: Text('Task Name: ${task.taskName}',
