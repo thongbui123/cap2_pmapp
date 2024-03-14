@@ -49,6 +49,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   DatabaseReference? userRef;
   UserModel? currentUserModel;
   final databaseReference = FirebaseDatabase.instance.ref();
+  late Map commentMap;
   @override
   void initState() {
     // TODO: implement initState

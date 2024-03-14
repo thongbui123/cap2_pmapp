@@ -143,10 +143,9 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
                         Container(
                             height: 50,
                             child: IconButton(
-                              onPressed: (){},
+                              onPressed: () {},
                               icon: Icon(Icons.search),
-                            )
-                        ),
+                            )),
                       ],
                     ),
                   ),
@@ -159,7 +158,8 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
                       child: Container(
                           decoration: BoxDecoration(
                             color: Colors.indigo[50],
-                            borderRadius: BorderRadius.circular(5.0),  // Set the border radius
+                            borderRadius: BorderRadius.circular(
+                                5.0), // Set the border radius
                           ),
                           child: Padding(
                             padding: EdgeInsets.all(15),
@@ -170,17 +170,17 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
                                 Row(
                                   children: <Widget>[
                                     IconButton(
-                                      onPressed: (){
+                                      onPressed: () {
                                         Navigator.of(context).push(
-                                            MaterialPageRoute(
-                                                builder: (context) {
-                                                  return ListOfTaskScreen(
-                                                    userModel: currentUserModel!,
-                                                    projectMap: projectMap,
-                                                    taskMap: taskMap,
-                                                  );
-                                                },
-                                            ),
+                                          MaterialPageRoute(
+                                            builder: (context) {
+                                              return ListOfTaskScreen(
+                                                userModel: currentUserModel!,
+                                                projectMap: projectMap,
+                                                taskMap: taskMap,
+                                              );
+                                            },
+                                          ),
                                         );
                                       },
                                       icon: Icon(
@@ -208,21 +208,22 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
                                   children: <Widget>[
                                     Text(
                                       '${TaskService().getJoinedTaskNumber(taskMap, currentUserModel!.userId)} on going',
-                                      style: TextStyle(fontSize: 12, fontFamily: 'MontMed'),
+                                      style: TextStyle(
+                                          fontSize: 12, fontFamily: 'MontMed'),
                                     )
                                   ],
                                 ),
                               ],
                             ),
-                          )
-                      ),
+                          )),
                     ),
                     SizedBox(width: 10),
                     Expanded(
                       child: Container(
                         decoration: BoxDecoration(
                           color: Colors.deepOrange[50],
-                          borderRadius: BorderRadius.circular(5.0),  // Set the border radius
+                          borderRadius: BorderRadius.circular(
+                              5.0), // Set the border radius
                         ),
                         //height: 125,
                         child: Padding(
@@ -234,13 +235,13 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
                               Row(
                                 children: <Widget>[
                                   IconButton(
-                                    onPressed: (){
+                                    onPressed: () {
                                       Navigator.of(context).push(
                                         MaterialPageRoute(
                                           builder: (context) {
                                             return ListOfProjectScreen(
                                               currentUserModel:
-                                              currentUserModel,
+                                                  currentUserModel,
                                               projectMap: projectMap,
                                               taskMap: taskMap,
                                             );
@@ -273,7 +274,8 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
                                 children: <Widget>[
                                   Text(
                                     '${joinedProjects.length.toString()} on going',
-                                    style: TextStyle(fontSize: 12, fontFamily: 'MontMed'),
+                                    style: TextStyle(
+                                        fontSize: 12, fontFamily: 'MontMed'),
                                   )
                                 ],
                               ),
@@ -294,17 +296,18 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
                           color: Colors.indigo[50],
                           child: Row(
                             children: [
-                              Icon(Icons.playlist_remove_rounded, size: 30, color: Colors.redAccent),
+                              Icon(Icons.playlist_remove_rounded,
+                                  size: 30, color: Colors.redAccent),
                               SizedBox(width: 10),
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text('Overdue Tasks: ', style: TextStyle(fontFamily: 'MontMed', fontSize: 11)),
+                                  Text('Overdue:',
+                                      style: TextStyle(
+                                          fontFamily: 'MontMed', fontSize: 12)),
                                   Text(
-                                      '${taskService.getOverdouTaskNumber(taskMap, currentUserModel!.userId)} Task(s)'
-                                      , style: TextStyle(fontFamily: 'MontMed'
-                                      )
-                                  )
+                                      '${taskService.getOverdouTaskNumber(taskMap, currentUserModel!.userId)} Task(s)',
+                                      style: TextStyle(fontFamily: 'MontMed'))
                                 ],
                               ),
                             ],
@@ -318,13 +321,17 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
                           color: Colors.deepOrange[50],
                           child: Row(
                             children: [
-                              Icon(Icons.rule_folder_sharp, size: 30, color: Colors.redAccent),
+                              Icon(Icons.rule_folder_sharp,
+                                  size: 30, color: Colors.redAccent),
                               SizedBox(width: 10),
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text('Overdue Project: ', style: TextStyle(fontFamily: 'MontMed', fontSize: 11)),
-                                  Text('$overdouProjectNumber Project(s)', style: TextStyle(fontFamily: 'MontMed'))
+                                  Text('Overdue Project: ',
+                                      style: TextStyle(
+                                          fontFamily: 'MontMed', fontSize: 11)),
+                                  Text('$overdouProjectNumber Project(s)',
+                                      style: TextStyle(fontFamily: 'MontMed'))
                                 ],
                               ),
                             ],
@@ -344,16 +351,18 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
                           color: Colors.indigo[50],
                           child: Row(
                             children: [
-                              Icon(Icons.layers, size: 30, color: Colors.blueAccent),
+                              Icon(Icons.layers,
+                                  size: 30, color: Colors.blueAccent),
                               SizedBox(width: 10),
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text('Finalized Tasks: ', style: TextStyle(fontFamily: 'MontMed', fontSize: 11)),
+                                  Text('Finalized Tasks: ',
+                                      style: TextStyle(
+                                          fontFamily: 'MontMed', fontSize: 11)),
                                   Text(
-                                      '${taskService.getCompleteTaskNumber(taskMap, currentUserModel!.userId)} Task(s)'
-                                      ,style: TextStyle(fontFamily: 'MontMed')
-                                  )
+                                      '${taskService.getCompleteTaskNumber(taskMap, currentUserModel!.userId)} Task(s)',
+                                      style: TextStyle(fontFamily: 'MontMed'))
                                 ],
                               ),
                             ],
@@ -367,16 +376,18 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
                           color: Colors.deepOrange[50],
                           child: Row(
                             children: [
-                              Icon(Icons.folder_special, size: 30, color: Colors.green),
+                              Icon(Icons.folder_special,
+                                  size: 30, color: Colors.green),
                               SizedBox(width: 10),
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text('Finalized Project: ', style: TextStyle(fontFamily: 'MontMed', fontSize: 11)),
+                                  Text('Finalized Project: ',
+                                      style: TextStyle(
+                                          fontFamily: 'MontMed', fontSize: 11)),
                                   Text(
-                                      '${projectServices.getCompleteProjectNumber(projectMap, currentUserModel!.userId)} Project(s)'
-                                      ,style: TextStyle(fontFamily: 'MontMed')
-                                  )
+                                      '${projectServices.getCompleteProjectNumber(projectMap, currentUserModel!.userId)} Project(s)',
+                                      style: TextStyle(fontFamily: 'MontMed'))
                                 ],
                               ),
                             ],
@@ -396,7 +407,8 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
                       Expanded(
                         child: Container(
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(5.0),  // Set the border radius
+                            borderRadius: BorderRadius.circular(
+                                5.0), // Set the border radius
                           ),
                           height: 200,
                           child: const Dashboard_chart(),
@@ -521,8 +533,7 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
                 ),
               ],
             ),
-          )
-    );
+          ));
   }
 
   DateTime? stringToDateTime(
