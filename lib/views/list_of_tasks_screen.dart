@@ -4,6 +4,7 @@ import 'package:capstone2_project_management_app/models/phrase_model.dart';
 import 'package:capstone2_project_management_app/models/project_model.dart';
 import 'package:capstone2_project_management_app/models/task_model.dart';
 import 'package:capstone2_project_management_app/models/user_model.dart';
+import 'package:capstone2_project_management_app/services/comment_service.dart';
 import 'package:capstone2_project_management_app/services/phrase_services.dart';
 import 'package:capstone2_project_management_app/services/project_services.dart';
 import 'package:capstone2_project_management_app/services/task_services.dart';
@@ -40,6 +41,7 @@ class _ListOfTaskScreenState extends State<ListOfTaskScreen> {
   late ProjectModel? projectModel;
   late PhraseModel? phraseModel;
   late Map<String, dynamic> userMap;
+  late Map<String, dynamic> commentMap;
   late Map<dynamic, dynamic> projectMap;
   late List<ProjectModel> listJoinedProjects;
   late List<TaskModel> listJoinedTasks;
@@ -118,19 +120,23 @@ class _ListOfTaskScreenState extends State<ListOfTaskScreen> {
               .compareTo(b.value['timestamp'] as int);
         });
         setState(() {
-          phraseMap = Map.fromEntries(sortedEntries.map((entry) {
-            return MapEntry(
-              entry.key,
-              {
-                'timestamp': entry.value['timestamp'],
-                'phraseId': entry.value['phraseId'],
-                'phraseName': entry.value['phraseName'],
-                'listTasks': entry.value['listTasks'],
-                'phraseDescription': entry.value['phraseDescription'],
-                'projectId': entry.value['projectId'],
+          phraseMap = Map.fromEntries(
+            sortedEntries.map(
+              (entry) {
+                return MapEntry(
+                  entry.key,
+                  {
+                    'timestamp': entry.value['timestamp'],
+                    'phraseId': entry.value['phraseId'],
+                    'phraseName': entry.value['phraseName'],
+                    'listTasks': entry.value['listTasks'],
+                    'phraseDescription': entry.value['phraseDescription'],
+                    'projectId': entry.value['projectId'],
+                  },
+                );
               },
-            );
-          }));
+            ),
+          );
           phraseModel = phraseServices.getCurrentPhraseModelFromProject(
               phraseMap, projectModel!.projectId);
         });
@@ -884,8 +890,11 @@ class _ExpansionTileTasksState extends State<ExpansionTileTasks> {
             Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (context) {
-                  return FutureBuilder<Map<String, dynamic>>(
-                    future: UserServices().getUserDataMap(),
+                  return FutureBuilder<List<Map<String, dynamic>>>(
+                    future: Future.wait([
+                      UserServices().getUserDataMap(),
+                      CommentService().getCommentMap()
+                    ]),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const Expanded(
@@ -895,11 +904,13 @@ class _ExpansionTileTasksState extends State<ExpansionTileTasks> {
                       } else if (snapshot.hasError) {
                         return Center(child: Text('Error: ${snapshot.error}'));
                       } else {
-                        userMap = snapshot.data!;
+                        userMap = snapshot.data![0];
+                        commentMap = snapshot.data![1];
                         return TaskDetailScreen(
                           taskModel: task,
                           userMap: userMap,
                           taskMap: taskMap,
+                          commentMap: commentMap,
                         );
                       }
                     },

@@ -4,13 +4,13 @@ import 'dart:convert';
 class CommentModel {
   String commentId;
   String commentContent;
-  String commmentAuthor;
+  String commentAuthor;
   String commentDate;
   String taskId;
   CommentModel({
     required this.commentId,
     required this.commentContent,
-    required this.commmentAuthor,
+    required this.commentAuthor,
     required this.commentDate,
     required this.taskId,
   });
@@ -18,14 +18,14 @@ class CommentModel {
   CommentModel copyWith({
     String? commentId,
     String? commentContent,
-    String? commmentAuthor,
+    String? commentAuthor,
     String? commentDate,
     String? taskId,
   }) {
     return CommentModel(
       commentId: commentId ?? this.commentId,
       commentContent: commentContent ?? this.commentContent,
-      commmentAuthor: commmentAuthor ?? this.commmentAuthor,
+      commentAuthor: commentAuthor ?? this.commentAuthor,
       commentDate: commentDate ?? this.commentDate,
       taskId: taskId ?? this.taskId,
     );
@@ -35,7 +35,7 @@ class CommentModel {
     return <String, dynamic>{
       'commentId': commentId,
       'commentContent': commentContent,
-      'commmentAuthor': commmentAuthor,
+      'commentAuthor': commentAuthor,
       'commentDate': commentDate,
       'taskId': taskId,
     };
@@ -45,7 +45,7 @@ class CommentModel {
     return CommentModel(
       commentId: map['commentId'] as String,
       commentContent: map['commentContent'] as String,
-      commmentAuthor: map['commmentAuthor'] as String,
+      commentAuthor: map['commentAuthor'] as String,
       commentDate: map['commentDate'] as String,
       taskId: map['taskId'] as String,
     );
@@ -58,7 +58,7 @@ class CommentModel {
 
   @override
   String toString() {
-    return 'CommentModel(commentId: $commentId, commentContent: $commentContent, commmentAuthor: $commmentAuthor, commentDate: $commentDate, taskId: $taskId)';
+    return 'CommentModel(commentId: $commentId, commentContent: $commentContent, commentAuthor: $commentAuthor, commentDate: $commentDate, taskId: $taskId)';
   }
 
   @override
@@ -67,7 +67,7 @@ class CommentModel {
 
     return other.commentId == commentId &&
         other.commentContent == commentContent &&
-        other.commmentAuthor == commmentAuthor &&
+        other.commentAuthor == commentAuthor &&
         other.commentDate == commentDate &&
         other.taskId == taskId;
   }
@@ -76,7 +76,7 @@ class CommentModel {
   int get hashCode {
     return commentId.hashCode ^
         commentContent.hashCode ^
-        commmentAuthor.hashCode ^
+        commentAuthor.hashCode ^
         commentDate.hashCode ^
         taskId.hashCode;
   }

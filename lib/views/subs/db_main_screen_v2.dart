@@ -1,12 +1,12 @@
 import 'package:capstone2_project_management_app/models/user_model.dart';
 import 'package:capstone2_project_management_app/services/project_services.dart';
 import 'package:capstone2_project_management_app/views/list_of_project_screen.dart';
+import 'package:capstone2_project_management_app/views/list_of_tasks_screen.dart';
 import 'package:capstone2_project_management_app/views/stats/stats.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 class DashboardMainV2 extends StatefulWidget {
   final UserModel? userModel;
@@ -112,10 +112,9 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                         Container(
                             height: 50,
                             child: IconButton(
-                              onPressed: (){},
+                              onPressed: () {},
                               icon: Icon(Icons.search),
-                            )
-                        ),
+                            )),
                       ],
                     ),
                   ),
@@ -128,7 +127,8 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                       child: Container(
                           decoration: BoxDecoration(
                             color: Colors.indigo[50],
-                            borderRadius: BorderRadius.circular(5.0),  // Set the border radius
+                            borderRadius: BorderRadius.circular(
+                                5.0), // Set the border radius
                           ),
                           child: Padding(
                             padding: EdgeInsets.all(15),
@@ -139,7 +139,18 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                                 Row(
                                   children: <Widget>[
                                     IconButton(
-                                      onPressed: (){
+                                      onPressed: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                ListOfTaskScreen(
+                                                    userModel:
+                                                        currentUserModel!,
+                                                    projectMap: projectMap,
+                                                    taskMap: taskMap),
+                                          ),
+                                        );
                                       },
                                       icon: Icon(
                                         Icons.layers,
@@ -164,20 +175,24 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                                 Divider(),
                                 Row(
                                   children: <Widget>[
-                                    Text('4 Task in Progress', style: TextStyle(fontSize: 12, fontFamily: 'MontMed'),)
+                                    Text(
+                                      '4 Task in Progress',
+                                      style: TextStyle(
+                                          fontSize: 12, fontFamily: 'MontMed'),
+                                    )
                                   ],
                                 ),
                               ],
                             ),
-                          )
-                      ),
+                          )),
                     ),
                     SizedBox(width: 10),
                     Expanded(
                       child: Container(
                         decoration: BoxDecoration(
                           color: Colors.deepOrange[50],
-                          borderRadius: BorderRadius.circular(5.0),  // Set the border radius
+                          borderRadius: BorderRadius.circular(
+                              5.0), // Set the border radius
                         ),
                         //height: 125,
                         child: Padding(
@@ -189,13 +204,13 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                               Row(
                                 children: <Widget>[
                                   IconButton(
-                                    onPressed: (){
+                                    onPressed: () {
                                       Navigator.of(context).push(
                                         MaterialPageRoute(
                                           builder: (context) {
                                             return ListOfProjectScreen(
                                               currentUserModel:
-                                              currentUserModel,
+                                                  currentUserModel,
                                               projectMap: projectMap,
                                               taskMap: taskMap,
                                             );
@@ -218,8 +233,7 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                                       'PROJECTS',
                                       style: TextStyle(
                                           fontFamily: 'MontMed',
-                                          fontWeight: FontWeight.w900
-                                      ),
+                                          fontWeight: FontWeight.w900),
                                     ),
                                   ),
                                 ],
@@ -228,8 +242,9 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                               Row(
                                 children: <Widget>[
                                   Text(
-                                    '${projectServices.getJoinedProjectNumber(projectMap, currentUserModel!.userId)} Project(s) Joined'
-                                    , style: TextStyle(fontSize: 12, fontFamily: 'MontMed'),
+                                    '${projectServices.getJoinedProjectNumber(projectMap, currentUserModel!.userId)} Project(s) Joined',
+                                    style: TextStyle(
+                                        fontSize: 12, fontFamily: 'MontMed'),
                                   )
                                 ],
                               ),
@@ -245,7 +260,8 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                   padding: EdgeInsets.all(10),
                   decoration: BoxDecoration(
                     color: Colors.indigo[50],
-                    borderRadius: BorderRadius.circular(5.0),  // Set the border radius
+                    borderRadius:
+                        BorderRadius.circular(5.0), // Set the border radius
                   ),
                   child: ExpansionTile(
                     shape: RoundedRectangleBorder(
@@ -254,9 +270,14 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                     initiallyExpanded: true,
                     title: Row(
                       children: [
-                        Icon(Icons.sim_card_alert_outlined, color: Colors.red,),
+                        Icon(
+                          Icons.sim_card_alert_outlined,
+                          color: Colors.red,
+                        ),
                         SizedBox(width: 10),
-                        Text('Overdue Tasks (3)', style: TextStyle(fontFamily: 'MontMed', fontSize: 13)),
+                        Text('Overdue Tasks (3)',
+                            style:
+                                TextStyle(fontFamily: 'MontMed', fontSize: 13)),
                       ],
                     ),
                     trailing: Icon(
@@ -267,25 +288,31 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                     children: [
                       Divider(),
                       Container(
-
                         child: Column(
                           children: allTasks.map((project) {
                             return ListTile(
                               leading: const CircleAvatar(
-                                  child: Icon(
-                                      Icons.layers,
-                                      color: Colors.blue
-                                  )
-                              ),
-                              title: Text('Task Name: ${project}', maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: 'MontMed', fontSize: 13)),
+                                  child:
+                                      Icon(Icons.layers, color: Colors.blue)),
+                              title: Text('Task Name: ${project}',
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                      fontFamily: 'MontMed', fontSize: 13)),
                               subtitle: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Row(
                                     children: [
-                                      Icon(Icons.folder_open_sharp, size: 13,),
+                                      Icon(
+                                        Icons.folder_open_sharp,
+                                        size: 13,
+                                      ),
                                       SizedBox(width: 5),
-                                      Text('Project:...', style: TextStyle(fontFamily: 'MontMed', fontSize: 12))
+                                      Text('Project:...',
+                                          style: TextStyle(
+                                              fontFamily: 'MontMed',
+                                              fontSize: 12))
                                     ],
                                   ),
                                 ],
@@ -293,8 +320,14 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                               trailing: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Text('Priority: ', style: TextStyle(fontFamily: 'MontMed', fontSize: 12)),
-                                  Text('HIGH', style: TextStyle(fontFamily: 'MontMed', fontSize: 13, color: Colors.red))
+                                  Text('Priority: ',
+                                      style: TextStyle(
+                                          fontFamily: 'MontMed', fontSize: 12)),
+                                  Text('HIGH',
+                                      style: TextStyle(
+                                          fontFamily: 'MontMed',
+                                          fontSize: 13,
+                                          color: Colors.red))
                                 ],
                               ),
                             );
@@ -314,7 +347,8 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                   padding: EdgeInsets.all(10),
                   decoration: BoxDecoration(
                     color: Colors.indigo[50],
-                    borderRadius: BorderRadius.circular(5.0),  // Set the border radius
+                    borderRadius:
+                        BorderRadius.circular(5.0), // Set the border radius
                   ),
                   child: ExpansionTile(
                     shape: RoundedRectangleBorder(
@@ -324,9 +358,14 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                     title: Container(
                       child: Row(
                         children: [
-                          Icon(Icons.task_outlined, color: Colors.blue,),
+                          Icon(
+                            Icons.task_outlined,
+                            color: Colors.blue,
+                          ),
                           SizedBox(width: 10),
-                          Text('Recent Tasks (3)', style: TextStyle(fontFamily: 'MontMed', fontSize: 13)),
+                          Text('Recent Tasks (3)',
+                              style: TextStyle(
+                                  fontFamily: 'MontMed', fontSize: 13)),
                         ],
                       ),
                     ),
@@ -342,20 +381,27 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                           children: allTasks.map((project) {
                             return ListTile(
                               leading: const CircleAvatar(
-                                  child: Icon(
-                                      Icons.layers,
-                                      color: Colors.blue
-                                  )
-                              ),
-                              title: Text('Task Name: ${project}', maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: 'MontMed', fontSize: 13)),
+                                  child:
+                                      Icon(Icons.layers, color: Colors.blue)),
+                              title: Text('Task Name: ${project}',
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                      fontFamily: 'MontMed', fontSize: 13)),
                               subtitle: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Row(
                                     children: [
-                                      Icon(Icons.folder_open_sharp, size: 13,),
+                                      Icon(
+                                        Icons.folder_open_sharp,
+                                        size: 13,
+                                      ),
                                       SizedBox(width: 5),
-                                      Text('Project:...', style: TextStyle(fontFamily: 'MontMed', fontSize: 12))
+                                      Text('Project:...',
+                                          style: TextStyle(
+                                              fontFamily: 'MontMed',
+                                              fontSize: 12))
                                     ],
                                   ),
                                 ],
@@ -363,8 +409,14 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                               trailing: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Text('Priority: ', style: TextStyle(fontFamily: 'MontMed', fontSize: 12)),
-                                  Text('HIGH', style: TextStyle(fontFamily: 'MontMed', fontSize: 13, color: Colors.red))
+                                  Text('Priority: ',
+                                      style: TextStyle(
+                                          fontFamily: 'MontMed', fontSize: 12)),
+                                  Text('HIGH',
+                                      style: TextStyle(
+                                          fontFamily: 'MontMed',
+                                          fontSize: 13,
+                                          color: Colors.red))
                                 ],
                               ),
                             );
@@ -384,7 +436,8 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                   color: Colors.deepOrange[50],
                   child: Container(
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(5.0),  // Set the border radius
+                      borderRadius:
+                          BorderRadius.circular(5.0), // Set the border radius
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -429,8 +482,7 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                 ),
               ],
             ),
-          )
-    );
+          ));
   }
 }
 

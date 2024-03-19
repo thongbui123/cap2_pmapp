@@ -317,22 +317,28 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
                       SizedBox(width: 10),
                       Expanded(
                         child: Container(
-                          padding: EdgeInsets.all(15),
+                          padding: const EdgeInsets.all(15),
                           color: Colors.deepOrange[50],
                           child: Row(
                             children: [
-                              Icon(Icons.rule_folder_sharp,
+                              const Icon(Icons.rule_folder_sharp,
                                   size: 30, color: Colors.redAccent),
-                              SizedBox(width: 10),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text('Overdue Project: ',
-                                      style: TextStyle(
-                                          fontFamily: 'MontMed', fontSize: 11)),
-                                  Text('$overdouProjectNumber Project(s)',
-                                      style: TextStyle(fontFamily: 'MontMed'))
-                                ],
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text('Overdue:',
+                                        style: TextStyle(
+                                            fontFamily: 'MontMed',
+                                            fontSize: 12)),
+                                    Text('$overdouProjectNumber Project(s)',
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontFamily: 'MontMed',
+                                        ))
+                                  ],
+                                ),
                               ),
                             ],
                           ),
@@ -357,11 +363,12 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text('Finalized Tasks: ',
+                                  Text('Finalized:',
                                       style: TextStyle(
-                                          fontFamily: 'MontMed', fontSize: 11)),
+                                          fontFamily: 'MontMed', fontSize: 12)),
                                   Text(
                                       '${taskService.getCompleteTaskNumber(taskMap, currentUserModel!.userId)} Task(s)',
+                                      overflow: TextOverflow.ellipsis,
                                       style: TextStyle(fontFamily: 'MontMed'))
                                 ],
                               ),
@@ -379,16 +386,20 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
                               Icon(Icons.folder_special,
                                   size: 30, color: Colors.green),
                               SizedBox(width: 10),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text('Finalized Project: ',
-                                      style: TextStyle(
-                                          fontFamily: 'MontMed', fontSize: 11)),
-                                  Text(
-                                      '${projectServices.getCompleteProjectNumber(projectMap, currentUserModel!.userId)} Project(s)',
-                                      style: TextStyle(fontFamily: 'MontMed'))
-                                ],
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text('Finalized:',
+                                        style: TextStyle(
+                                            fontFamily: 'MontMed',
+                                            fontSize: 12)),
+                                    Text(
+                                        '${projectServices.getCompleteProjectNumber(projectMap, currentUserModel!.userId)} Project(s)',
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(fontFamily: 'MontMed'))
+                                  ],
+                                ),
                               ),
                             ],
                           ),

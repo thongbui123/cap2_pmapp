@@ -1,5 +1,7 @@
+import 'package:capstone2_project_management_app/models/comment_model.dart';
 import 'package:capstone2_project_management_app/models/task_model.dart';
 import 'package:capstone2_project_management_app/models/user_model.dart';
+import 'package:capstone2_project_management_app/services/comment_service.dart';
 import 'package:capstone2_project_management_app/services/task_services.dart';
 import 'package:capstone2_project_management_app/services/user_services.dart';
 import 'package:capstone2_project_management_app/views/stats/stats.dart';
@@ -14,11 +16,13 @@ class TaskDetailScreen extends StatefulWidget {
   final Map<String, dynamic> userMap;
   final TaskModel taskModel;
   final Map taskMap;
+  final Map commentMap;
   const TaskDetailScreen(
       {super.key,
       required this.taskModel,
       required this.userMap,
-      required this.taskMap});
+      required this.taskMap,
+      required this.commentMap});
 
   @override
   State<TaskDetailScreen> createState() => _TaskDetailScreenState();
@@ -41,15 +45,17 @@ List<String> comments = [
   'KEKW I always want to get the hell outa here'
 ];
 
+Map commentMap = {};
+
 class _TaskDetailScreenState extends State<TaskDetailScreen> {
   late TaskModel taskModel;
   late Map<String, dynamic> userMap;
   late Map taskMap;
+  late Map commentMap;
   User? user;
   DatabaseReference? userRef;
   UserModel? currentUserModel;
   final databaseReference = FirebaseDatabase.instance.ref();
-  late Map commentMap;
   @override
   void initState() {
     // TODO: implement initState
@@ -57,6 +63,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
     taskModel = widget.taskModel;
     userMap = widget.userMap;
     taskMap = widget.taskMap;
+    commentMap = widget.commentMap;
     user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       userRef = databaseReference.child('users').child(user!.uid);
@@ -240,14 +247,15 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                               fontFamily: 'MontMed',
                               fontSize: 12,
                               color: Colors.black54)),
-                      subtitle: Text('4 comments ',
+                      subtitle: Text(
+                          '${CommentService().getListAllCommentLength(commentMap, taskModel.taskId)} comment(s) ',
                           style:
                               TextStyle(fontFamily: 'MontMed', fontSize: 14)),
                       trailing: TextButton(
                           onPressed: () {
-                            _showStateBottomSheet2(context);
+                            _showStateCommentSheet(context, commentMap);
                           },
-                          child: Text('View All ',
+                          child: const Text('View All ',
                               style: TextStyle(
                                   fontFamily: 'MontMed', fontSize: 14))),
                     ),
@@ -402,11 +410,15 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
     );
   }
 
-  void _showStateBottomSheet2(BuildContext context) {
+  void _showStateCommentSheet(BuildContext context, Map commentMap) async {
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
-        return StatefulBottomSheetWidget2();
+        return StatefulCommentSheetWidget(
+          userMap: userMap,
+          taskId: taskModel.taskId,
+          commentMap: commentMap,
+        );
       },
     );
   }
@@ -621,43 +633,67 @@ class _StatefulBottomSheetWidgetState extends State<StatefulBottomSheetWidget> {
   }
 }
 
-class StatefulBottomSheetWidget2 extends StatefulWidget {
+class StatefulCommentSheetWidget extends StatefulWidget {
+  final Map<String, dynamic> userMap;
+  final String taskId;
+  final Map commentMap;
+  const StatefulCommentSheetWidget(
+      {super.key,
+      required this.userMap,
+      required this.taskId,
+      required this.commentMap});
+
   @override
-  _StatefulBottomSheetWidget2State createState() =>
-      _StatefulBottomSheetWidget2State();
+  _StatefulCommentSheetWidgetState createState() =>
+      _StatefulCommentSheetWidgetState();
 }
 
-class _StatefulBottomSheetWidget2State
-    extends State<StatefulBottomSheetWidget2> {
+class _StatefulCommentSheetWidgetState
+    extends State<StatefulCommentSheetWidget> {
+  User? user;
+  late Map<String, dynamic> userMap;
+  late Map commentMap;
+  late String taskId;
+  var commentController = TextEditingController();
+  List<CommentModel> listComments = [];
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    userMap = widget.userMap;
+    taskId = widget.taskId;
+    commentMap = widget.commentMap;
+    listComments = CommentService().getListAllComments(commentMap, taskId);
+    user = FirebaseAuth.instance.currentUser;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.fromLTRB(10, 0, 10, 10),
       child: Column(
         children: [
-          SizedBox(height: 20),
-          Row(
+          const SizedBox(height: 20),
+          const Row(
             children: [
               SizedBox(width: 25),
               Text('Comments:',
                   style: TextStyle(fontFamily: 'MontMed', fontSize: 16)),
             ],
           ),
-          SizedBox(height: 5),
-          Divider(),
-          Row(
-            children: [],
-          ),
+          const SizedBox(height: 5),
+          const Divider(),
           ListTile(
-              leading: CircleAvatar(child: Icon(Icons.person)),
+              leading: avatar(userMap, user!.uid),
               title: TextField(
-                style: TextStyle(
+                controller: commentController,
+                style: const TextStyle(
                   color: Colors.black,
                   fontFamily: 'MontMed',
                   fontWeight: FontWeight.normal,
                   fontSize: 12,
                 ),
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   enabledBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Color(0xFFD9D9D9)),
                   ),
@@ -676,8 +712,15 @@ class _StatefulBottomSheetWidget2State
                 ),
               ),
               trailing: IconButton(
-                onPressed: () {},
-                icon: Icon(Icons.send),
+                onPressed: () async {
+                  if (commentController.text != "") {
+                    await addComment();
+                    setState(() {
+                      commentController.text = "";
+                    });
+                  }
+                },
+                icon: const Icon(Icons.send),
               )),
           Divider(),
           Expanded(
@@ -686,26 +729,24 @@ class _StatefulBottomSheetWidget2State
               children: ListTile.divideTiles(
                 context:
                     context, // Make sure to provide the BuildContext if this code is inside a widget build method
-                tiles: comments.map((comment) {
+                tiles: listComments.map((comment) {
                   return ListTile(
-                      leading: const CircleAvatar(
-                        child: Icon(
-                          Icons.person,
-                        ),
-                      ),
-                      title: Text('Name',
+                      leading: avatar(userMap, comment.commentAuthor),
+                      title: Text(
+                          UserServices()
+                              .getNameFromId(userMap, comment.commentAuthor),
                           style: TextStyle(
                               fontFamily: 'MontMed',
                               fontSize: 12,
                               fontWeight: FontWeight.bold)),
                       subtitle: Text(
-                        comment,
+                        comment.commentContent,
                         style: const TextStyle(
                             fontFamily: 'MontMed',
                             fontSize: 13,
                             color: Colors.black),
                       ),
-                      trailing: Text('2024-10-20 | 7:00',
+                      trailing: Text('${comment.commentDate}',
                           style: TextStyle(fontFamily: 'MontMed')));
                 }),
               ).toList(),
@@ -714,6 +755,43 @@ class _StatefulBottomSheetWidget2State
         ],
       ),
     );
+  }
+
+  Future<void> addComment() async {
+    CommentService commentService = CommentService();
+    commentService.addComment(commentController.text, taskId);
+    DatabaseEvent commentDatabaseEvent =
+        await commentService.databaseReference.child('comments').once();
+    if (commentDatabaseEvent.snapshot.value != null &&
+        commentDatabaseEvent.snapshot.value is Map) {
+      setState(() {
+        commentMap = Map.from(commentDatabaseEvent.snapshot.value as dynamic);
+        List<MapEntry<dynamic, dynamic>> sortedEntries =
+            commentMap.entries.toList();
+        sortedEntries.sort((a, b) {
+          return (b.value['timestamp'] as int)
+              .compareTo(a.value['timestamp'] as int);
+        });
+        commentMap = Map.fromEntries(
+          sortedEntries.map(
+            (entry) {
+              return MapEntry(
+                entry.key,
+                {
+                  'timestamp': entry.value['timestamp'],
+                  'commentId': entry.value['commentId'],
+                  'commentContent': entry.value['commentContent'],
+                  'commentAuthor': entry.value['commentAuthor'],
+                  'commentDate': entry.value['commentDate'],
+                  'taskId': entry.value['taskId'],
+                },
+              );
+            },
+          ),
+        );
+        listComments = commentService.getListAllComments(commentMap, taskId);
+      });
+    }
   }
 }
 
