@@ -197,24 +197,27 @@ class _ListOfProjectScreenState extends State<ListOfProjectScreen>
                             // Content for Tab 1
                             SingleChildScrollView(
                               child: Column(
-                                children: ListTile.divideTiles(
-                                  context:
-                                      context, // Make sure to provide the BuildContext if this code is inside a widget build method
-                                  tiles: allProjects.map(
-                                    (project) {
-                                      return ListTile(
+                                children: allProjects.map((project) {
+                                    return Card(
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(15.0), // Set the radius here
+                                      ),
+                                      child: ListTile(
                                         onTap: () {
                                           Navigator.of(context).push(
-                                              MaterialPageRoute(
-                                                  builder: (context) {
-                                            return ListOfTaskScreen(
-                                              projectModel: project,
-                                              projectMap: projectMap,
-                                              userModel: userModel!,
-                                              taskMap: taskMap,
-                                            );
-                                          }));
+                                            MaterialPageRoute(
+                                              builder: (context) {
+                                                return ListOfTaskScreen(
+                                                  projectModel: project,
+                                                  projectMap: projectMap,
+                                                  userModel: userModel!,
+                                                  taskMap: taskMap,
+                                                );
+                                              },
+                                            ),
+                                          );
                                         },
+                                        tileColor: Colors.deepOrange[50],
                                         leading: const CircleAvatar(
                                           child: Icon(
                                             Icons.folder,
@@ -222,60 +225,66 @@ class _ListOfProjectScreenState extends State<ListOfProjectScreen>
                                           ),
                                         ),
                                         title: Text(
-                                            project.projectName.toString(),
-                                            style: TextStyle(
-                                                fontFamily: 'MontMed',
-                                                fontSize: 13)),
+                                          project.projectName.toString(),
+                                          style: TextStyle(
+                                            fontFamily: 'MontMed',
+                                            fontSize: 13,
+                                          ),
+                                        ),
                                         subtitle: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
+                                          crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
                                             Text(
                                               'Started Date: ${project.startDate}',
                                               style: const TextStyle(
-                                                  fontFamily: 'MontMed',
-                                                  fontSize: 12),
+                                                fontFamily: 'MontMed',
+                                                fontSize: 12,
+                                              ),
                                             ),
                                             Text(
                                               'Participant(s): ${project.projectMembers.length}',
                                               style: const TextStyle(
-                                                  fontFamily: 'MontMed',
-                                                  fontSize: 12),
+                                                fontFamily: 'MontMed',
+                                                fontSize: 12,
+                                              ),
                                             ),
                                           ],
                                         ),
-                                      );
-                                    },
-                                  ),
+                                      ),
+                                    );
+                                  },
                                 ).toList(),
                               ),
                             ),
                             // Content for Tab 2
                             Container(
                               child: Column(
-                                children: ListTile.divideTiles(
-                                  context:
-                                      context, // Make sure to provide the BuildContext if this code is inside a widget build method
-                                  tiles: allProjects.map((project) {
-                                    return ListTile(
-                                      leading: const CircleAvatar(
-                                        child: Icon(
-                                          Icons.folder,
-                                          color: Colors.orange,
+                                children: allProjects.map((project) {
+                                    return Card(
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(15.0), // Set the radius here
+                                      ),
+                                      child: ListTile(
+                                        leading: const CircleAvatar(
+                                          child: Icon(
+                                            Icons.folder,
+                                            color: Colors.orange,
+                                          ),
+                                        ),
+                                        tileColor: Colors.deepOrange[50],
+                                        title: Text(project.projectId,
+                                            style: TextStyle(
+                                                fontFamily: 'MontMed',
+                                                fontSize: 13)),
+                                        subtitle: Text(
+                                          'Participants: 3',
+                                          style: const TextStyle(
+                                              fontFamily: 'MontMed',
+                                              fontSize: 12),
                                         ),
                                       ),
-                                      title: Text(project.projectId,
-                                          style: TextStyle(
-                                              fontFamily: 'MontMed',
-                                              fontSize: 13)),
-                                      subtitle: Text(
-                                        'Participants: 3',
-                                        style: const TextStyle(
-                                            fontFamily: 'MontMed',
-                                            fontSize: 12),
-                                      ),
                                     );
-                                  }),
+                                  },
                                 ).toList(),
                               ),
                             )

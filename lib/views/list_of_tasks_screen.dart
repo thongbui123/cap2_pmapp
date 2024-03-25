@@ -803,7 +803,6 @@ class _ExpansionTileTasksState extends State<ExpansionTileTasks> {
           },
         ),
         const Divider(),
-        const Divider(),
         ExpansionTile(
           shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.zero,
@@ -900,85 +899,91 @@ class _ExpansionTileTasksState extends State<ExpansionTileTasks> {
     Map<String, dynamic> userMap;
     return Column(
       children: listOfJoinedTasks.map((task) {
-        return ListTile(
-          onTap: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) {
-                  return FutureBuilder<List<Map<String, dynamic>>>(
-                    future: Future.wait([
-                      UserServices().getUserDataMap(),
-                      CommentService().getCommentMap()
-                    ]),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Expanded(
-                            child: Center(
-                          child: CircularProgressIndicator(),
-                        ));
-                      } else if (snapshot.hasError) {
-                        return Center(child: Text('Error: ${snapshot.error}'));
-                      } else {
-                        userMap = snapshot.data![0];
-                        commentMap = snapshot.data![1];
-                        return TaskDetailScreen(
-                          taskModel: task,
-                          userMap: userMap,
-                          taskMap: taskMap,
-                          commentMap: commentMap,
-                        );
-                      }
-                    },
-                  );
-                },
-              ),
-            );
-          },
-          leading:
-              const CircleAvatar(child: Icon(Icons.layers, color: Colors.blue)),
-          title: Text('Task Name: ${task.taskName}',
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontFamily: 'MontMed', fontSize: 13)),
-          subtitle: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  const Icon(
-                    Icons.folder_open_sharp,
-                    size: 13,
-                  ),
-                  const SizedBox(width: 5),
-                  Expanded(
-                    child: Text(
-                        'Project: ${projectServices.getProjectNameFromId(projectMap, task.projectId)}',
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                            fontFamily: 'MontMed', fontSize: 12)),
-                  )
-                ],
-              ),
-            ],
+        return Card(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15.0), // Set the radius here
           ),
-          trailing: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text('Priority: ',
-                  style: TextStyle(fontFamily: 'MontMed', fontSize: 12)),
-              Text(
-                task.taskPriority.toUpperCase(),
-                style: TextStyle(
-                  fontFamily: 'MontMed',
-                  fontSize: 13,
-                  color: task.taskPriority == 'High'
-                      ? Colors.red
-                      : (task.taskPriority == 'Medium'
-                          ? Colors.yellow
-                          : Colors.blueAccent),
+          child: ListTile(
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) {
+                    return FutureBuilder<List<Map<String, dynamic>>>(
+                      future: Future.wait([
+                        UserServices().getUserDataMap(),
+                        CommentService().getCommentMap()
+                      ]),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return const Expanded(
+                              child: Center(
+                                child: CircularProgressIndicator(),
+                              ));
+                        } else if (snapshot.hasError) {
+                          return Center(child: Text('Error: ${snapshot.error}'));
+                        } else {
+                          userMap = snapshot.data![0];
+                          commentMap = snapshot.data![1];
+                          return TaskDetailScreen(
+                            taskModel: task,
+                            userMap: userMap,
+                            taskMap: taskMap,
+                            commentMap: commentMap,
+                          );
+                        }
+                      },
+                    );
+                  },
                 ),
-              ),
-            ],
+              );
+            },
+            tileColor: Colors.blue[50],
+            leading:
+            const CircleAvatar(child: Icon(Icons.layers, color: Colors.blue)),
+            title: Text('Task Name: ${task.taskName}',
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontFamily: 'MontMed', fontSize: 13)),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.folder_open_sharp,
+                      size: 13,
+                    ),
+                    const SizedBox(width: 5),
+                    Expanded(
+                      child: Text(
+                          'Project: ${projectServices.getProjectNameFromId(projectMap, task.projectId)}',
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                              fontFamily: 'MontMed', fontSize: 12)),
+                    )
+                  ],
+                ),
+              ],
+            ),
+            trailing: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text('Priority: ',
+                    style: TextStyle(fontFamily: 'MontMed', fontSize: 12)),
+                Text(
+                  task.taskPriority.toUpperCase(),
+                  style: TextStyle(
+                    fontFamily: 'MontMed',
+                    fontSize: 13,
+                    color: task.taskPriority == 'High'
+                        ? Colors.red
+                        : (task.taskPriority == 'Medium'
+                        ? Colors.yellow
+                        : Colors.blueAccent),
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       }).toList(),
