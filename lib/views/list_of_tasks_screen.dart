@@ -66,8 +66,8 @@ class _ListOfTaskScreenState extends State<ListOfTaskScreen> {
     taskMap = widget.taskMap;
     listJoinedTasks = taskService.getJoinedTaskListFromProject(
         taskMap, currentUserModel.userId, projectModel!.projectId);
-    listOverdueTasks =
-        taskService.getOverdouTaskList(taskMap, currentUserModel.userId);
+    listOverdueTasks = taskService.getOverdouTaskListFromProject(
+        taskMap, currentUserModel.userId, projectModel!.projectId);
     taskLength = taskService.getJoinedTaskNumberFromProject(
         taskMap, currentUserModel.userId, projectModel!.projectId);
     _getPhraseData();
@@ -376,6 +376,21 @@ class _ListOfTaskScreenState extends State<ListOfTaskScreen> {
                       onTap: () {
                         setState(() {
                           projectModel = project;
+                          listJoinedTasks =
+                              taskService.getJoinedTaskListFromProject(
+                                  taskMap,
+                                  currentUserModel.userId,
+                                  projectModel!.projectId);
+                          listOverdueTasks =
+                              taskService.getOverdouTaskListFromProject(
+                                  taskMap,
+                                  currentUserModel.userId,
+                                  projectModel!.projectId);
+                          taskLength =
+                              taskService.getJoinedTaskNumberFromProject(
+                                  taskMap,
+                                  currentUserModel.userId,
+                                  projectModel!.projectId);
                         });
                         Navigator.of(context).pop();
                       },

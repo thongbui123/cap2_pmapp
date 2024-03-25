@@ -1,5 +1,8 @@
+import 'package:capstone2_project_management_app/models/project_model.dart';
+import 'package:capstone2_project_management_app/models/task_model.dart';
 import 'package:capstone2_project_management_app/models/user_model.dart';
 import 'package:capstone2_project_management_app/services/project_services.dart';
+import 'package:capstone2_project_management_app/services/task_services.dart';
 import 'package:capstone2_project_management_app/views/list_of_project_screen.dart';
 import 'package:capstone2_project_management_app/views/list_of_tasks_screen.dart';
 import 'package:capstone2_project_management_app/views/stats/stats.dart';
@@ -29,7 +32,9 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
   ProjectServices projectServices = ProjectServices();
   late Map projectMap;
   late Map taskMap;
-
+  List<ProjectModel> joinedProjects = [];
+  List<TaskModel> overduoTaskList = [];
+  List<TaskModel> joinedTaskList = [];
   bool _customTileExpanded0 = true;
   bool _customTileExpanded1 = true;
 
@@ -50,6 +55,12 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
     currentUserModel = widget.userModel;
     projectMap = widget.projectMap;
     taskMap = widget.taskMap;
+    joinedProjects =
+        ProjectServices().getJoinedProjectList(projectMap, currentUserModel!);
+    overduoTaskList =
+        TaskService().getOverdouTaskList(taskMap, currentUserModel!.userId);
+    joinedTaskList = TaskService()
+        .getJoinedTaskListFromUser(taskMap, currentUserModel!.userId);
   }
 
   @override
@@ -176,7 +187,7 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                                 Row(
                                   children: <Widget>[
                                     Text(
-                                      '4 Task in Progress',
+                                      '${TaskService().getJoinedTaskNumber(taskMap, currentUserModel!.userId)} Task in Progress',
                                       style: TextStyle(
                                           fontSize: 12, fontFamily: 'MontMed'),
                                     )
@@ -275,7 +286,8 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                           color: Colors.red,
                         ),
                         SizedBox(width: 10),
-                        Text('Overdue Tasks (3)',
+                        Text(
+                            'Overdue Tasks (${TaskService().getOverdouTaskNumber(taskMap, currentUserModel!.userId)})',
                             style:
                                 TextStyle(fontFamily: 'MontMed', fontSize: 13)),
                       ],
@@ -289,12 +301,12 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                       Divider(),
                       Container(
                         child: Column(
-                          children: allTasks.map((project) {
+                          children: overduoTaskList.map((task) {
                             return ListTile(
                               leading: const CircleAvatar(
                                   child:
                                       Icon(Icons.layers, color: Colors.blue)),
-                              title: Text('Task Name: ${project}',
+                              title: Text('Task Name: ${task.taskName}',
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
@@ -309,10 +321,14 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                                         size: 13,
                                       ),
                                       SizedBox(width: 5),
-                                      Text('Project:...',
-                                          style: TextStyle(
-                                              fontFamily: 'MontMed',
-                                              fontSize: 12))
+                                      Expanded(
+                                        child: Text(
+                                            'Project: ${projectServices.getProjectNameFromId(projectMap, task.projectId)}',
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                                fontFamily: 'MontMed',
+                                                fontSize: 12)),
+                                      )
                                     ],
                                   ),
                                 ],
@@ -363,7 +379,7 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                             color: Colors.blue,
                           ),
                           SizedBox(width: 10),
-                          Text('Recent Tasks (3)',
+                          Text('Recent Tasks (${joinedTaskList.length})',
                               style: TextStyle(
                                   fontFamily: 'MontMed', fontSize: 13)),
                         ],
@@ -378,12 +394,12 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                       Divider(),
                       Container(
                         child: Column(
-                          children: allTasks.map((project) {
+                          children: joinedTaskList.map((task) {
                             return ListTile(
                               leading: const CircleAvatar(
                                   child:
                                       Icon(Icons.layers, color: Colors.blue)),
-                              title: Text('Task Name: ${project}',
+                              title: Text('Task Name: ${task.taskName}',
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
@@ -398,10 +414,14 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                                         size: 13,
                                       ),
                                       SizedBox(width: 5),
-                                      Text('Project:...',
-                                          style: TextStyle(
-                                              fontFamily: 'MontMed',
-                                              fontSize: 12))
+                                      Expanded(
+                                        child: Text(
+                                            'Project: ${projectServices.getProjectNameFromId(projectMap, task.projectId)}',
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                                fontFamily: 'MontMed',
+                                                fontSize: 12)),
+                                      )
                                     ],
                                   ),
                                 ],
@@ -458,17 +478,17 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                           child: Divider(),
                         ),
                         Column(
-                          children: projects.map((project) {
+                          children: joinedProjects.map((project) {
                             return ListTile(
                               leading: const CircleAvatar(
                                 backgroundColor: Colors.black12,
                                 child: Icon(Icons.folder, color: Colors.orange),
                               ),
-                              title: Text(project.name,
+                              title: Text(project.projectName,
                                   style: TextStyle(
                                       fontFamily: 'MontMed', fontSize: 13)),
                               subtitle: Text(
-                                '2 Participants',
+                                '${project.projectMembers.length.toString()} Participants',
                                 style: const TextStyle(
                                     fontFamily: 'MontMed', fontSize: 12),
                               ),
