@@ -1,5 +1,7 @@
 import 'package:capstone2_project_management_app/views/dashboard_screen.dart';
+import 'package:capstone2_project_management_app/views/notification_screen.dart';
 import 'package:capstone2_project_management_app/views/profile_screen.dart';
+import 'package:capstone2_project_management_app/views/statistics_screen.dart';
 import 'package:capstone2_project_management_app/views/subs/sign_out_dialog.dart';
 import 'package:capstone2_project_management_app/views/team_screen.dart';
 import 'package:flutter/material.dart';
@@ -45,6 +47,12 @@ class db_side_menu extends StatelessWidget {
               ListTile(
                 leading: const Icon(Icons.notifications, color: Colors.white),
                 onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => notification_screen(),
+                    ),
+                  );
                   // Handle menu item tap
                 },
               ),
@@ -74,9 +82,14 @@ class db_side_menu extends StatelessWidget {
             ],
           ),
           ListTile(
-            leading: const Icon(Icons.settings, color: Colors.white),
+            leading: const Icon(Icons.analytics, color: Colors.white),
             onTap: () {
-              // Handle menu item tap
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => statistic_screen(),
+                ),
+              ); // Handle menu item tap
             },
           ),
           ListTile(

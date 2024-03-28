@@ -1,9 +1,12 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:capstone2_project_management_app/models/project_model.dart';
+import 'package:capstone2_project_management_app/models/task_model.dart';
 import 'package:capstone2_project_management_app/models/user_model.dart';
 import 'package:capstone2_project_management_app/services/project_services.dart';
 import 'package:capstone2_project_management_app/services/task_services.dart';
 import 'package:capstone2_project_management_app/views/list_of_project_screen.dart';
 import 'package:capstone2_project_management_app/views/list_of_tasks_screen.dart';
+import 'package:capstone2_project_management_app/views/search_screen.dart';
 import 'package:capstone2_project_management_app/views/stats/stats.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -36,7 +39,7 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
   List<ProjectModel> allProjects = [];
   List<ProjectModel> joinedProjects = [];
   int overdouProjectNumber = 0;
-
+  List<TaskModel> listAllTasks = [];
   Future<void> getProjectMap() async {
     DatabaseEvent databaseEvent =
         await databaseReference.child('projects').once();
@@ -70,6 +73,8 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
     currentUserModel = widget.currentUserModel;
     projectMap = widget.projectMap;
     taskMap = widget.taskMap;
+    listAllTasks = taskService.getTaskListOnlyContainUser(
+        taskMap, currentUserModel!.userId);
     _getData();
     //_getProjectDetails();
   }
@@ -143,7 +148,14 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
                         Container(
                             height: 50,
                             child: IconButton(
-                              onPressed: () {},
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => search_screen(),
+                                  ),
+                                );
+                              },
                               icon: Icon(Icons.search),
                             )),
                       ],
@@ -422,7 +434,9 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
                                 5.0), // Set the border radius
                           ),
                           height: 200,
-                          child: const Dashboard_chart(),
+                          child: Dashboard_chart(
+                            listAllTasks: listAllTasks,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -561,13 +575,50 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
 }
 
 class Dashboard_chart extends StatefulWidget {
-  const Dashboard_chart({Key? key}) : super(key: key);
+  List<TaskModel> listAllTasks;
+  Dashboard_chart({
+    Key? key,
+    required this.listAllTasks,
+  }) : super(key: key);
 
   @override
   State<Dashboard_chart> createState() => _Dashboard_chartState();
 }
 
 class _Dashboard_chartState extends State<Dashboard_chart> {
+  late List<TaskModel> listAllTasks;
+  int totalTasks = 0;
+  int doneTaskNumber = 0;
+  int overdueTaskNumber = 0;
+  int inProgressTaskNumber = 0;
+  double overdueTaskPercentage = 0;
+  double inProgressTaskPercentage = 0;
+  double doneTaskPercentage = 0;
+  @override
+  void initState() {
+    super.initState();
+    listAllTasks = widget.listAllTasks;
+    totalTasks = listAllTasks.length;
+    countTask(listAllTasks);
+    doneTaskPercentage = (doneTaskNumber / totalTasks) * 100;
+    overdueTaskPercentage = (overdueTaskNumber / totalTasks) * 100;
+    inProgressTaskPercentage = (inProgressTaskNumber / totalTasks) * 100;
+  }
+
+  countTask(List<TaskModel> listAllTasks) {
+    for (var task in listAllTasks) {
+      if (task.taskStatus == 'Complete') {
+        doneTaskNumber++;
+      } else {
+        if (task.taskStatus == 'Overdue') {
+          overdueTaskNumber++;
+        } else {
+          inProgressTaskNumber++;
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -578,14 +629,18 @@ class _Dashboard_chartState extends State<Dashboard_chart> {
             centerSpaceRadius: 10,
             sections: [
               PieChartSectionData(
-                  value: 2, color: Colors.green, showTitle: true, radius: 35),
+                  value: double.parse(doneTaskPercentage.toStringAsFixed(1)),
+                  color: Colors.green,
+                  showTitle: true,
+                  radius: 35),
               PieChartSectionData(
-                  value: 5,
+                  value:
+                      double.parse(inProgressTaskPercentage.toStringAsFixed(1)),
                   color: Colors.blueAccent,
                   showTitle: true,
                   radius: 30),
               PieChartSectionData(
-                  value: 3,
+                  value: double.parse(overdueTaskPercentage.toStringAsFixed(1)),
                   color: Colors.redAccent,
                   showTitle: true,
                   radius: 40),

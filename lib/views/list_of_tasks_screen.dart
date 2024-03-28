@@ -65,6 +65,8 @@ class _ListOfTaskScreenState extends State<ListOfTaskScreen> {
         ? listJoinedProjects.first
         : widget.projectModel;
     taskMap = widget.taskMap;
+    listCompleteTasks = taskService.getCompleteTaskListByProject(
+        taskMap, currentUserModel!.userId, projectModel!.projectId);
     listJoinedTasks = taskService.getJoinedTaskListFromProject(
         taskMap, currentUserModel.userId, projectModel!.projectId);
     listOverdueTasks = taskService.getOverdouTaskListFromProject(
@@ -645,6 +647,7 @@ class _ExpansionTileTasksState extends State<ExpansionTileTasks> {
   TaskService taskService = TaskService();
   ProjectServices projectServices = ProjectServices();
   late List<TaskModel> listJoinedTasks;
+  late List<TaskModel> listDoneTasks;
   late List<TaskModel> listOverdueTasks;
   late UserModel currentUserModel;
   late Map taskMap;
@@ -663,10 +666,12 @@ class _ExpansionTileTasksState extends State<ExpansionTileTasks> {
     taskMap = widget.taskMap;
     currentUserModel = widget.currentUserModel;
     projectModel = widget.projectModel;
+    listDoneTasks = taskService.getCompleteTaskListByProject(
+        taskMap, currentUserModel.userId, projectModel.projectId);
     listJoinedTasks = taskService.getJoinedTaskListFromProject(
         taskMap, currentUserModel.userId, projectModel.projectId);
-    listOverdueTasks =
-        taskService.getOverdouTaskList(taskMap, currentUserModel.userId);
+    listOverdueTasks = taskService.getOverdouTaskListFromProject(
+        taskMap, currentUserModel.userId, projectModel.projectId);
     groupEvents = widget.taskCalendarEvents;
     super.initState();
   }
@@ -823,7 +828,7 @@ class _ExpansionTileTasksState extends State<ExpansionTileTasks> {
             children: [
               const Icon(Icons.list_alt),
               const SizedBox(width: 10),
-              Text('Complete Tasks (${listJoinedTasks.length})',
+              Text('Complete Tasks (${listDoneTasks.length})',
                   style: const TextStyle(fontFamily: 'MontMed', fontSize: 13)),
             ],
           ),
@@ -835,7 +840,7 @@ class _ExpansionTileTasksState extends State<ExpansionTileTasks> {
           children: [
             const Divider(),
             Container(
-              child: _showTaskList(listJoinedTasks),
+              child: _showTaskList(listDoneTasks),
             ),
           ],
           onExpansionChanged: (bool expanded) {

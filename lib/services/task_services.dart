@@ -49,8 +49,24 @@ class TaskService {
     List<TaskModel> listAllTasks = [];
     for (var task in taskMap.values) {
       TaskModel taskModel = TaskModel.fromMap(Map<String, dynamic>.from(task));
+      DateTime now = DateTime.now();
+      DateTime endDate = DateTime.parse(taskModel.taskEndDate);
       if (taskModel.taskMembers.contains(memberId) &&
           taskModel.projectId == projectId) {
+        if (taskModel.taskStatus != 'Complete' && now.isBefore(endDate)) {
+          listAllTasks.add(taskModel);
+        }
+      }
+    }
+    return listAllTasks;
+  }
+
+  List<TaskModel> getTaskListOnlyContainUser(
+      Map<dynamic, dynamic> taskMap, String memberId) {
+    List<TaskModel> listAllTasks = [];
+    for (var task in taskMap.values) {
+      TaskModel taskModel = TaskModel.fromMap(Map<String, dynamic>.from(task));
+      if (taskModel.taskMembers.contains(memberId)) {
         listAllTasks.add(taskModel);
       }
     }
@@ -212,5 +228,23 @@ class TaskService {
       'taskStatus': 'Complete',
     });
     Fluttertoast.showToast(msg: 'This task has been submited successfully');
+  }
+
+  Future<void> updateTaskStatusOverdue(String taskId) async {
+    DatabaseReference taskRef =
+        FirebaseDatabase.instance.ref().child('tasks').child(taskId);
+    //String? teamId = teamRef.push().key;
+    await taskRef.update({
+      'taskStatus': 'Overdue',
+    });
+  }
+
+  String updateOverdueOrNot(TaskModel taskModel) {
+    DateTime now = DateTime.now();
+    DateTime endDate = DateTime.parse(taskModel.taskEndDate);
+    if (now.isAfter(endDate)) {
+      taskModel.taskStatus = 'Overdue';
+    }
+    return taskModel.taskStatus;
   }
 }
