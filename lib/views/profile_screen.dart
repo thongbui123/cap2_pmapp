@@ -56,289 +56,204 @@ class _profile_screenState extends State<profile_screen> {
       body: userModel == null
           ? Center(child: loader())
           : SafeArea(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  db_side_menu(),
-                  Expanded(
-                      child: Padding(
-                    padding: EdgeInsets.all(defaultPadding),
-                    child: SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'PROFLE',
-                            style: TextStyle(
-                              fontFamily: 'Anurati',
-                              fontSize: 30,
-                            ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            db_side_menu(),
+            Expanded(
+                child: Padding(
+                  padding: EdgeInsets.all(defaultPadding),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'PROFLE',
+                          style: TextStyle(
+                            fontFamily: 'MontMed',
+                            fontSize: 16,
                           ),
-                          Divider(),
-                          SizedBox(height: 10),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              CircleAvatar(
-                                radius: 70,
-                                backgroundColor: Colors.lightBlue,
-                                child: userModel!.profileImage == ''
-                                    ? Text(
-                                        getFirstLetter(userModel!.userFirstName
-                                            .toString()),
-                                        style: const TextStyle(
-                                            fontFamily: 'Mounted',
-                                            fontSize: 80,
-                                            color: Colors.white),
-                                      )
-                                    : CircleAvatar(
-                                        radius: 66,
-                                        backgroundColor: Colors.white,
-                                        backgroundImage: showLocalFile
-                                            ? FileImage(imageFile!)
-                                                as ImageProvider
-                                            : NetworkImage(
-                                                userModel!.profileImage)),
-                              ),
-                              Container(
-                                width: 10,
-                                height: 2,
+                        ),
+                        Divider(),
+                        SizedBox(height: 10),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            CircleAvatar(
+                              radius: 70,
+                              child: userModel!.profileImage == ''
+                                  ? Text(
+                                getFirstLetter(userModel!.userFirstName
+                                    .toString()),
+                                style: const TextStyle(
+                                    fontFamily: 'Mounted',
+                                    fontSize: 80,
+                                    color: Colors.white),
+                              )
+                                  : CircleAvatar(
+                                  radius: 66,
+                                  backgroundColor: Colors.white,
+                                  backgroundImage: showLocalFile
+                                      ? FileImage(imageFile!)
+                                  as ImageProvider
+                                      : NetworkImage(
+                                      userModel!.profileImage)),
+                            ),
+                            Container(
+                              width: 10,
+                              height: 2,
+                              color: Colors.lightBlue,
+                            ),
+                            Ink(
+                              decoration: const ShapeDecoration(
                                 color: Colors.lightBlue,
+                                shape: CircleBorder(),
                               ),
-                              Ink(
-                                decoration: const ShapeDecoration(
-                                  color: Colors.lightBlue,
-                                  shape: CircleBorder(),
+                              child: IconButton(
+                                icon: const Icon(
+                                  Icons.camera_alt,
+                                  size: 16,
                                 ),
-                                child: IconButton(
-                                  icon: const Icon(
-                                    Icons.camera_alt,
-                                    size: 16,
-                                  ),
-                                  color: Colors.white,
-                                  onPressed: () {
-                                    showModalBottomSheet(
-                                        context: context,
-                                        builder: (context) {
-                                          return Padding(
-                                            padding: const EdgeInsets.all(10),
-                                            child: Column(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                ListTile(
-                                                  leading:
-                                                      const Icon(Icons.image),
-                                                  title: const Text(
-                                                      'From Gallery'),
-                                                  onTap: () {
-                                                    _pickImageFromGallery;
-                                                    Navigator.of(context).pop();
-                                                  },
-                                                ),
-                                                ListTile(
-                                                  leading: const Icon(
-                                                      Icons.camera_alt),
-                                                  title:
-                                                      const Text('From Camera'),
-                                                  onTap: () {
-                                                    _pickImageFromCamera(
-                                                        ImageSource.camera);
-                                                    Navigator.of(context).pop();
-                                                  },
-                                                ),
-                                              ],
-                                            ),
-                                          );
-                                        });
-                                  },
-                                ),
+                                color: Colors.white,
+                                onPressed: () {
+                                  showModalBottomSheet(
+                                      context: context,
+                                      builder: (context) {
+                                        return Padding(
+                                          padding: const EdgeInsets.all(10),
+                                          child: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              ListTile(
+                                                leading:
+                                                const Icon(Icons.image),
+                                                title: const Text(
+                                                    'From Gallery'),
+                                                onTap: () {
+                                                  _pickImageFromGallery;
+                                                  Navigator.of(context).pop();
+                                                },
+                                              ),
+                                              ListTile(
+                                                leading: const Icon(
+                                                    Icons.camera_alt),
+                                                title:
+                                                const Text('From Camera'),
+                                                onTap: () {
+                                                  _pickImageFromCamera(
+                                                      ImageSource.camera);
+                                                  Navigator.of(context).pop();
+                                                },
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      });
+                                },
                               ),
-                            ],
-                          ),
-                          SizedBox(height: 10),
-                          Divider(),
-                          SizedBox(height: 10),
-                          Container(
-                            padding: EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8.0),
-                              color: Color(
-                                  0xFFD9D9D9), // Creates uniformly rounded corners
                             ),
-                            child: Row(
-                              children: [
-                                SizedBox(width: 10),
-                                Icon(
-                                  Icons.person,
-                                  size: 20,
-                                ),
-                                SizedBox(width: 20),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text('Name:',
-                                          style: TextStyle(
-                                              fontFamily: 'MontMed',
-                                              color: Colors.black38)),
-                                      Text(
-                                          '${userModel?.userFirstName} ${userModel?.userLastName}',
-                                          style: TextStyle(
-                                              fontFamily: 'MontMed',
-                                              fontSize: 16)),
-                                    ],
-                                  ),
-                                ),
-                                SizedBox(width: 10),
-                                IconButton(
-                                  onPressed: () {},
-                                  icon: Icon(
-                                    Icons.border_color,
-                                    size: 17,
-                                  ),
-                                ),
-                              ],
+                          ],
+                        ),
+                        SizedBox(height: 10),
+                        Divider(),
+                        ListTile(
+                          leading: CircleAvatar(
+                            child: Icon(Icons.person),
+                          ),
+                          title: Text('Full Name : ', style: TextStyle(fontFamily: 'MontMed', fontSize: 12, color: Colors.black54)),
+                          subtitle: Text('${userModel?.userFirstName} ${userModel?.userLastName}', style: TextStyle(fontFamily: 'MontMed', fontSize: 14)),
+                        ),
+                        Divider(),
+                        ListTile(
+                          leading: CircleAvatar(
+                            child: Icon(Icons.star),
+                          ),
+                          title: Text('User Role : ', style: TextStyle(fontFamily: 'MontMed', fontSize: 12, color: Colors.black54)),
+                          subtitle: Text('Member', style: TextStyle(fontFamily: 'MontMed', fontSize: 14)),
+                          trailing: IconButton(
+                            onPressed: () {},
+                            icon: Icon(
+                              Icons.border_color,
+                              size: 15,
                             ),
                           ),
-                          SizedBox(height: 10),
-                          Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8.0),
-                              color: Color(
-                                  0xFFD9D9D9), // Creates uniformly rounded corners
-                            ),
-                            padding: EdgeInsets.all(10),
-                            child: Row(
-                              children: [
-                                SizedBox(width: 10),
-                                Icon(
-                                  Icons.email,
-                                  size: 20,
-                                ),
-                                SizedBox(width: 20),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text('Email:',
-                                          style: TextStyle(
-                                              fontFamily: 'MontMed',
-                                              color: Colors.black38)),
-                                      Text('${userModel?.userEmail}',
-                                          style: TextStyle(
-                                              fontFamily: 'MontMed',
-                                              fontSize: 16)),
-                                    ],
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 10,
-                                ),
-                                IconButton(
-                                  onPressed: () {},
-                                  icon: Icon(
-                                    Icons.border_color,
-                                    size: 17,
-                                  ),
-                                ),
-                              ],
+                        ),
+                        Divider(),
+                        ListTile(
+                          leading: CircleAvatar(
+                            child: Icon(Icons.mail),
+                          ),
+                          title: Text('Contact Email : ', style: TextStyle(fontFamily: 'MontMed', fontSize: 12, color: Colors.black54)),
+                          subtitle: Text('${userModel?.userEmail}', style: TextStyle(fontFamily: 'MontMed', fontSize: 14)),
+                        ),
+                        Divider(),
+                        ListTile(
+                          leading: CircleAvatar(
+                            child: Icon(Icons.phone),
+                          ),
+                          title: Text('Mobile Number : ', style: TextStyle(fontFamily: 'MontMed', fontSize: 12, color: Colors.black54)),
+                          subtitle: Text('+84 444 131 49', style: TextStyle(fontFamily: 'MontMed', fontSize: 14)),
+                          trailing: IconButton(
+                            onPressed: () {},
+                            icon: Icon(
+                              Icons.border_color,
+                              size: 15,
                             ),
                           ),
-                          SizedBox(height: 10),
-                          Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8.0),
-                              color: Color(0xFFD9D9D9),
-                            ),
-                            padding: EdgeInsets.all(10),
-                            child: Row(
-                              children: [
-                                SizedBox(width: 10),
-                                Icon(
-                                  Icons.phone,
-                                  size: 22,
-                                ),
-                                SizedBox(width: 20),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text('Mobile:',
-                                          style: TextStyle(
-                                              fontFamily: 'MontMed',
-                                              color: Colors.black38)),
-                                      Text('+84 444 131 49',
-                                          style: TextStyle(
-                                              fontFamily: 'MontMed',
-                                              fontSize: 16)),
-                                    ],
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 10,
-                                ),
-                                IconButton(
-                                  onPressed: () {},
-                                  icon: Icon(
-                                    Icons.border_color,
-                                    size: 17,
-                                  ),
-                                ),
-                              ],
+                        ),
+                        Divider(),
+                        ListTile(
+                          title: Text('About yourself : ', style: TextStyle(fontFamily: 'MontMed', fontSize: 12, color: Colors.black54)),
+                          subtitle: Text(
+                              'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla tempus mollis odio, et feugiat sem tincidunt sed. Integer at porttitor massa. Ut ullamcorper eros non orci porta posuere.',
+                              style: TextStyle(fontFamily: 'MontMed', fontSize: 14)),
+                          trailing: IconButton(
+                            onPressed: () {},
+                            icon: Icon(
+                              Icons.border_color,
+                              size: 15,
                             ),
                           ),
-                          SizedBox(height: 10),
-                          Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8.0),
-                              color: Color(
-                                  0xFFD9D9D9), // Creates uniformly rounded corners
-                            ),
-                            padding: EdgeInsets.all(10),
-                            child: Row(
-                              children: [
-                                SizedBox(width: 10),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text('About Yourself:',
-                                          style: TextStyle(
-                                              fontFamily: 'MontMed',
-                                              color: Colors.black38)),
-                                      Divider(),
-                                      Text(
-                                          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla tempus mollis odio, et feugiat sem tincidunt sed. Integer at porttitor massa. Ut ullamcorper eros non orci porta posuere.',
-                                          style: TextStyle(
-                                              fontFamily: 'MontMed',
-                                              fontSize: 16)),
-                                      SizedBox(
-                                        height: 10,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                IconButton(
-                                  onPressed: () {},
-                                  icon: Icon(
-                                    Icons.border_color,
-                                    size: 17,
-                                  ),
-                                ),
-                              ],
+                        ),
+                        Divider(),
+                        ListTile(
+                          leading: CircleAvatar(
+                            child: Icon(Icons.folder),
+                          ),
+                          title: Text('Projects Related : ', style: TextStyle(fontFamily: 'MontMed', fontSize: 12, color: Colors.black54)),
+                          subtitle: Text('3 Projects Participated', style: TextStyle(fontFamily: 'MontMed', fontSize: 14)),
+                          trailing: IconButton(
+                            onPressed: () {},
+                            icon: Icon(
+                              Icons.info,
+                              size: 20,
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                        Divider(),
+                        ListTile(
+                          leading: CircleAvatar(
+                            child: Icon(Icons.layers),
+                          ),
+                          title: Text('Tasks Related : ', style: TextStyle(fontFamily: 'MontMed', fontSize: 12, color: Colors.black54)),
+                          subtitle: Text('12 Tasks Participated', style: TextStyle(fontFamily: 'MontMed', fontSize: 14)),
+                          trailing: IconButton(
+                            onPressed: () {},
+                            icon: Icon(
+                              Icons.info,
+                              size: 20,
+                            ),
+                          ),
+                        ),
+                        Divider(),
+                      ],
                     ),
-                  )),
-                ],
-              ),
+                  ),
+                )
             ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -406,4 +321,81 @@ class _profile_screenState extends State<profile_screen> {
   }
 
   String getFirstLetter(String myString) => myString.substring(0, 1);
+
+  bool member = true;
+  bool leader = false;
+  bool manager = false;
+  void _showStateDrawer(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          // Your bottom drawer content goes here
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              SizedBox(height: 20),
+              Row(
+                children: [
+                  SizedBox(width: 25),
+                  Text('Change Role:', style: TextStyle(fontFamily: 'MontMed', fontSize: 16)),
+                ],
+              ),
+              SizedBox(height: 5),
+              Divider(),
+              ListTile(
+                  leading: Icon(Icons.people),
+                  title: Text('Member', style: TextStyle(fontFamily: 'MontMed', fontSize: 14)),
+                  onTap: () {
+                    member = true;
+                    leader = false;
+                    manager = false;
+                    Navigator.pop(context);
+                  },
+                  trailing: Container(
+                      child: Visibility(
+                        visible: member,
+                        child: Icon(Icons.check),
+                      )
+                  )
+              ),
+              ListTile(
+                  leading: Icon(Icons.person),
+                  title: Text('Incompleted', style: TextStyle(fontFamily: 'MontMed', fontSize: 14)),
+                  onTap: () {
+                    member = false;
+                    leader = true;
+                    manager = false;
+                    Navigator.pop(context);
+                  },
+                  trailing: Container(
+                      child: Visibility(
+                        visible: leader,
+                        child: Icon(Icons.check),
+                      )
+                  )
+              ),
+              ListTile(
+                  leading: Icon(Icons.star),
+                  title: Text('Manager', style: TextStyle(fontFamily: 'MontMed', fontSize: 14)),
+                  onTap: () {
+                    member = false;
+                    leader = false;
+                    manager = true;
+                    Navigator.pop(context);
+                  },
+                  trailing: Container(
+                      child: Visibility(
+                        visible: manager,
+                        child: Icon(Icons.check),
+                      )
+                  )
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 }
