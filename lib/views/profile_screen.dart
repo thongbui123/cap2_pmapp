@@ -211,7 +211,7 @@ class _profile_screenState extends State<profile_screen> {
                             onPressed: () {},
                             icon: Icon(
                               Icons.border_color,
-                              size: 15,
+                              size: 14,
                             ),
                           ),
                         ),
