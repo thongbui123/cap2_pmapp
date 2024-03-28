@@ -115,7 +115,7 @@ class TaskService {
       TaskModel taskModel = TaskModel.fromMap(Map<String, dynamic>.from(task));
       DateTime now = DateTime.now();
       DateTime endDate = DateTime.parse(taskModel.taskEndDate);
-      if (taskModel.taskMembers.contains(id) && endDate.isBefore(now)) {
+      if (taskModel.taskMembers.contains(id) && now.isAfter(endDate)) {
         if (taskModel.taskStatus == 'Incomplete') {
           listOverdou.add(taskModel);
         }
@@ -132,7 +132,7 @@ class TaskService {
       DateTime now = DateTime.now();
       DateTime endDate = DateTime.parse(taskModel.taskEndDate);
       if (taskModel.taskMembers.contains(id) &&
-          endDate.isBefore(now) &&
+          now.isAfter(endDate) &&
           taskModel.projectId == projectId) {
         if (taskModel.taskStatus == 'Incomplete') {
           listOverdou.add(taskModel);
@@ -148,6 +148,21 @@ class TaskService {
     for (var task in taskMap.values) {
       TaskModel taskModel = TaskModel.fromMap(Map<String, dynamic>.from(task));
       if (taskModel.taskMembers.contains(id)) {
+        if (taskModel.taskStatus == 'Complete') {
+          listOverdou.add(taskModel);
+        }
+      }
+    }
+    return listOverdou;
+  }
+
+  List<TaskModel> getCompleteTaskListByProject(
+      Map<dynamic, dynamic> taskMap, String id, String projectId) {
+    List<TaskModel> listOverdou = [];
+    for (var task in taskMap.values) {
+      TaskModel taskModel = TaskModel.fromMap(Map<String, dynamic>.from(task));
+      if (taskModel.taskMembers.contains(id) &&
+          taskModel.projectId == projectId) {
         if (taskModel.taskStatus == 'Complete') {
           listOverdou.add(taskModel);
         }

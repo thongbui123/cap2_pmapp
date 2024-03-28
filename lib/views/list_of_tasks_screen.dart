@@ -45,6 +45,7 @@ class _ListOfTaskScreenState extends State<ListOfTaskScreen> {
   late Map<dynamic, dynamic> projectMap;
   late List<ProjectModel> listJoinedProjects;
   late List<TaskModel> listJoinedTasks;
+  late List<TaskModel> listCompleteTasks;
   late List<TaskModel> listOverdueTasks;
   late Map phraseMap = {};
   late Map taskMap;
@@ -391,8 +392,18 @@ class _ListOfTaskScreenState extends State<ListOfTaskScreen> {
                                   taskMap,
                                   currentUserModel.userId,
                                   projectModel!.projectId);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ListOfTaskScreen(
+                                  userModel: currentUserModel,
+                                  projectMap: projectMap,
+                                  projectModel: projectModel,
+                                  taskMap: taskMap),
+                            ),
+                          );
                         });
-                        Navigator.of(context).pop();
+                        //Navigator.of(context).pop();
                       },
                     ),
                     const Divider(height: 0),
@@ -812,7 +823,7 @@ class _ExpansionTileTasksState extends State<ExpansionTileTasks> {
             children: [
               const Icon(Icons.list_alt),
               const SizedBox(width: 10),
-              Text('All Tasks (${listJoinedTasks.length})',
+              Text('Complete Tasks (${listJoinedTasks.length})',
                   style: const TextStyle(fontFamily: 'MontMed', fontSize: 13)),
             ],
           ),
@@ -914,13 +925,15 @@ class _ExpansionTileTasksState extends State<ExpansionTileTasks> {
                         CommentService().getCommentMap()
                       ]),
                       builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
                           return const Expanded(
                               child: Center(
-                                child: CircularProgressIndicator(),
-                              ));
+                            child: CircularProgressIndicator(),
+                          ));
                         } else if (snapshot.hasError) {
-                          return Center(child: Text('Error: ${snapshot.error}'));
+                          return Center(
+                              child: Text('Error: ${snapshot.error}'));
                         } else {
                           userMap = snapshot.data![0];
                           commentMap = snapshot.data![1];
@@ -938,8 +951,8 @@ class _ExpansionTileTasksState extends State<ExpansionTileTasks> {
               );
             },
             tileColor: Colors.blue[50],
-            leading:
-            const CircleAvatar(child: Icon(Icons.layers, color: Colors.blue)),
+            leading: const CircleAvatar(
+                child: Icon(Icons.layers, color: Colors.blue)),
             title: Text('Task Name: ${task.taskName}',
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
@@ -978,8 +991,8 @@ class _ExpansionTileTasksState extends State<ExpansionTileTasks> {
                     color: task.taskPriority == 'High'
                         ? Colors.red
                         : (task.taskPriority == 'Medium'
-                        ? Colors.yellow
-                        : Colors.blueAccent),
+                            ? Colors.yellow
+                            : Colors.blueAccent),
                   ),
                 ),
               ],
