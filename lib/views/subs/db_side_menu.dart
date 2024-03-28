@@ -45,7 +45,7 @@ class DbSideMenu extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => employee_screen(
+                    builder: (context) => EmployeeScreen(
                       userModel: userModel,
                     ),
                   ),

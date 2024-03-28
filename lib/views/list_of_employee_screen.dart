@@ -1,14 +1,17 @@
 import 'package:capstone2_project_management_app/models/user_model.dart';
 import 'package:capstone2_project_management_app/views/stats/stats.dart';
 import 'package:capstone2_project_management_app/views/subs/db_side_menu.dart';
+import 'package:capstone2_project_management_app/views/subs/sub_widgets.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 
-class employee_screen extends StatefulWidget {
+class EmployeeScreen extends StatefulWidget {
   final UserModel userModel;
-  const employee_screen({Key? key, required this.userModel}) : super(key: key);
+  const EmployeeScreen({Key? key, required this.userModel}) : super(key: key);
 
   @override
-  State<employee_screen> createState() => _employee_screenState();
+  State<EmployeeScreen> createState() => _EmployeeScreenState();
 }
 
 List<String> allMember = [
@@ -31,12 +34,43 @@ bool _customTileExpanded0 = true;
 bool _customTileExpanded1 = true;
 bool _customTileExpanded2 = true;
 
-class _employee_screenState extends State<employee_screen> {
+class _EmployeeScreenState extends State<EmployeeScreen> {
   late UserModel userModel;
+  DatabaseReference? usersRef;
+  Map<String, dynamic> userMap = {};
+  late List<UserModel> listMembers;
+  late List<UserModel> listLeaders;
+  late List<UserModel> listManagers;
   @override
   void initState() {
     super.initState();
     userModel = widget.userModel;
+    if (FirebaseAuth.instance.currentUser != null) {
+      usersRef = FirebaseDatabase.instance.ref().child('users');
+    }
+    _getUserDetails();
+  }
+
+  _getUserDetails() async {
+    //DatabaseEvent snapshot = await usersRef!.once();
+    usersRef?.onValue.listen((event) {
+      setState(() {
+        userMap = Map.from(event.snapshot.value as dynamic);
+        for (var user in userMap.values) {
+          UserModel userModel =
+              UserModel.fromMap(Map<String, dynamic>.from(user));
+          if (userModel.userRole == 'User') {
+            listMembers.add(userModel);
+          } else {
+            if (userModel.userRole == 'Team Leader') {
+              listLeaders.add(userModel);
+            } else {
+              listManagers.add(userModel);
+            }
+          }
+        }
+      });
+    });
   }
 
   @override
@@ -100,12 +134,10 @@ class _employee_screenState extends State<employee_screen> {
                           Divider(),
                           Container(
                             child: Column(
-                              children: allMember.map((project) {
+                              children: listMembers.map((member) {
                                 return ListTile(
-                                  leading: const CircleAvatar(
-                                    child: Text('T'),
-                                  ),
-                                  title: Text('${project}',
+                                  leading: avatar(userMap, member.userId),
+                                  title: Text('${member.userFirstName}',
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
