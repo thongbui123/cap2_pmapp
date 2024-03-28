@@ -1,11 +1,13 @@
+import 'package:capstone2_project_management_app/models/user_model.dart';
 import 'package:capstone2_project_management_app/views/stats/stats.dart';
 import 'package:capstone2_project_management_app/views/subs/db_side_menu.dart';
-import 'package:flutter/material.dart';
-import 'dart:io';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter/material.dart';
 
 class notification_screen extends StatefulWidget {
-  const notification_screen({Key? key}) : super(key: key);
+  final UserModel userModel;
+  const notification_screen({Key? key, required this.userModel})
+      : super(key: key);
 
   @override
   State<notification_screen> createState() => _notification_screenState();
@@ -17,10 +19,11 @@ List<String> allNotice = [
 ];
 
 class _notification_screenState extends State<notification_screen> {
-
+  late UserModel userModel;
   @override
   void initState() {
     super.initState();
+    userModel = widget.userModel;
   }
 
   @override
@@ -30,7 +33,9 @@ class _notification_screenState extends State<notification_screen> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            db_side_menu(),
+            DbSideMenu(
+              userModel: userModel!,
+            ),
             Expanded(
               child: Padding(
                 padding: EdgeInsets.all(defaultPadding),
@@ -53,7 +58,8 @@ class _notification_screenState extends State<notification_screen> {
                       Container(
                         child: Column(
                           children: ListTile.divideTiles(
-                            context: context,  // Make sure to provide the BuildContext if this code is inside a widget build method
+                            context:
+                                context, // Make sure to provide the BuildContext if this code is inside a widget build method
                             tiles: allNotice.map((notice) {
                               return ListTile(
                                 leading: const CircleAvatar(
@@ -62,11 +68,14 @@ class _notification_screenState extends State<notification_screen> {
                                     color: Colors.black87,
                                   ),
                                 ),
-                                onTap: (){ },
-                                title: Text(notice, style: TextStyle(fontFamily: 'MontMed', fontSize: 13)),
+                                onTap: () {},
+                                title: Text(notice,
+                                    style: TextStyle(
+                                        fontFamily: 'MontMed', fontSize: 13)),
                                 subtitle: Text(
                                   '2024-10-20 | 7:00',
-                                  style: const TextStyle(fontFamily: 'MontMed', fontSize: 12),
+                                  style: const TextStyle(
+                                      fontFamily: 'MontMed', fontSize: 12),
                                 ),
                               );
                             }),
@@ -101,14 +110,23 @@ class _Dashboard_chartState extends State<Dashboard_chart> {
         children: [
           Center(
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text("123", style: TextStyle(fontFamily: 'MontMed', fontSize: 18, fontWeight: FontWeight.bold)),
-                  Text("PROJECTS", style: TextStyle(fontFamily: 'MontMed'),),
-                  Text("IN TOTAL", style: TextStyle(fontFamily: 'MontMed'),)
-                ],
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text("123",
+                  style: TextStyle(
+                      fontFamily: 'MontMed',
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold)),
+              Text(
+                "PROJECTS",
+                style: TextStyle(fontFamily: 'MontMed'),
+              ),
+              Text(
+                "IN TOTAL",
+                style: TextStyle(fontFamily: 'MontMed'),
               )
-          ),
+            ],
+          )),
           PieChart(
             PieChartData(
               sectionsSpace: 0,
@@ -121,8 +139,7 @@ class _Dashboard_chartState extends State<Dashboard_chart> {
                     titlePositionPercentageOffset: 1.5,
                     title: '20',
                     titleStyle: TextStyle(fontFamily: 'MontMed'),
-                    radius: 24
-                ),
+                    radius: 24),
                 PieChartSectionData(
                     value: 5,
                     color: Colors.lightBlueAccent,
@@ -130,8 +147,7 @@ class _Dashboard_chartState extends State<Dashboard_chart> {
                     titlePositionPercentageOffset: 1.6,
                     title: '50',
                     titleStyle: TextStyle(fontFamily: 'MontMed'),
-                    radius: 20
-                ),
+                    radius: 20),
                 PieChartSectionData(
                     value: 3,
                     color: Colors.redAccent,
@@ -139,10 +155,10 @@ class _Dashboard_chartState extends State<Dashboard_chart> {
                     titlePositionPercentageOffset: 1.5,
                     title: '30',
                     titleStyle: TextStyle(fontFamily: 'MontMed'),
-                    radius: 28
-                ),
+                    radius: 28),
               ],
-            ),),
+            ),
+          ),
         ],
       ),
     );
@@ -160,7 +176,8 @@ class _YearDropdownState extends State<YearDropdown> {
   @override
   Widget build(BuildContext context) {
     final int currentYear = DateTime.now().year;
-    final List<int> years = List.generate(currentYear - 2022, (index) => currentYear - index);
+    final List<int> years =
+        List.generate(currentYear - 2022, (index) => currentYear - index);
 
     return DropdownButton<int>(
       value: selectedYear,
@@ -175,10 +192,12 @@ class _YearDropdownState extends State<YearDropdown> {
       items: years.map<DropdownMenuItem<int>>((int value) {
         return DropdownMenuItem<int>(
           value: value,
-          child: Text(value.toString(), style: TextStyle(fontFamily: 'MontMed', fontSize: 14),),
+          child: Text(
+            value.toString(),
+            style: TextStyle(fontFamily: 'MontMed', fontSize: 14),
+          ),
         );
       }).toList(),
     );
   }
 }
-

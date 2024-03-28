@@ -101,7 +101,9 @@ class _ListOfProjectScreenState extends State<ListOfProjectScreen>
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            db_side_menu(),
+            DbSideMenu(
+              userModel: userModel!,
+            ),
             Expanded(
               child: Padding(
                 padding: EdgeInsets.all(defaultPadding),
@@ -197,10 +199,12 @@ class _ListOfProjectScreenState extends State<ListOfProjectScreen>
                             // Content for Tab 1
                             SingleChildScrollView(
                               child: Column(
-                                children: allProjects.map((project) {
+                                children: allProjects.map(
+                                  (project) {
                                     return Card(
                                       shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(15.0), // Set the radius here
+                                        borderRadius: BorderRadius.circular(
+                                            15.0), // Set the radius here
                                       ),
                                       child: ListTile(
                                         onTap: () {
@@ -232,7 +236,8 @@ class _ListOfProjectScreenState extends State<ListOfProjectScreen>
                                           ),
                                         ),
                                         subtitle: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
                                             Text(
                                               'Started Date: ${project.startDate}',
@@ -259,10 +264,12 @@ class _ListOfProjectScreenState extends State<ListOfProjectScreen>
                             // Content for Tab 2
                             Container(
                               child: Column(
-                                children: allProjects.map((project) {
+                                children: allProjects.map(
+                                  (project) {
                                     return Card(
                                       shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(15.0), // Set the radius here
+                                        borderRadius: BorderRadius.circular(
+                                            15.0), // Set the radius here
                                       ),
                                       child: ListTile(
                                         leading: const CircleAvatar(

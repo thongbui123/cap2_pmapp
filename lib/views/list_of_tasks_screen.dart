@@ -172,7 +172,9 @@ class _ListOfTaskScreenState extends State<ListOfTaskScreen> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            db_side_menu(),
+            DbSideMenu(
+              userModel: currentUserModel,
+            ),
             Expanded(
                 child: Padding(
                     padding: const EdgeInsets.all(defaultPadding),

@@ -7,6 +7,9 @@ import 'package:flutter/material.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  //FirebaseAuth auth = FirebaseAuth.instance;
+  //auth.signOut();
+  //AuthServices().signOut;
   runApp(const MyApp());
 }
 

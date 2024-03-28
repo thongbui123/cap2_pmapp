@@ -1,12 +1,16 @@
+import 'package:capstone2_project_management_app/models/user_model.dart';
 import 'package:capstone2_project_management_app/views/dashboard_screen.dart';
+import 'package:capstone2_project_management_app/views/list_of_employee_screen.dart';
 import 'package:capstone2_project_management_app/views/notification_screen.dart';
 import 'package:capstone2_project_management_app/views/profile_screen.dart';
 import 'package:capstone2_project_management_app/views/statistics_screen.dart';
 import 'package:capstone2_project_management_app/views/subs/sign_out_dialog.dart';
-import 'package:capstone2_project_management_app/views/team_screen.dart';
 import 'package:flutter/material.dart';
 
-class db_side_menu extends StatelessWidget {
+class DbSideMenu extends StatelessWidget {
+  final UserModel userModel;
+  const DbSideMenu({super.key, required this.userModel});
+
   @override
   Widget build(BuildContext context) {
     return Drawer(
@@ -33,14 +37,22 @@ class db_side_menu extends StatelessWidget {
               // Handle menu item tap
             },
           ),
-          ListTile(
-            leading: const Icon(Icons.group, color: Colors.white),
-            onTap: () {
-              Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-                return const TeamScreen();
-              }));
-              // Handle menu item tap
-            },
+          Visibility(
+            visible: userModel.userRole == 'Admin',
+            child: ListTile(
+              leading: const Icon(Icons.group, color: Colors.white),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => employee_screen(
+                      userModel: userModel,
+                    ),
+                  ),
+                );
+                // Handle menu item tap
+              },
+            ),
           ),
           Stack(
             children: [
@@ -50,7 +62,8 @@ class db_side_menu extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => notification_screen(),
+                      builder: (context) =>
+                          notification_screen(userModel: userModel),
                     ),
                   );
                   // Handle menu item tap
@@ -87,7 +100,7 @@ class db_side_menu extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => statistic_screen(),
+                  builder: (context) => statistic_screen(userModel: userModel),
                 ),
               ); // Handle menu item tap
             },

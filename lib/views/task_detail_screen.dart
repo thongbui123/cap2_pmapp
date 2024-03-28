@@ -120,7 +120,9 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            db_side_menu(),
+            DbSideMenu(
+              userModel: currentUserModel!,
+            ),
             Expanded(
                 child: Padding(
               padding: EdgeInsets.all(defaultPadding),
@@ -827,7 +829,9 @@ class _StatefulBottomSheetWidget3State
                 style: TextStyle(fontFamily: 'MontMed', fontSize: 13)),
             subtitle: Text('Task Completion and Storage',
                 style: TextStyle(fontFamily: 'MontMed', fontSize: 12)),
-            onTap: () {},
+            onTap: () {
+              //TaskService().updateTaskStatusOverdue(taskId)
+            },
           ),
           Divider(),
           ListTile(

@@ -79,7 +79,9 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            db_side_menu(),
+            DbSideMenu(
+              userModel: _userModel,
+            ),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(defaultPadding),

@@ -74,7 +74,9 @@ class _Dashboard_screenState extends State<Dashboard_screen> {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    db_side_menu(),
+                    DbSideMenu(
+                      userModel: userModel!,
+                    ),
                     FutureBuilder<List<Map<String, dynamic>>>(
                       future:
                           Future.wait([_getProjectValues(), _getTaskValues()]),
