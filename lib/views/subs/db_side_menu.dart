@@ -1,11 +1,16 @@
 import 'package:capstone2_project_management_app/models/user_model.dart';
+import 'package:capstone2_project_management_app/services/project_services.dart';
+import 'package:capstone2_project_management_app/services/user_services.dart';
 import 'package:capstone2_project_management_app/views/dashboard_screen.dart';
 import 'package:capstone2_project_management_app/views/list_of_employee_screen.dart';
 import 'package:capstone2_project_management_app/views/notification_screen.dart';
 import 'package:capstone2_project_management_app/views/profile_screen.dart';
 import 'package:capstone2_project_management_app/views/statistics_screen.dart';
 import 'package:capstone2_project_management_app/views/subs/sign_out_dialog.dart';
+import 'package:capstone2_project_management_app/views/subs/sub_widgets.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:rxdart/rxdart.dart';
 
 class DbSideMenu extends StatelessWidget {
   final UserModel userModel;
@@ -45,9 +50,36 @@ class DbSideMenu extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => EmployeeScreen(
-                      userModel: userModel,
-                    ),
+                    builder: (context) => StreamBuilder<List<Object>>(
+                        stream: CombineLatestStream.list([
+                          UserServices().databaseReference.onValue,
+                          ProjectServices().reference.onValue
+                        ]),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return loader();
+                          } else if (snapshot.hasError) {
+                            return Center(
+                              child: Text('Error: ${snapshot.error}'),
+                            );
+                          } else {
+                            var eventUser = snapshot.data![0] as DatabaseEvent;
+                            var eventProject =
+                                snapshot.data![1] as DatabaseEvent;
+                            var dynamicUser =
+                                eventUser.snapshot.value as dynamic;
+                            var dynamicProject =
+                                eventProject.snapshot.value as dynamic;
+                            Map mapUser = Map.from(dynamicUser);
+                            Map mapProject = Map.from(dynamicProject);
+                            return EmployeeScreen(
+                              userModel: userModel,
+                              userMap: mapUser,
+                              projectMap: mapProject,
+                            );
+                          }
+                        }),
                   ),
                 );
                 // Handle menu item tap

@@ -1,21 +1,27 @@
 import 'package:capstone2_project_management_app/services/user_services.dart';
 import 'package:flutter/material.dart';
 
-Widget loader() {
-  return const Column(
-    mainAxisAlignment: MainAxisAlignment.center,
-    children: [
-      CircularProgressIndicator(
-        valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
+ColoredBox loader() {
+  return const ColoredBox(
+    color: Colors.white,
+    child: Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          CircularProgressIndicator(),
+          SizedBox(
+              height: 16), // Space between CircularProgressIndicator and Text
+          Text(
+            'Please Wait...',
+            style: TextStyle(
+                fontSize: 15,
+                fontFamily: 'MontMed',
+                color: Colors.black,
+                decoration: TextDecoration.none),
+          ),
+        ],
       ),
-      SizedBox(
-        height: 10,
-      ),
-      Text(
-        'Please Wait',
-        style: TextStyle(fontFamily: 'MontMed', fontSize: 14),
-      ),
-    ],
+    ),
   );
 }
 

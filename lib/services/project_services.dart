@@ -69,6 +69,18 @@ class ProjectServices {
     return count;
   }
 
+  int getCreateProjectNumber(Map<dynamic, dynamic> projectMap, String id) {
+    int count = 0;
+    for (var project in projectMap.values) {
+      ProjectModel projectModel =
+          ProjectModel.fromMap(Map<String, dynamic>.from(project));
+      if (projectModel.managerId == id) {
+        count++;
+      }
+    }
+    return count;
+  }
+
   int getCompleteProjectNumber(Map<dynamic, dynamic> projectMap, String id) {
     int count = 0;
     for (var project in projectMap.values) {

@@ -1,14 +1,21 @@
 import 'package:capstone2_project_management_app/models/user_model.dart';
+import 'package:capstone2_project_management_app/services/project_services.dart';
 import 'package:capstone2_project_management_app/views/stats/stats.dart';
 import 'package:capstone2_project_management_app/views/subs/db_side_menu.dart';
 import 'package:capstone2_project_management_app/views/subs/sub_widgets.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 
 class EmployeeScreen extends StatefulWidget {
   final UserModel userModel;
-  const EmployeeScreen({Key? key, required this.userModel}) : super(key: key);
+  final Map userMap;
+  final Map projectMap;
+  const EmployeeScreen(
+      {Key? key,
+      required this.userModel,
+      required this.userMap,
+      required this.projectMap})
+      : super(key: key);
 
   @override
   State<EmployeeScreen> createState() => _EmployeeScreenState();
@@ -38,39 +45,35 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
   late UserModel userModel;
   DatabaseReference? usersRef;
   Map<String, dynamic> userMap = {};
-  late List<UserModel> listMembers;
-  late List<UserModel> listLeaders;
-  late List<UserModel> listManagers;
+  Map projectMap = {};
+  List<UserModel> listMembers = [];
+  List<UserModel> listLeaders = [];
+  List<UserModel> listManagers = [];
+
+  _getUserDetails() {
+    widget.userMap.forEach((key, value) {
+      userMap[key.toString()] = value;
+    });
+    for (var user in userMap.values) {
+      UserModel userModel = UserModel.fromMap(Map<String, dynamic>.from(user));
+      if (userModel.userRole == 'User') {
+        listMembers.add(userModel);
+      } else {
+        if (userModel.userRole == 'Team Leader') {
+          listLeaders.add(userModel);
+        } else {
+          listManagers.add(userModel);
+        }
+      }
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     userModel = widget.userModel;
-    if (FirebaseAuth.instance.currentUser != null) {
-      usersRef = FirebaseDatabase.instance.ref().child('users');
-    }
+    projectMap = widget.projectMap;
     _getUserDetails();
-  }
-
-  _getUserDetails() async {
-    //DatabaseEvent snapshot = await usersRef!.once();
-    usersRef?.onValue.listen((event) {
-      setState(() {
-        userMap = Map.from(event.snapshot.value as dynamic);
-        for (var user in userMap.values) {
-          UserModel userModel =
-              UserModel.fromMap(Map<String, dynamic>.from(user));
-          if (userModel.userRole == 'User') {
-            listMembers.add(userModel);
-          } else {
-            if (userModel.userRole == 'Team Leader') {
-              listLeaders.add(userModel);
-            } else {
-              listManagers.add(userModel);
-            }
-          }
-        }
-      });
-    });
   }
 
   @override
@@ -85,16 +88,16 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
             ),
             Expanded(
                 child: Padding(
-              padding: EdgeInsets.all(defaultPadding),
+              padding: const EdgeInsets.all(defaultPadding),
               child: SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
+                    const Row(
                       children: [
                         Text(
                           'LIST OF USERS',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontFamily: 'MontMed',
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
@@ -137,7 +140,8 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
                               children: listMembers.map((member) {
                                 return ListTile(
                                   leading: avatar(userMap, member.userId),
-                                  title: Text('${member.userFirstName}',
+                                  title: Text(
+                                      '${member.userFirstName} ${member.userLastName}',
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
@@ -153,7 +157,8 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
                                             size: 13,
                                           ),
                                           SizedBox(width: 5),
-                                          Text('Projects Joined: 3',
+                                          Text(
+                                              'Projects Joined: ${ProjectServices().getJoinedProjectNumber(projectMap, member.userId)}',
                                               style: TextStyle(
                                                   fontFamily: 'MontMed',
                                                   fontSize: 12))
@@ -212,10 +217,11 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
                           Divider(),
                           Container(
                             child: Column(
-                              children: allLeader.map((task) {
+                              children: listLeaders.map((leader) {
                                 return ListTile(
-                                  leading: const CircleAvatar(child: Text('T')),
-                                  title: Text(task,
+                                  leading: avatar(userMap, leader.userId),
+                                  title: Text(
+                                      '${leader.userFirstName} ${leader.userLastName}',
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
@@ -231,7 +237,8 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
                                             size: 13,
                                           ),
                                           SizedBox(width: 5),
-                                          Text('Project Joined: 3',
+                                          Text(
+                                              'Project Joined: ${ProjectServices().getJoinedProjectNumber(projectMap, leader.userId)}',
                                               style: TextStyle(
                                                   fontFamily: 'MontMed',
                                                   fontSize: 12))
@@ -290,12 +297,11 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
                           Divider(),
                           Container(
                             child: Column(
-                              children: allManager.map((project) {
+                              children: listManagers.map((manager) {
                                 return ListTile(
-                                  leading: const CircleAvatar(
-                                    child: Text('H'),
-                                  ),
-                                  title: Text(project,
+                                  leading: avatar(userMap, manager.userId),
+                                  title: Text(
+                                      '${manager.userFirstName} ${manager.userLastName}',
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
@@ -311,7 +317,8 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
                                             size: 13,
                                           ),
                                           SizedBox(width: 5),
-                                          Text('Project Created: 3',
+                                          Text(
+                                              'Project Created: ${ProjectServices().getCreateProjectNumber(projectMap, manager.userId)}',
                                               style: TextStyle(
                                                   fontFamily: 'MontMed',
                                                   fontSize: 12))
