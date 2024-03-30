@@ -3,13 +3,13 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 
-class PhraseModel {
+class PhaseModel {
   String phraseId;
   String projectId;
   String phraseName;
   String phraseDescription;
   List<String> listTasks;
-  PhraseModel({
+  PhaseModel({
     required this.phraseId,
     required this.projectId,
     required this.phraseName,
@@ -17,14 +17,14 @@ class PhraseModel {
     required this.listTasks,
   });
 
-  PhraseModel copyWith({
+  PhaseModel copyWith({
     String? phraseId,
     String? projectId,
     String? phraseName,
     String? phraseDescription,
     List<String>? listTasks,
   }) {
-    return PhraseModel(
+    return PhaseModel(
       phraseId: phraseId ?? this.phraseId,
       projectId: projectId ?? this.projectId,
       phraseName: phraseName ?? this.phraseName,
@@ -43,8 +43,8 @@ class PhraseModel {
     };
   }
 
-  factory PhraseModel.fromMap(Map<String, dynamic> map) {
-    return PhraseModel(
+  factory PhaseModel.fromMap(Map<String, dynamic> map) {
+    return PhaseModel(
         phraseId: map['phraseId'] as String,
         projectId: map['projectId'] as String,
         phraseName: map['phraseName'] as String,
@@ -59,8 +59,8 @@ class PhraseModel {
 
   String toJson() => json.encode(toMap());
 
-  factory PhraseModel.fromJson(String source) =>
-      PhraseModel.fromMap(json.decode(source) as Map<String, dynamic>);
+  factory PhaseModel.fromJson(String source) =>
+      PhaseModel.fromMap(json.decode(source) as Map<String, dynamic>);
 
   @override
   String toString() {
@@ -68,7 +68,7 @@ class PhraseModel {
   }
 
   @override
-  bool operator ==(covariant PhraseModel other) {
+  bool operator ==(covariant PhaseModel other) {
     if (identical(this, other)) return true;
 
     return other.phraseId == phraseId &&

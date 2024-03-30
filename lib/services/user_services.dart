@@ -19,6 +19,12 @@ class UserServices {
     return {};
   }
 
+  Future<void> updateUserRole(String userRole, String userId) async {
+    await databaseReference.child(userId).update({
+      'userRole': userRole,
+    });
+  }
+
   List<UserModel> getUserDataList(Map<String, dynamic> userMap) {
     List<UserModel> userList = [];
     for (var user in userMap.values) {

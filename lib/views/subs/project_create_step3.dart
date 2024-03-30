@@ -1,5 +1,6 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:capstone2_project_management_app/models/user_model.dart';
-import 'package:capstone2_project_management_app/services/phrase_services.dart';
+import 'package:capstone2_project_management_app/services/phase_services.dart';
 import 'package:capstone2_project_management_app/services/project_services.dart';
 import 'package:capstone2_project_management_app/views/dashboard_screen.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -38,25 +39,31 @@ class _ProjectCreateStep3State extends State<ProjectCreateStep3> {
   UserModel? currentUserModel;
   String teamLeaderIdController = "";
   Map<String, dynamic> projectMap = {};
-  List<String> phrasesList = [];
-  List<String> phraseNames = [
-    "Requirement and Gathering",
-    "Planning",
-    "Design",
-    "Development",
-    "Testing",
-    "Deployment",
-    "Maintenance"
+  List<String> phaseNames = [];
+  List<Phase> phrasesList = [
+    Phase(
+        phaseName: "Requirement and Gathering",
+        phraseDescription: "Description"),
+    Phase(phaseName: "Planning", phraseDescription: "Description"),
+    Phase(phaseName: "Design", phraseDescription: "Description"),
+    Phase(phaseName: "Development", phraseDescription: "Description"),
+    Phase(
+        phaseName: "Requirement and Gathering",
+        phraseDescription: "Description"),
+    Phase(phaseName: "Testing", phraseDescription: "Description"),
+    Phase(phaseName: "Deployment", phraseDescription: "Description"),
+    Phase(phaseName: "Maintenance", phraseDescription: "Description"),
   ];
 
-  List<String> currentPhrases = [
-    "Distribution",
+  List<Phase> additionPhrases = [
+    Phase(phaseName: "Distribution", phraseDescription: "Description"),
   ];
 
   Future<void> _getProjectValues() async {
     DatabaseEvent databaseEvent =
         await FirebaseDatabase.instance.ref().child('projects').once();
     projectMap = Map.from(databaseEvent.snapshot.value as dynamic);
+
     setState(() {});
   }
 
@@ -69,6 +76,9 @@ class _ProjectCreateStep3State extends State<ProjectCreateStep3> {
     teamLeaderIdController = widget.teamLeaderId;
     currentUserModel = widget.currentUserModel;
     projectMap = widget.projectMap;
+    phrasesList.forEach((element) {
+      phaseNames.add(element.phaseName);
+    });
     super.initState();
   }
 
@@ -90,9 +100,9 @@ class _ProjectCreateStep3State extends State<ProjectCreateStep3> {
                           Navigator.pop(context);
                         }),
                     const Text(
-                      'PHRASES',
+                      'PHASES',
                       style: TextStyle(
-                        fontFamily: 'Anurati',
+                        fontFamily: 'MontMed',
                         fontSize: 30,
                       ),
                     ),
@@ -108,7 +118,7 @@ class _ProjectCreateStep3State extends State<ProjectCreateStep3> {
                   ],
                 ),
                 Column(
-                  children: phraseNames.map((process) {
+                  children: phrasesList.map((phase) {
                     return Column(
                       children: <Widget>[
                         ListTile(
@@ -116,12 +126,12 @@ class _ProjectCreateStep3State extends State<ProjectCreateStep3> {
                             child: Icon(Icons.keyboard_arrow_down),
                           ),
                           title: Text(
-                            process,
+                            phase.phaseName,
                             style: const TextStyle(fontFamily: 'MontMed'),
                           ),
-                          subtitle: const Text(
-                            'Description',
-                            style: TextStyle(fontFamily: 'MontMed'),
+                          subtitle: Text(
+                            phase.phraseDescription,
+                            style: const TextStyle(fontFamily: 'MontMed'),
                           ),
                         ),
                         const Divider(height: 0),
@@ -137,7 +147,7 @@ class _ProjectCreateStep3State extends State<ProjectCreateStep3> {
                   ],
                 ),
                 Column(
-                  children: currentPhrases.map((process) {
+                  children: additionPhrases.map((phase) {
                     return Column(
                       children: <Widget>[
                         ListTile(
@@ -145,11 +155,11 @@ class _ProjectCreateStep3State extends State<ProjectCreateStep3> {
                             child: Icon(Icons.keyboard_arrow_down),
                           ),
                           title: Text(
-                            process,
+                            phase.phaseName,
                             style: const TextStyle(fontFamily: 'MontMed'),
                           ),
-                          subtitle: const Text(
-                            'Description',
+                          subtitle: Text(
+                            phase.phraseDescription,
                             style: TextStyle(fontFamily: 'MontMed'),
                           ),
                           trailing: Ink(
@@ -161,7 +171,7 @@ class _ProjectCreateStep3State extends State<ProjectCreateStep3> {
                               icon: const Icon(Icons.remove_circle),
                               color: Colors.redAccent,
                               onPressed: () {
-                                _removeProcess(process);
+                                _removeProcess(phase.phaseName);
                               },
                             ),
                           ),
@@ -200,26 +210,36 @@ class _ProjectCreateStep3State extends State<ProjectCreateStep3> {
                           ),
                         );
                         ProjectServices projectServices = ProjectServices();
+                        if (additionPhrases.isNotEmpty) {
+                          for (var phase in additionPhrases) {
+                            phrasesList.add(phase);
+                            phaseNames.add(phase.phaseName);
+                          }
+                        }
                         projectServices.addProject(
                             projectNameController.text,
                             projectDescriptionController.text,
                             startDateController.text,
                             endDateController.text,
                             teamLeaderIdController,
-                            phrasesList,
+                            phaseNames,
                             currentUserModel);
                         //Navigator.popUntil(context, ModalRoute.withName('/'));
-                        for (var i in phraseNames) {
-                          PhraseServices()
-                              .addPhrase(i, projectServices.realProjectID, []);
-                          phrasesList.add(projectServices.realProjectID);
+                        for (var phase in phrasesList) {
+                          PhaseServices().addPhrase(
+                            phase.phaseName,
+                            projectServices.realProjectID,
+                            [],
+                            phase.phraseDescription,
+                          );
+                          phaseNames.add(projectServices.realProjectID);
                           DatabaseReference projectRef = FirebaseDatabase
                               .instance
                               .ref()
                               .child('projects')
                               .child(projectServices.realProjectID);
                           await projectRef.update({
-                            'projectPhrases': phrasesList,
+                            'projectPhrases': phaseNames,
                           });
                         }
                       },
@@ -259,28 +279,30 @@ class _ProjectCreateStep3State extends State<ProjectCreateStep3> {
           ),
           content: Container(
             height: 200,
-            child: Column(
-              children: [
-                TextField(
-                  controller: nameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Name',
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  TextField(
+                    controller: nameController,
+                    decoration: const InputDecoration(
+                      labelText: 'Name',
+                    ),
+                    style: const TextStyle(
+                      color: Colors.black,
+                      fontFamily: 'MontMed',
+                    ),
                   ),
-                  style: const TextStyle(
-                    color: Colors.black,
-                    fontFamily: 'MontMed',
+                  TextField(
+                    controller: descriptionController,
+                    maxLines: 4,
+                    decoration: const InputDecoration(labelText: 'Description'),
+                    style: const TextStyle(
+                      color: Colors.black,
+                      fontFamily: 'MontMed',
+                    ),
                   ),
-                ),
-                TextField(
-                  controller: descriptionController,
-                  maxLines: 4,
-                  decoration: const InputDecoration(labelText: 'Description'),
-                  style: const TextStyle(
-                    color: Colors.black,
-                    fontFamily: 'MontMed',
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
           actions: [
@@ -297,7 +319,9 @@ class _ProjectCreateStep3State extends State<ProjectCreateStep3> {
               onPressed: () {
                 // Update the list with the new item
                 setState(() {
-                  currentPhrases.add(nameController.text);
+                  additionPhrases.add(Phase(
+                      phaseName: nameController.text,
+                      phraseDescription: descriptionController.text));
                 });
                 Navigator.pop(context);
               },
@@ -314,7 +338,16 @@ class _ProjectCreateStep3State extends State<ProjectCreateStep3> {
 
   void _removeProcess(String member) {
     setState(() {
-      currentPhrases.remove(member);
+      additionPhrases.remove(member);
     });
   }
+}
+
+class Phase {
+  String phaseName;
+  String phraseDescription;
+  Phase({
+    required this.phaseName,
+    required this.phraseDescription,
+  });
 }

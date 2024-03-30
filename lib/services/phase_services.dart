@@ -1,13 +1,14 @@
-import 'package:capstone2_project_management_app/models/phrase_model.dart';
+import 'package:capstone2_project_management_app/models/phase_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-class PhraseServices {
+class PhaseServices {
   Future<void> addPhrase(
     String phraseName,
     String projectId,
     List<String> listTasks,
+    String phraseDescription,
   ) async {
     if (phraseName.isEmpty) {
       Fluttertoast.showToast(msg: 'Please provide phrase name');
@@ -22,7 +23,7 @@ class PhraseServices {
         'phraseName': phraseName,
         'listTasks': listTasks,
         'projectId': projectId,
-        'phraseDescription': phraseName,
+        'phraseDescription': phraseDescription,
         'timestamp': ServerValue.timestamp
       });
       Fluttertoast.showToast(msg: 'New phrase has been created successfully');
@@ -84,8 +85,8 @@ class PhraseServices {
   String getNameFromId(Map<String, dynamic> phraseMap, String id) {
     Map<String, String> mapName = {};
     for (var phrase in phraseMap.values) {
-      PhraseModel phraseModel =
-          PhraseModel.fromMap(Map<String, dynamic>.from(phrase));
+      PhaseModel phraseModel =
+          PhaseModel.fromMap(Map<String, dynamic>.from(phrase));
       mapName[phraseModel.phraseId] = phraseModel.phraseName;
       if (phraseModel.phraseId == id) {
         return mapName[phraseModel.phraseId].toString();
@@ -98,8 +99,8 @@ class PhraseServices {
     Map<String, int> mapName = {};
     int num = 0;
     for (var phrase in phraseMap.values) {
-      PhraseModel phraseModel =
-          PhraseModel.fromMap(Map<String, dynamic>.from(phrase));
+      PhaseModel phraseModel =
+          PhaseModel.fromMap(Map<String, dynamic>.from(phrase));
       mapName[phraseModel.phraseName] = num;
       if (phraseModel.phraseName == phraseName) {
         return num;
@@ -109,12 +110,12 @@ class PhraseServices {
     return 0;
   }
 
-  PhraseModel? getPhraseModelFromName(
+  PhaseModel? getPhraseModelFromName(
       Map<dynamic, dynamic> phraseMap, String phraseName) {
-    PhraseModel? result;
+    PhaseModel? result;
     for (var phrase in phraseMap.values) {
-      PhraseModel phraseModel =
-          PhraseModel.fromMap(Map<String, dynamic>.from(phrase));
+      PhaseModel phraseModel =
+          PhaseModel.fromMap(Map<String, dynamic>.from(phrase));
       if (phraseModel.phraseName == phraseName) {
         result = phraseModel;
       }
@@ -122,12 +123,12 @@ class PhraseServices {
     return result;
   }
 
-  PhraseModel? getCurrentPhraseModelFromProject(
+  PhaseModel? getCurrentPhraseModelFromProject(
       Map<dynamic, dynamic> phraseMap, String projectId) {
-    PhraseModel? result;
+    PhaseModel? result;
     for (var phrase in phraseMap.values) {
-      PhraseModel phraseModel =
-          PhraseModel.fromMap(Map<String, dynamic>.from(phrase));
+      PhaseModel phraseModel =
+          PhaseModel.fromMap(Map<String, dynamic>.from(phrase));
       if (phraseModel.projectId == projectId) {
         result = phraseModel;
       }
@@ -139,8 +140,8 @@ class PhraseServices {
     Map<int, String> mapName = {};
     int num = 0;
     for (var phrase in phraseMap.values) {
-      PhraseModel phraseModel =
-          PhraseModel.fromMap(Map<String, dynamic>.from(phrase));
+      PhaseModel phraseModel =
+          PhaseModel.fromMap(Map<String, dynamic>.from(phrase));
       mapName[num] = phraseModel.phraseName;
       num++;
     }

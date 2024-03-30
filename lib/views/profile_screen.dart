@@ -182,16 +182,12 @@ class _profile_screenState extends State<profile_screen> {
                                     fontFamily: 'MontMed',
                                     fontSize: 12,
                                     color: Colors.black54)),
-                            subtitle: Text('Member',
+                            subtitle: Text(
+                                userModel?.userRole == 'User'
+                                    ? 'Member'
+                                    : '${userModel?.userRole}',
                                 style: TextStyle(
                                     fontFamily: 'MontMed', fontSize: 14)),
-                            trailing: IconButton(
-                              onPressed: () {},
-                              icon: Icon(
-                                Icons.border_color,
-                                size: 15,
-                              ),
-                            ),
                           ),
                           Divider(),
                           ListTile(

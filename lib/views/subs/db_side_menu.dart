@@ -1,4 +1,5 @@
 import 'package:capstone2_project_management_app/models/user_model.dart';
+import 'package:capstone2_project_management_app/services/notification_services.dart';
 import 'package:capstone2_project_management_app/services/project_services.dart';
 import 'package:capstone2_project_management_app/services/user_services.dart';
 import 'package:capstone2_project_management_app/views/dashboard_screen.dart';
@@ -94,8 +95,37 @@ class DbSideMenu extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) =>
-                          notification_screen(userModel: userModel),
+                      builder: (context) => StreamBuilder<List<Object>>(
+                          stream: CombineLatestStream.list([
+                            UserServices().databaseReference.onValue,
+                            NotificationService().databaseReference.onValue,
+                          ]),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return loader();
+                            } else if (snapshot.hasError) {
+                              return Center(
+                                child: Text('Error: ${snapshot.error}'),
+                              );
+                            } else {
+                              var eventUser =
+                                  snapshot.data![0] as DatabaseEvent;
+                              var eventNotification =
+                                  snapshot.data![1] as DatabaseEvent;
+                              var dynamicUser =
+                                  eventUser.snapshot.value as dynamic;
+                              var dynamicNotification =
+                                  eventNotification.snapshot.value as dynamic;
+                              Map mapUser = Map.from(dynamicUser);
+                              Map mapNotification =
+                                  Map.from(dynamicNotification);
+                              return NotificationScreen(
+                                  userModel: userModel,
+                                  notificationMap: mapNotification,
+                                  userMap: mapUser);
+                            }
+                          }),
                     ),
                   );
                   // Handle menu item tap

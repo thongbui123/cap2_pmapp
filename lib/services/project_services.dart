@@ -26,7 +26,9 @@ class ProjectServices {
     for (var project in projectMap.values) {
       ProjectModel projectModel =
           ProjectModel.fromMap(Map<String, dynamic>.from(project));
-      if (projectModel.projectMembers.contains(currentUserModel.userId)) {
+      if ((projectModel.projectMembers.contains(currentUserModel.userId) ||
+          projectModel.managerId == currentUserModel.userId ||
+          projectModel.leaderId == currentUserModel.userId)) {
         joinedProjects.add(projectModel);
       }
     }
@@ -62,7 +64,9 @@ class ProjectServices {
     for (var project in projectMap.values) {
       ProjectModel projectModel =
           ProjectModel.fromMap(Map<String, dynamic>.from(project));
-      if (projectModel.projectMembers.contains(id)) {
+      if ((projectModel.projectMembers.contains(id) ||
+          projectModel.managerId == id ||
+          projectModel.leaderId == id)) {
         count++;
       }
     }
@@ -86,7 +90,9 @@ class ProjectServices {
     for (var project in projectMap.values) {
       ProjectModel projectModel =
           ProjectModel.fromMap(Map<String, dynamic>.from(project));
-      if (projectModel.projectMembers.contains(id) &&
+      if ((projectModel.projectMembers.contains(id) ||
+              projectModel.managerId == id ||
+              projectModel.leaderId == id) &&
           projectModel.projectStatus == 'Completed') {
         count++;
       }

@@ -1,11 +1,11 @@
 import 'dart:collection';
 
-import 'package:capstone2_project_management_app/models/phrase_model.dart';
+import 'package:capstone2_project_management_app/models/phase_model.dart';
 import 'package:capstone2_project_management_app/models/project_model.dart';
 import 'package:capstone2_project_management_app/models/task_model.dart';
 import 'package:capstone2_project_management_app/models/user_model.dart';
 import 'package:capstone2_project_management_app/services/comment_service.dart';
-import 'package:capstone2_project_management_app/services/phrase_services.dart';
+import 'package:capstone2_project_management_app/services/phase_services.dart';
 import 'package:capstone2_project_management_app/services/project_services.dart';
 import 'package:capstone2_project_management_app/services/task_services.dart';
 import 'package:capstone2_project_management_app/services/user_services.dart';
@@ -39,21 +39,21 @@ class ListOfTaskScreen extends StatefulWidget {
 class _ListOfTaskScreenState extends State<ListOfTaskScreen> {
   late UserModel currentUserModel;
   late ProjectModel? projectModel;
-  late PhraseModel? phraseModel;
+  late PhaseModel? phraseModel;
   late Map<String, dynamic> userMap;
   late Map<String, dynamic> commentMap;
   late Map<dynamic, dynamic> projectMap;
-  late List<ProjectModel> listJoinedProjects;
-  late List<TaskModel> listJoinedTasks;
-  late List<TaskModel> listCompleteTasks;
-  late List<TaskModel> listOverdueTasks;
+  List<ProjectModel> listJoinedProjects = [];
+  List<TaskModel> listJoinedTasks = [];
+  List<TaskModel> listCompleteTasks = [];
+  List<TaskModel> listOverdueTasks = [];
   late Map phraseMap = {};
   late Map taskMap;
   late int taskLength;
   late Map<DateTime, List<TaskModel>> calendarTaskEvents;
   UserServices userServices = UserServices();
   TaskService taskService = TaskService();
-  PhraseServices phraseServices = PhraseServices();
+  PhaseServices phraseServices = PhaseServices();
   ProjectServices projectServices = ProjectServices();
   @override
   void initState() {
@@ -113,7 +113,7 @@ class _ListOfTaskScreenState extends State<ListOfTaskScreen> {
     if (snapshot.snapshot.value != null && snapshot.snapshot.value is Map) {
       setState(() {
         phraseMap = Map.from(snapshot.snapshot.value as dynamic);
-        phraseModel = PhraseServices()
+        phraseModel = PhaseServices()
             .getPhraseModelFromName(phraseMap, projectModel!.projectStatus);
         //taskLength = phraseModel!.listTasks.length;
         List<MapEntry<dynamic, dynamic>> sortedEntries =

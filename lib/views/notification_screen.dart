@@ -1,16 +1,25 @@
+import 'package:capstone2_project_management_app/models/notification_model.dart';
 import 'package:capstone2_project_management_app/models/user_model.dart';
+import 'package:capstone2_project_management_app/services/notification_services.dart';
+import 'package:capstone2_project_management_app/views/profile_screen.dart';
 import 'package:capstone2_project_management_app/views/stats/stats.dart';
 import 'package:capstone2_project_management_app/views/subs/db_side_menu.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
-class notification_screen extends StatefulWidget {
+class NotificationScreen extends StatefulWidget {
+  final Map notificationMap;
+  final Map userMap;
   final UserModel userModel;
-  const notification_screen({Key? key, required this.userModel})
+  const NotificationScreen(
+      {Key? key,
+      required this.userModel,
+      required this.notificationMap,
+      required this.userMap})
       : super(key: key);
 
   @override
-  State<notification_screen> createState() => _notification_screenState();
+  State<NotificationScreen> createState() => _NotificationScreenState();
 }
 
 List<String> allNotice = [
@@ -18,12 +27,22 @@ List<String> allNotice = [
   'Task A has been assigned to you'
 ];
 
-class _notification_screenState extends State<notification_screen> {
+class _NotificationScreenState extends State<NotificationScreen> {
   late UserModel userModel;
+  late Map notificationMap;
+  Map<String, dynamic> userMap = {};
+  NotificationService notificationService = NotificationService();
+  late List<NotificationModel> listNotifications;
   @override
   void initState() {
     super.initState();
     userModel = widget.userModel;
+    notificationMap = widget.notificationMap;
+    widget.userMap.forEach((key, value) {
+      userMap[key.toString()] = value;
+    });
+    listNotifications = notificationService.getListAllNotifications(
+        notificationMap, userModel.userId);
   }
 
   @override
@@ -34,7 +53,7 @@ class _notification_screenState extends State<notification_screen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             DbSideMenu(
-              userModel: userModel!,
+              userModel: userModel,
             ),
             Expanded(
               child: Padding(
@@ -60,7 +79,7 @@ class _notification_screenState extends State<notification_screen> {
                           children: ListTile.divideTiles(
                             context:
                                 context, // Make sure to provide the BuildContext if this code is inside a widget build method
-                            tiles: allNotice.map((notice) {
+                            tiles: listNotifications.map((notification) {
                               return ListTile(
                                 leading: const CircleAvatar(
                                   child: Icon(
@@ -68,12 +87,21 @@ class _notification_screenState extends State<notification_screen> {
                                     color: Colors.black87,
                                   ),
                                 ),
-                                onTap: () {},
-                                title: Text(notice,
+                                onTap: () {
+                                  if (notification.notificationType == 'User') {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => profile_screen(),
+                                      ),
+                                    );
+                                  }
+                                },
+                                title: Text(notification.notificationContent,
                                     style: TextStyle(
                                         fontFamily: 'MontMed', fontSize: 13)),
                                 subtitle: Text(
-                                  '2024-10-20 | 7:00',
+                                  notification.notificationDate,
                                   style: const TextStyle(
                                       fontFamily: 'MontMed', fontSize: 12),
                                 ),

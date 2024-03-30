@@ -3,12 +3,12 @@ import 'package:capstone2_project_management_app/views/stats/stats.dart';
 import 'package:capstone2_project_management_app/views/subs/db_side_menu.dart';
 import 'package:flutter/material.dart';
 
-class search_screen extends StatefulWidget {
-  final UserModel? userModel;
-  const search_screen({Key? key, this.userModel}) : super(key: key);
+class SearchScreen extends StatefulWidget {
+  final UserModel userModel;
+  const SearchScreen({Key? key, required this.userModel}) : super(key: key);
 
   @override
-  State<search_screen> createState() => _search_screenState();
+  State<SearchScreen> createState() => _SearchScreenState();
 }
 
 List<String> allProjects = [
@@ -32,11 +32,12 @@ bool _customTileExpanded0 = true;
 bool _customTileExpanded1 = true;
 bool _customTileExpanded2 = true;
 
-class _search_screenState extends State<search_screen> {
+class _SearchScreenState extends State<SearchScreen> {
   late UserModel? userModel;
   @override
   void initState() {
     super.initState();
+    userModel = widget.userModel;
   }
 
   @override

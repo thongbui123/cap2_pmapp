@@ -1,7 +1,7 @@
-import 'package:capstone2_project_management_app/models/phrase_model.dart';
+import 'package:capstone2_project_management_app/models/phase_model.dart';
 import 'package:capstone2_project_management_app/models/project_model.dart';
 import 'package:capstone2_project_management_app/models/user_model.dart';
-import 'package:capstone2_project_management_app/services/phrase_services.dart';
+import 'package:capstone2_project_management_app/services/phase_services.dart';
 import 'package:capstone2_project_management_app/services/user_services.dart';
 import 'package:capstone2_project_management_app/views/list_of_tasks_screen.dart';
 import 'package:capstone2_project_management_app/views/stats/stats.dart';
@@ -33,18 +33,18 @@ class ProjectDetailScreen extends StatefulWidget {
 }
 
 List<String> currentList = [];
-List<PhraseModel> listOfPhrase = [];
+List<PhaseModel> listOfPhrase = [];
 
 class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
   late ProjectModel _projectModel;
-  late PhraseModel phraseModel;
+  late PhaseModel phraseModel;
   UserServices userServices = UserServices();
   late UserModel _userModel;
-  PhraseServices phraseServices = PhraseServices();
+  PhaseServices phraseServices = PhaseServices();
   List<UserModel> allMembers = [];
   List<String> allMemberIds = [];
   late Map<String, dynamic> userMap;
-  Map<String, PhraseModel> currentPhraseMap = {};
+  Map<String, PhaseModel> currentPhraseMap = {};
   List<UserModel> currentList = [];
   bool _customTileExpanded = false;
   late Map<dynamic, dynamic> projectMap;

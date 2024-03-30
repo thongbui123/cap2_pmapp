@@ -80,7 +80,7 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
   }
 
   _getData() async {
-    //await getProjectMap();
+    await getProjectMap();
     await _getProjectDetails();
     //projectMap = await projectServices.getProjectMap();
   }
@@ -152,7 +152,9 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => search_screen(),
+                                    builder: (context) => SearchScreen(
+                                      userModel: currentUserModel!,
+                                    ),
                                   ),
                                 );
                               },
@@ -285,7 +287,7 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
                               Row(
                                 children: <Widget>[
                                   Text(
-                                    '${joinedProjects.length.toString()} on going',
+                                    '${ProjectServices().getJoinedProjectNumber(projectMap, currentUserModel!.userId)} on going',
                                     style: TextStyle(
                                         fontSize: 12, fontFamily: 'MontMed'),
                                   )

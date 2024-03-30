@@ -1,7 +1,7 @@
-import 'package:capstone2_project_management_app/models/phrase_model.dart';
+import 'package:capstone2_project_management_app/models/phase_model.dart';
 import 'package:capstone2_project_management_app/models/project_model.dart';
 import 'package:capstone2_project_management_app/models/user_model.dart';
-import 'package:capstone2_project_management_app/services/phrase_services.dart';
+import 'package:capstone2_project_management_app/services/phase_services.dart';
 import 'package:capstone2_project_management_app/services/project_services.dart';
 import 'package:capstone2_project_management_app/services/task_services.dart';
 import 'package:capstone2_project_management_app/services/user_services.dart';
@@ -49,7 +49,7 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
   late Map phraseMap;
   late Map taskMap;
   late UserModel currentUserModel;
-  late PhraseModel currentPhraseModel;
+  late PhaseModel currentPhraseModel;
   late ProjectModel projectModel;
   late Map<String, dynamic> userMap;
   var taskNameController = TextEditingController();
@@ -78,8 +78,8 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
   _getPhraseModel() {
     String currentPhraseName = projectModel.projectStatus;
     for (var phrase in phraseMap.values) {
-      PhraseModel phraseModel =
-          PhraseModel.fromMap(Map<String, dynamic>.from(phrase));
+      PhaseModel phraseModel =
+          PhaseModel.fromMap(Map<String, dynamic>.from(phrase));
       if (phraseModel.phraseName == currentPhraseName) {
         currentPhraseModel = phraseModel;
       }
@@ -422,7 +422,7 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
         currentPhraseModel.phraseId,
         currentList);
     currentPhraseModel.listTasks.add(taskService.realTaskId);
-    PhraseServices().updatePhraseTaskList(projectModel!.projectId,
+    PhaseServices().updatePhraseTaskList(projectModel!.projectId,
         currentPhraseModel.phraseId, currentPhraseModel.listTasks);
     DatabaseEvent taskDatabaseEvent = await taskService.taskRef.once();
     if (taskDatabaseEvent.snapshot.value != null &&
