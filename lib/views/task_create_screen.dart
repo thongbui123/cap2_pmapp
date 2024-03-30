@@ -10,6 +10,8 @@ import 'package:capstone2_project_management_app/views/stats/stats.dart';
 import 'package:capstone2_project_management_app/views/subs/sub_widgets.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:rxdart/rxdart.dart';
 
 class TaskCreateScreen extends StatefulWidget {
   final Map projectMap;
@@ -380,15 +382,44 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
             height: 50,
             child: TextButton(
               onPressed: () {
+                if (taskNameController.text == "") {
+                  Fluttertoast.showToast(msg: 'Task name cannot be empty.');
+                  return;
+                }
+                if (endDateController.text == "") {
+                  Fluttertoast.showToast(msg: 'Task name cannot be empty.');
+                  return;
+                }
                 _addTask();
                 Navigator.of(context)
                     .pushReplacement(MaterialPageRoute(builder: (context) {
-                  return ListOfTaskScreen(
-                    projectModel: projectModel!,
-                    projectMap: projectMap,
-                    userModel: currentUserModel,
-                    taskMap: taskMap,
-                  );
+                  return StreamBuilder<List<Object>>(
+                      stream: CombineLatestStream.list([
+                        TaskService().taskRef.onValue,
+                        ProjectServices().reference.onValue
+                      ]),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return loader();
+                        } else if (snapshot.hasError) {
+                          return Center(
+                            child: Text('Error: ${snapshot.error}'),
+                          );
+                        } else {
+                          var eventTask = snapshot.data![0] as DatabaseEvent;
+                          var eventProject = snapshot.data![1] as DatabaseEvent;
+                          var dynamicTask = eventTask.snapshot.value as dynamic;
+                          var dynamicProject =
+                              eventProject.snapshot.value as dynamic;
+                          Map mapTask = Map.from(dynamicTask);
+                          Map mapProject = Map.from(dynamicProject);
+                          return ListOfTaskScreen(
+                              userModel: currentUserModel,
+                              projectMap: mapProject,
+                              taskMap: mapTask);
+                        }
+                      });
                 }));
               },
               child: Container(
@@ -424,23 +455,6 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
     currentPhraseModel.listTasks.add(taskService.realTaskId);
     PhaseServices().updatePhraseTaskList(projectModel!.projectId,
         currentPhraseModel.phraseId, currentPhraseModel.listTasks);
-    DatabaseEvent taskDatabaseEvent = await taskService.taskRef.once();
-    if (taskDatabaseEvent.snapshot.value != null &&
-        taskDatabaseEvent.snapshot.value is Map) {
-      taskMap = Map.from(taskDatabaseEvent.snapshot.value as dynamic);
-    }
-
-    // DatabaseReference phraseRef = FirebaseDatabase.instance
-    //     .ref()
-    //     .child('phrases')
-    //     .child(projectModel.projectId);
-    // DatabaseEvent phraseDatabaseEvent = await phraseRef.once();
-    // if (phraseDatabaseEvent.snapshot.value != null &&
-    //     phraseDatabaseEvent.snapshot.value is Map) {
-    //   setState(() {
-    //     phraseMap = Map.from(phraseDatabaseEvent.snapshot.value as dynamic);
-    //   });
-    // }
   }
 
   Future<void> _selectDate(TextEditingController textEditingController,

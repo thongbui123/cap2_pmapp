@@ -11,18 +11,21 @@ import 'package:comment_box/comment/comment.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:rxdart/rxdart.dart';
 
 class TaskDetailScreen extends StatefulWidget {
   final Map<String, dynamic> userMap;
   final TaskModel taskModel;
   final Map taskMap;
   final Map commentMap;
+  final UserModel userModel;
   const TaskDetailScreen(
       {super.key,
       required this.taskModel,
       required this.userMap,
       required this.taskMap,
-      required this.commentMap});
+      required this.commentMap,
+      required this.userModel});
 
   @override
   State<TaskDetailScreen> createState() => _TaskDetailScreenState();
@@ -55,7 +58,8 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   User? user;
   DatabaseReference? userRef;
   UserModel? currentUserModel;
-  final databaseReference = FirebaseDatabase.instance.ref();
+  late List<CommentModel> listComments;
+  //final databaseReference = FirebaseDatabase.instance.ref();
   @override
   void initState() {
     // TODO: implement initState
@@ -64,282 +68,298 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
     userMap = widget.userMap;
     taskMap = widget.taskMap;
     commentMap = widget.commentMap;
-    user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      userRef = databaseReference.child('users').child(user!.uid);
-      _getUserDetails();
-    }
-  }
-
-  Future<void> _getUserDetails() async {
-    DatabaseEvent snapshot = await userRef!.once();
-    currentUserModel = UserModel.fromMap(
-        Map<String, dynamic>.from(snapshot.snapshot.value as dynamic));
+    currentUserModel = widget.userModel;
+    listComments =
+        CommentService().getListAllComments(commentMap, taskModel.taskId);
   }
 
   Widget commentChild(data) {
-    return currentUserModel == null
-        ? loader()
-        : ListView(
-            children: [
-              for (var i = 0; i < data.length; i++)
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(2.0, 8.0, 2.0, 0.0),
-                  child: ListTile(
-                    leading: GestureDetector(
-                      onTap: () async {
-                        // Display the image in large form.
-                        print("Comment Clicked");
-                      },
-                      child: Container(
-                        height: 50.0,
-                        width: 50.0,
-                        decoration: new BoxDecoration(
-                            color: Colors.blue,
-                            borderRadius:
-                                new BorderRadius.all(Radius.circular(50))),
-                        child: CircleAvatar(
-                            radius: 50,
-                            backgroundImage: CommentBox.commentImageParser(
-                                imageURLorPath: data[i]['pic'])),
-                      ),
-                    ),
-                    title: Text(
-                      data[i]['name'],
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    subtitle: Text(data[i]['message']),
-                    trailing:
-                        Text(data[i]['date'], style: TextStyle(fontSize: 10)),
-                  ),
-                )
-            ],
-          );
+    return ListView(
+      children: [
+        for (var i = 0; i < data.length; i++)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(2.0, 8.0, 2.0, 0.0),
+            child: ListTile(
+              leading: GestureDetector(
+                onTap: () async {
+                  // Display the image in large form.
+                  print("Comment Clicked");
+                },
+                child: Container(
+                  height: 50.0,
+                  width: 50.0,
+                  decoration: new BoxDecoration(
+                      color: Colors.blue,
+                      borderRadius: new BorderRadius.all(Radius.circular(50))),
+                  child: CircleAvatar(
+                      radius: 50,
+                      backgroundImage: CommentBox.commentImageParser(
+                          imageURLorPath: data[i]['pic'])),
+                ),
+              ),
+              title: Text(
+                data[i]['name'],
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              subtitle: Text(data[i]['message']),
+              trailing: Text(data[i]['date'], style: TextStyle(fontSize: 10)),
+            ),
+          )
+      ],
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            DbSideMenu(
-              userModel: currentUserModel!,
-            ),
-            Expanded(
-                child: Padding(
-              padding: EdgeInsets.all(defaultPadding),
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        IconButton(
-                            icon: const Icon(Icons.arrow_back_ios),
-                            onPressed: () {
-                              Navigator.pop(context);
-                            }),
-                        Text(
-                          'TASK',
-                          style: TextStyle(
-                            fontFamily: 'Anurati',
-                            fontSize: 30,
+    return StreamBuilder<List<Object>>(
+        stream: CombineLatestStream.list([
+          CommentService().databaseReference.onValue,
+          TaskService().taskRef.onValue,
+          UserServices().databaseReference.onValue,
+        ]),
+        builder: (context, snapshot) {
+          if (snapshot.hasError || !snapshot.hasData) {
+            return loader();
+          }
+          var eventComment = snapshot.data![0] as DatabaseEvent;
+          var eventTask = snapshot.data![1] as DatabaseEvent;
+          var eventUser = snapshot.data![2] as DatabaseEvent;
+          var dynamicComment = eventComment.snapshot.value as dynamic;
+          var dynamicTask = eventTask.snapshot.value as dynamic;
+          var dynamicUser = eventUser.snapshot.value as dynamic;
+          commentMap = Map.from(dynamicComment);
+          taskMap = Map.from(dynamicTask);
+          userMap = Map.from(dynamicUser);
+          listComments =
+              CommentService().getListAllComments(commentMap, taskModel.taskId);
+          return Scaffold(
+            body: SafeArea(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  DbSideMenu(
+                    userModel: currentUserModel!,
+                  ),
+                  Expanded(
+                      child: Padding(
+                    padding: EdgeInsets.all(defaultPadding),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              IconButton(
+                                  icon: const Icon(Icons.arrow_back_ios),
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                  }),
+                              Text(
+                                'TASK',
+                                style: TextStyle(
+                                  fontFamily: 'Anurati',
+                                  fontSize: 30,
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                      ],
-                    ),
-                    Divider(),
-                    ListTile(
-                      leading: CircleAvatar(
-                          child: Icon(Icons.layers, color: Colors.blueAccent)),
-                      title: Text(
-                          'Task Name: ${taskModel.taskName.toUpperCase()}',
-                          style: TextStyle(
-                              fontFamily: 'MontMed',
-                              color: Colors.black,
-                              fontSize: 13)),
-                      subtitle: Text(
-                        'Current State: ${taskModel.taskStatus}',
-                        style: TextStyle(fontFamily: 'MontMed', fontSize: 12),
-                      ),
-                    ),
-                    SizedBox(height: 5),
-                    Container(
-                      width: 50,
-                      height: 1,
-                      color: Colors.black,
-                    ),
-                    SizedBox(height: 5),
-                    Text(
-                      '${taskModel.taskDescription}',
-                      style: TextStyle(
-                          fontFamily: 'MontMed',
-                          color: Colors.black87,
-                          fontSize: 12),
-                    ),
-                    SizedBox(height: 10),
-                    Divider(),
-                    ListTile(
-                      leading: avatar(userMap, taskModel.assignById),
-                      title: Text('Assigned by: ',
-                          style: TextStyle(
-                              fontFamily: 'MontMed',
-                              fontSize: 12,
-                              color: Colors.black54)),
-                      subtitle: Text(
-                          '${UserServices().getNameFromId(userMap, taskModel.assignById)}',
-                          style:
-                              TextStyle(fontFamily: 'MontMed', fontSize: 14)),
-                      trailing: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            SizedBox(height: 8),
-                            Text('Priority: ',
+                          Divider(),
+                          ListTile(
+                            leading: CircleAvatar(
+                                child: Icon(Icons.layers,
+                                    color: Colors.blueAccent)),
+                            title: Text(
+                                'Task Name: ${taskModel.taskName.toUpperCase()}',
+                                style: TextStyle(
+                                    fontFamily: 'MontMed',
+                                    color: Colors.black,
+                                    fontSize: 13)),
+                            subtitle: Text(
+                              'Current State: ${taskModel.taskStatus}',
+                              style: TextStyle(
+                                  fontFamily: 'MontMed', fontSize: 12),
+                            ),
+                          ),
+                          SizedBox(height: 5),
+                          Container(
+                            width: 50,
+                            height: 1,
+                            color: Colors.black,
+                          ),
+                          SizedBox(height: 5),
+                          Text(
+                            '${taskModel.taskDescription}',
+                            style: TextStyle(
+                                fontFamily: 'MontMed',
+                                color: Colors.black87,
+                                fontSize: 12),
+                          ),
+                          SizedBox(height: 10),
+                          Divider(),
+                          ListTile(
+                            leading: avatar(userMap, taskModel.assignById),
+                            title: Text('Assigned by: ',
                                 style: TextStyle(
                                     fontFamily: 'MontMed',
                                     fontSize: 12,
                                     color: Colors.black54)),
-                            Padding(
-                              padding: EdgeInsets.fromLTRB(0, 0, 40, 0),
-                              child: Text(taskModel.taskPriority.toUpperCase(),
-                                  style: TextStyle(
-                                      fontFamily: 'MontMed',
-                                      color: taskModel.taskPriority == 'High'
-                                          ? Colors.red
-                                          : (taskModel.taskPriority == 'Medium'
-                                              ? Colors.yellow
-                                              : Colors.blueAccent),
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 14)),
-                            )
-                          ]),
-                    ),
-                    Divider(),
-                    ListTile(
-                      leading: CircleAvatar(
-                        child: Icon(Icons.calendar_month),
-                      ),
-                      title: Text('Start Date: ',
-                          style: TextStyle(
-                              fontFamily: 'MontMed',
-                              fontSize: 12,
-                              color: Colors.black54)),
-                      subtitle: Text('${taskModel.taskStartDate}',
-                          style:
-                              TextStyle(fontFamily: 'MontMed', fontSize: 14)),
-                      trailing: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            SizedBox(height: 8),
-                            Text('End Date: ',
+                            subtitle: Text(
+                                '${UserServices().getNameFromId(userMap, taskModel.assignById)}',
+                                style: TextStyle(
+                                    fontFamily: 'MontMed', fontSize: 14)),
+                            trailing: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SizedBox(height: 8),
+                                  Text('Priority: ',
+                                      style: TextStyle(
+                                          fontFamily: 'MontMed',
+                                          fontSize: 12,
+                                          color: Colors.black54)),
+                                  Padding(
+                                    padding: EdgeInsets.fromLTRB(0, 0, 40, 0),
+                                    child: Text(
+                                        taskModel.taskPriority.toUpperCase(),
+                                        style: TextStyle(
+                                            fontFamily: 'MontMed',
+                                            color:
+                                                taskModel.taskPriority == 'High'
+                                                    ? Colors.red
+                                                    : (taskModel.taskPriority ==
+                                                            'Medium'
+                                                        ? Colors.yellow
+                                                        : Colors.blueAccent),
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 14)),
+                                  )
+                                ]),
+                          ),
+                          Divider(),
+                          ListTile(
+                            leading: CircleAvatar(
+                              child: Icon(Icons.calendar_month),
+                            ),
+                            title: Text('Start Date: ',
                                 style: TextStyle(
                                     fontFamily: 'MontMed',
                                     fontSize: 12,
                                     color: Colors.black54)),
-                            Text('${taskModel.taskEndDate}',
+                            subtitle: Text('${taskModel.taskStartDate}',
                                 style: TextStyle(
-                                    fontFamily: 'MontMed', fontSize: 14))
-                          ]),
-                    ),
-                    Divider(),
-                    ListTile(
-                      leading: CircleAvatar(
-                        child: Icon(Icons.comment),
+                                    fontFamily: 'MontMed', fontSize: 14)),
+                            trailing: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SizedBox(height: 8),
+                                  Text('End Date: ',
+                                      style: TextStyle(
+                                          fontFamily: 'MontMed',
+                                          fontSize: 12,
+                                          color: Colors.black54)),
+                                  Text('${taskModel.taskEndDate}',
+                                      style: TextStyle(
+                                          fontFamily: 'MontMed', fontSize: 14))
+                                ]),
+                          ),
+                          Divider(),
+                          ListTile(
+                            leading: CircleAvatar(
+                              child: Icon(Icons.comment),
+                            ),
+                            title: Text('Comments Related: ',
+                                style: TextStyle(
+                                    fontFamily: 'MontMed',
+                                    fontSize: 12,
+                                    color: Colors.black54)),
+                            subtitle: Text(
+                                '${CommentService().getListAllCommentLength(commentMap, taskModel.taskId)} comment(s) ',
+                                style: TextStyle(
+                                    fontFamily: 'MontMed', fontSize: 14)),
+                            trailing: TextButton(
+                                onPressed: () {
+                                  _showStateCommentSheet(context, commentMap);
+                                },
+                                child: const Text('View All ',
+                                    style: TextStyle(
+                                        fontFamily: 'MontMed', fontSize: 14))),
+                          ),
+                          Divider(),
+                          ListTile(
+                            leading: CircleAvatar(
+                              child: Icon(Icons.people),
+                            ),
+                            title: Text('Participants: ',
+                                style: TextStyle(
+                                    fontFamily: 'MontMed',
+                                    fontSize: 12,
+                                    color: Colors.black54)),
+                            subtitle: Text(
+                                '${taskModel.taskMembers.length} members ',
+                                style: TextStyle(
+                                    fontFamily: 'MontMed', fontSize: 14)),
+                            trailing: TextButton(
+                                onPressed: () {
+                                  _showStateBottomSheet(context);
+                                },
+                                child: Text('View All ',
+                                    style: TextStyle(
+                                        fontFamily: 'MontMed', fontSize: 14))),
+                          ),
+                          Divider(),
+                          ListTile(
+                            leading: CircleAvatar(
+                              child: Icon(Icons.settings),
+                            ),
+                            title: Text('Task Modification: ',
+                                style: TextStyle(
+                                    fontFamily: 'MontMed',
+                                    fontSize: 12,
+                                    color: Colors.black54)),
+                            subtitle: Text('Advanced Options',
+                                style: TextStyle(
+                                    fontFamily: 'MontMed', fontSize: 14)),
+                            trailing: TextButton(
+                                onPressed: () {
+                                  _showStateBottomSheet3(context);
+                                },
+                                child: Text('View All ',
+                                    style: TextStyle(
+                                        fontFamily: 'MontMed', fontSize: 14))),
+                          ),
+                          Divider(),
+                          ListTile(
+                            leading: CircleAvatar(
+                              child: Icon(Icons.check),
+                            ),
+                            title: Text('Task Submit: ',
+                                style: TextStyle(
+                                    fontFamily: 'MontMed',
+                                    fontSize: 12,
+                                    color: Colors.black54)),
+                            subtitle: Text('Finalize This Task',
+                                style: TextStyle(
+                                    fontFamily: 'MontMed', fontSize: 14)),
+                            trailing: TextButton(
+                                onPressed: () {
+                                  _showYesNoDialog(context);
+                                },
+                                child: Text(
+                                    taskModel.taskStatus != 'Complete'
+                                        ? 'SUBMIT'
+                                        : 'UNSUBMIT',
+                                    style: TextStyle(
+                                        fontFamily: 'MontMed', fontSize: 14))),
+                          ),
+                          Divider(),
+                        ],
                       ),
-                      title: Text('Comments Related: ',
-                          style: TextStyle(
-                              fontFamily: 'MontMed',
-                              fontSize: 12,
-                              color: Colors.black54)),
-                      subtitle: Text(
-                          '${CommentService().getListAllCommentLength(commentMap, taskModel.taskId)} comment(s) ',
-                          style:
-                              TextStyle(fontFamily: 'MontMed', fontSize: 14)),
-                      trailing: TextButton(
-                          onPressed: () {
-                            _showStateCommentSheet(context, commentMap);
-                          },
-                          child: const Text('View All ',
-                              style: TextStyle(
-                                  fontFamily: 'MontMed', fontSize: 14))),
                     ),
-                    Divider(),
-                    ListTile(
-                      leading: CircleAvatar(
-                        child: Icon(Icons.people),
-                      ),
-                      title: Text('Participants: ',
-                          style: TextStyle(
-                              fontFamily: 'MontMed',
-                              fontSize: 12,
-                              color: Colors.black54)),
-                      subtitle: Text('${taskModel.taskMembers.length} members ',
-                          style:
-                              TextStyle(fontFamily: 'MontMed', fontSize: 14)),
-                      trailing: TextButton(
-                          onPressed: () {
-                            _showStateBottomSheet(context);
-                          },
-                          child: Text('View All ',
-                              style: TextStyle(
-                                  fontFamily: 'MontMed', fontSize: 14))),
-                    ),
-                    Divider(),
-                    ListTile(
-                      leading: CircleAvatar(
-                        child: Icon(Icons.settings),
-                      ),
-                      title: Text('Task Modification: ',
-                          style: TextStyle(
-                              fontFamily: 'MontMed',
-                              fontSize: 12,
-                              color: Colors.black54)),
-                      subtitle: Text('Advanced Options',
-                          style:
-                              TextStyle(fontFamily: 'MontMed', fontSize: 14)),
-                      trailing: TextButton(
-                          onPressed: () {
-                            _showStateBottomSheet3(context);
-                          },
-                          child: Text('View All ',
-                              style: TextStyle(
-                                  fontFamily: 'MontMed', fontSize: 14))),
-                    ),
-                    Divider(),
-                    ListTile(
-                      leading: CircleAvatar(
-                        child: Icon(Icons.check),
-                      ),
-                      title: Text('Task Submit: ',
-                          style: TextStyle(
-                              fontFamily: 'MontMed',
-                              fontSize: 12,
-                              color: Colors.black54)),
-                      subtitle: Text('Finalize This Task',
-                          style:
-                              TextStyle(fontFamily: 'MontMed', fontSize: 14)),
-                      trailing: TextButton(
-                          onPressed: () {
-                            _showYesNoDialog(context);
-                          },
-                          child: Text(
-                              taskModel.taskStatus != 'Complete'
-                                  ? 'SUBMIT'
-                                  : 'UNSUBMIT',
-                              style: TextStyle(
-                                  fontFamily: 'MontMed', fontSize: 14))),
-                    ),
-                    Divider(),
-                  ],
-                ),
+                  )),
+                ],
               ),
-            )),
-          ],
-        ),
-      ),
-    );
+            ),
+          );
+        });
   }
 
   void _showYesNoDialog(BuildContext context) {
@@ -424,6 +444,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
           userMap: userMap,
           taskId: taskModel.taskId,
           commentMap: commentMap,
+          listComments: listComments,
         );
       },
     );
@@ -643,11 +664,13 @@ class StatefulCommentSheetWidget extends StatefulWidget {
   final Map<String, dynamic> userMap;
   final String taskId;
   final Map commentMap;
+  final List<CommentModel> listComments;
   const StatefulCommentSheetWidget(
       {super.key,
       required this.userMap,
       required this.taskId,
-      required this.commentMap});
+      required this.commentMap,
+      required this.listComments});
 
   @override
   _StatefulCommentSheetWidgetState createState() =>
@@ -669,135 +692,150 @@ class _StatefulCommentSheetWidgetState
     userMap = widget.userMap;
     taskId = widget.taskId;
     commentMap = widget.commentMap;
-    listComments = CommentService().getListAllComments(commentMap, taskId);
+    listComments = widget.listComments;
     user = FirebaseAuth.instance.currentUser;
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.fromLTRB(10, 0, 10, 10),
-      child: Column(
-        children: [
-          const SizedBox(height: 20),
-          const Row(
-            children: [
-              SizedBox(width: 25),
-              Text('Comments:',
-                  style: TextStyle(fontFamily: 'MontMed', fontSize: 16)),
-            ],
-          ),
-          const SizedBox(height: 5),
-          const Divider(),
-          ListTile(
-              leading: avatar(userMap, user!.uid),
-              title: TextField(
-                controller: commentController,
-                style: const TextStyle(
-                  color: Colors.black,
-                  fontFamily: 'MontMed',
-                  fontWeight: FontWeight.normal,
-                  fontSize: 12,
-                ),
-                decoration: const InputDecoration(
-                  enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFFD9D9D9)),
-                  ),
-                  focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.black54),
-                  ),
-                  labelText: 'Post a Comment',
-                  labelStyle: TextStyle(
-                    color: Colors.black,
-                    fontFamily: 'MontMed',
-                    fontWeight: FontWeight.normal,
-                    fontSize: 14,
-                  ),
-                  filled: true,
-                  fillColor: Color(0xFFD9D9D9),
-                ),
-              ),
-              trailing: IconButton(
-                onPressed: () async {
-                  if (commentController.text != "") {
-                    await addComment();
-                    setState(() {
-                      commentController.text = "";
-                    });
-                  }
-                },
-                icon: const Icon(Icons.send),
-              )),
-          Divider(),
-          Expanded(
-              child: SingleChildScrollView(
+    return StreamBuilder<Object>(
+        stream: CommentService().databaseReference.onValue,
+        builder: (context, snapshot) {
+          if (snapshot.hasError || !snapshot.hasData) {
+            return loader();
+          }
+          var commentEvent = snapshot.data as DatabaseEvent;
+          var commentDynamic = commentEvent.snapshot.value as dynamic;
+          commentMap = Map.from(commentDynamic);
+          Map<String, dynamic> map = {};
+          commentMap.forEach((key, value) {
+            map[key.toString()] = value;
+          });
+          commentMap = CommentService().sortedMap(map);
+          listComments =
+              CommentService().getListAllComments(commentMap, taskId);
+          return Container(
+            padding: EdgeInsets.fromLTRB(10, 0, 10, 10),
             child: Column(
-              children: ListTile.divideTiles(
-                context:
-                    context, // Make sure to provide the BuildContext if this code is inside a widget build method
-                tiles: listComments.map((comment) {
-                  return ListTile(
-                      leading: avatar(userMap, comment.commentAuthor),
-                      title: Text(
-                          UserServices()
-                              .getNameFromId(userMap, comment.commentAuthor),
-                          style: TextStyle(
-                              fontFamily: 'MontMed',
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold)),
-                      subtitle: Text(
-                        comment.commentContent,
-                        style: const TextStyle(
-                            fontFamily: 'MontMed',
-                            fontSize: 13,
-                            color: Colors.black),
+              children: [
+                const SizedBox(height: 20),
+                const Row(
+                  children: [
+                    SizedBox(width: 25),
+                    Text('Comments:',
+                        style: TextStyle(fontFamily: 'MontMed', fontSize: 16)),
+                  ],
+                ),
+                const SizedBox(height: 5),
+                const Divider(),
+                ListTile(
+                    leading: avatar(userMap, user!.uid),
+                    title: TextField(
+                      controller: commentController,
+                      style: const TextStyle(
+                        color: Colors.black,
+                        fontFamily: 'MontMed',
+                        fontWeight: FontWeight.normal,
+                        fontSize: 12,
                       ),
-                      trailing: Text('${comment.commentDate}',
-                          style: TextStyle(fontFamily: 'MontMed')));
-                }),
-              ).toList(),
+                      decoration: const InputDecoration(
+                        enabledBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Color(0xFFD9D9D9)),
+                        ),
+                        focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.black54),
+                        ),
+                        labelText: 'Post a Comment',
+                        labelStyle: TextStyle(
+                          color: Colors.black,
+                          fontFamily: 'MontMed',
+                          fontWeight: FontWeight.normal,
+                          fontSize: 14,
+                        ),
+                        filled: true,
+                        fillColor: Color(0xFFD9D9D9),
+                      ),
+                    ),
+                    trailing: IconButton(
+                      onPressed: () async {
+                        if (commentController.text != "") {
+                          await addComment();
+                          setState(() {
+                            commentController.text = "";
+                          });
+                        }
+                      },
+                      icon: const Icon(Icons.send),
+                    )),
+                Divider(),
+                Expanded(
+                    child: SingleChildScrollView(
+                  child: Column(
+                    children: ListTile.divideTiles(
+                      context:
+                          context, // Make sure to provide the BuildContext if this code is inside a widget build method
+                      tiles: listComments.map((comment) {
+                        return ListTile(
+                            leading: avatar(userMap, comment.commentAuthor),
+                            title: Text(
+                                UserServices().getNameFromId(
+                                    userMap, comment.commentAuthor),
+                                style: TextStyle(
+                                    fontFamily: 'MontMed',
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold)),
+                            subtitle: Text(
+                              comment.commentContent,
+                              style: const TextStyle(
+                                  fontFamily: 'MontMed',
+                                  fontSize: 13,
+                                  color: Colors.black),
+                            ),
+                            trailing: Text('${comment.commentDate}',
+                                style: TextStyle(fontFamily: 'MontMed')));
+                      }),
+                    ).toList(),
+                  ),
+                )),
+              ],
             ),
-          )),
-        ],
-      ),
-    );
+          );
+        });
   }
 
   Future<void> addComment() async {
     CommentService commentService = CommentService();
     commentService.addComment(commentController.text, taskId);
-    DatabaseEvent commentDatabaseEvent =
-        await commentService.databaseReference.child('comments').once();
-    if (commentDatabaseEvent.snapshot.value != null &&
-        commentDatabaseEvent.snapshot.value is Map) {
-      setState(() {
-        commentMap = Map.from(commentDatabaseEvent.snapshot.value as dynamic);
-        List<MapEntry<dynamic, dynamic>> sortedEntries =
-            commentMap.entries.toList();
-        sortedEntries.sort((a, b) {
-          return (b.value['timestamp'] as int)
-              .compareTo(a.value['timestamp'] as int);
-        });
-        commentMap = Map.fromEntries(
-          sortedEntries.map(
-            (entry) {
-              return MapEntry(
-                entry.key,
-                {
-                  'timestamp': entry.value['timestamp'],
-                  'commentId': entry.value['commentId'],
-                  'commentContent': entry.value['commentContent'],
-                  'commentAuthor': entry.value['commentAuthor'],
-                  'commentDate': entry.value['commentDate'],
-                  'taskId': entry.value['taskId'],
-                },
-              );
-            },
-          ),
-        );
-        listComments = commentService.getListAllComments(commentMap, taskId);
-      });
-    }
+    // DatabaseEvent commentDatabaseEvent =
+    //     await commentService.databaseReference.child('comments').once();
+    // if (commentDatabaseEvent.snapshot.value != null &&
+    //     commentDatabaseEvent.snapshot.value is Map) {
+    //   commentMap = Map.from(commentDatabaseEvent.snapshot.value as dynamic);
+    //   List<MapEntry<dynamic, dynamic>> sortedEntries =
+    //       commentMap.entries.toList();
+    //   sortedEntries.sort((a, b) {
+    //     return (b.value['timestamp'] as int)
+    //         .compareTo(a.value['timestamp'] as int);
+    //   });
+    //   commentMap = Map.fromEntries(
+    //     sortedEntries.map(
+    //       (entry) {
+    //         return MapEntry(
+    //           entry.key,
+    //           {
+    //             'timestamp': entry.value['timestamp'],
+    //             'commentId': entry.value['commentId'],
+    //             'commentContent': entry.value['commentContent'],
+    //             'commentAuthor': entry.value['commentAuthor'],
+    //             'commentDate': entry.value['commentDate'],
+    //             'taskId': entry.value['taskId'],
+    //           },
+    //         );
+    //       },
+    //     ),
+    //   );
+    //   listComments = commentService.getListAllComments(commentMap, taskId);
+    // }
   }
 }
 

@@ -949,6 +949,7 @@ class _ExpansionTileTasksState extends State<ExpansionTileTasks> {
                             userMap: userMap,
                             taskMap: taskMap,
                             commentMap: commentMap,
+                            userModel: currentUserModel,
                           );
                         }
                       },

@@ -47,9 +47,6 @@ class _ProjectCreateStep3State extends State<ProjectCreateStep3> {
     Phase(phaseName: "Planning", phraseDescription: "Description"),
     Phase(phaseName: "Design", phraseDescription: "Description"),
     Phase(phaseName: "Development", phraseDescription: "Description"),
-    Phase(
-        phaseName: "Requirement and Gathering",
-        phraseDescription: "Description"),
     Phase(phaseName: "Testing", phraseDescription: "Description"),
     Phase(phaseName: "Deployment", phraseDescription: "Description"),
     Phase(phaseName: "Maintenance", phraseDescription: "Description"),
@@ -76,9 +73,9 @@ class _ProjectCreateStep3State extends State<ProjectCreateStep3> {
     teamLeaderIdController = widget.teamLeaderId;
     currentUserModel = widget.currentUserModel;
     projectMap = widget.projectMap;
-    phrasesList.forEach((element) {
+    for (var element in phrasesList) {
       phaseNames.add(element.phaseName);
-    });
+    }
     super.initState();
   }
 
@@ -212,8 +209,8 @@ class _ProjectCreateStep3State extends State<ProjectCreateStep3> {
                         ProjectServices projectServices = ProjectServices();
                         if (additionPhrases.isNotEmpty) {
                           for (var phase in additionPhrases) {
-                            phrasesList.add(phase);
                             phaseNames.add(phase.phaseName);
+                            phrasesList.add(phase);
                           }
                         }
                         projectServices.addProject(

@@ -5,39 +5,44 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 
 class CommentService {
-  DatabaseReference databaseReference = FirebaseDatabase.instance.ref();
+  DatabaseReference databaseReference =
+      FirebaseDatabase.instance.ref().child('comments');
   Future<Map<String, dynamic>> getCommentMap() async {
     Map<String, dynamic> commentMap = {};
-    DatabaseEvent databaseEvent =
-        await databaseReference.child('comments').once();
+    DatabaseEvent databaseEvent = await databaseReference.once();
     if (databaseEvent.snapshot.value != null) {
       commentMap = Map.from(databaseEvent.snapshot.value as dynamic);
-      List<MapEntry<dynamic, dynamic>> sortedEntries =
-          commentMap.entries.toList();
-      sortedEntries.sort((a, b) {
-        return (b.value['timestamp'] as int)
-            .compareTo(a.value['timestamp'] as int);
-      });
-      commentMap = Map.fromEntries(
-        sortedEntries.map(
-          (entry) {
-            return MapEntry(
-              entry.key,
-              {
-                'timestamp': entry.value['timestamp'],
-                'commentId': entry.value['commentId'],
-                'commentContent': entry.value['commentContent'],
-                'commentAuthor': entry.value['commentAuthor'],
-                'commentDate': entry.value['commentDate'],
-                'taskId': entry.value['taskId'],
-              },
-            );
-          },
-        ),
-      );
+      commentMap = sortedMap(commentMap);
       return commentMap;
     }
     return {};
+  }
+
+  Map<String, dynamic> sortedMap(Map<String, dynamic> commentMap) {
+    List<MapEntry<dynamic, dynamic>> sortedEntries =
+        commentMap.entries.toList();
+    sortedEntries.sort((a, b) {
+      return (b.value['timestamp'] as int)
+          .compareTo(a.value['timestamp'] as int);
+    });
+    commentMap = Map.fromEntries(
+      sortedEntries.map(
+        (entry) {
+          return MapEntry(
+            entry.key,
+            {
+              'timestamp': entry.value['timestamp'],
+              'commentId': entry.value['commentId'],
+              'commentContent': entry.value['commentContent'],
+              'commentAuthor': entry.value['commentAuthor'],
+              'commentDate': entry.value['commentDate'],
+              'taskId': entry.value['taskId'],
+            },
+          );
+        },
+      ),
+    );
+    return commentMap;
   }
 
   List<CommentModel> getListAllComments(

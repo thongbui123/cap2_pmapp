@@ -51,7 +51,8 @@ class TaskService {
       TaskModel taskModel = TaskModel.fromMap(Map<String, dynamic>.from(task));
       DateTime now = DateTime.now();
       DateTime endDate = DateTime.parse(taskModel.taskEndDate);
-      if (taskModel.taskMembers.contains(memberId) &&
+      if ((taskModel.taskMembers.contains(memberId) ||
+              taskModel.assignById == memberId) &&
           taskModel.projectId == projectId) {
         if (taskModel.taskStatus != 'Complete' && now.isBefore(endDate)) {
           listAllTasks.add(taskModel);
@@ -66,7 +67,8 @@ class TaskService {
     List<TaskModel> listAllTasks = [];
     for (var task in taskMap.values) {
       TaskModel taskModel = TaskModel.fromMap(Map<String, dynamic>.from(task));
-      if (taskModel.taskMembers.contains(memberId)) {
+      if ((taskModel.taskMembers.contains(memberId) ||
+          taskModel.assignById == memberId)) {
         listAllTasks.add(taskModel);
       }
     }
@@ -80,7 +82,8 @@ class TaskService {
       TaskModel taskModel = TaskModel.fromMap(Map<String, dynamic>.from(task));
       DateTime now = DateTime.now();
       DateTime endDate = DateTime.parse(taskModel.taskEndDate);
-      if (taskModel.taskMembers.contains(memberId) &&
+      if ((taskModel.taskMembers.contains(memberId) ||
+              taskModel.assignById == memberId) &&
           endDate.isAfter(now) &&
           (taskModel.taskStatus == 'Incomplete')) {
         listAllTasks.add(taskModel);
@@ -94,7 +97,7 @@ class TaskService {
     int count = 0;
     for (var task in taskMap.values) {
       TaskModel taskModel = TaskModel.fromMap(Map<String, dynamic>.from(task));
-      if (taskModel.taskMembers.contains(projectId)) {
+      if (taskModel.projectId == projectId) {
         count++;
       }
     }
@@ -105,7 +108,8 @@ class TaskService {
     int count = 0;
     for (var task in taskMap.values) {
       TaskModel taskModel = TaskModel.fromMap(Map<String, dynamic>.from(task));
-      if (taskModel.taskMembers.contains(memberId)) {
+      if ((taskModel.taskMembers.contains(memberId) ||
+          taskModel.assignById == memberId)) {
         count++;
       }
     }
@@ -117,7 +121,8 @@ class TaskService {
     int count = 0;
     for (var task in taskMap.values) {
       TaskModel taskModel = TaskModel.fromMap(Map<String, dynamic>.from(task));
-      if (taskModel.taskMembers.contains(memberId) &&
+      if ((taskModel.taskMembers.contains(memberId) ||
+              taskModel.assignById == memberId) &&
           taskModel.projectId == projectId) {
         count++;
       }
@@ -131,7 +136,8 @@ class TaskService {
       TaskModel taskModel = TaskModel.fromMap(Map<String, dynamic>.from(task));
       DateTime now = DateTime.now();
       DateTime endDate = DateTime.parse(taskModel.taskEndDate);
-      if (taskModel.taskMembers.contains(id) && now.isAfter(endDate)) {
+      if ((taskModel.taskMembers.contains(id) || taskModel.assignById == id) &&
+          now.isAfter(endDate)) {
         if (taskModel.taskStatus == 'Incomplete') {
           listOverdou.add(taskModel);
         }
@@ -147,7 +153,7 @@ class TaskService {
       TaskModel taskModel = TaskModel.fromMap(Map<String, dynamic>.from(task));
       DateTime now = DateTime.now();
       DateTime endDate = DateTime.parse(taskModel.taskEndDate);
-      if (taskModel.taskMembers.contains(id) &&
+      if ((taskModel.taskMembers.contains(id) || taskModel.assignById == id) &&
           now.isAfter(endDate) &&
           taskModel.projectId == projectId) {
         if (taskModel.taskStatus == 'Incomplete') {
@@ -163,7 +169,7 @@ class TaskService {
     List<TaskModel> listOverdou = [];
     for (var task in taskMap.values) {
       TaskModel taskModel = TaskModel.fromMap(Map<String, dynamic>.from(task));
-      if (taskModel.taskMembers.contains(id)) {
+      if ((taskModel.taskMembers.contains(id) || taskModel.assignById == id)) {
         if (taskModel.taskStatus == 'Complete') {
           listOverdou.add(taskModel);
         }
@@ -177,7 +183,7 @@ class TaskService {
     List<TaskModel> listOverdou = [];
     for (var task in taskMap.values) {
       TaskModel taskModel = TaskModel.fromMap(Map<String, dynamic>.from(task));
-      if (taskModel.taskMembers.contains(id) &&
+      if ((taskModel.taskMembers.contains(id) || taskModel.assignById == id) &&
           taskModel.projectId == projectId) {
         if (taskModel.taskStatus == 'Complete') {
           listOverdou.add(taskModel);
@@ -193,7 +199,8 @@ class TaskService {
       TaskModel taskModel = TaskModel.fromMap(Map<String, dynamic>.from(task));
       DateTime now = DateTime.now();
       DateTime endDate = DateTime.parse(taskModel.taskEndDate);
-      if (taskModel.taskMembers.contains(id) && now.isAfter(endDate)) {
+      if ((taskModel.taskMembers.contains(id) || taskModel.assignById == id) &&
+          now.isAfter(endDate)) {
         count++;
       }
     }
