@@ -40,7 +40,7 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
   List<ProjectModel> joinedProjects = [];
   int overdouProjectNumber = 0;
   List<TaskModel> listAllTasks = [];
-
+  TextEditingController editingController = TextEditingController();
   @override
   initState() {
     super.initState();
@@ -83,15 +83,16 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Expanded(
+                        Expanded(
                           child: TextField(
-                            style: TextStyle(
+                            controller: editingController,
+                            style: const TextStyle(
                               color: Colors.black,
                               fontFamily: 'MontMed',
                               fontWeight: FontWeight.normal,
                               fontSize: 16,
                             ),
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                               enabledBorder: UnderlineInputBorder(
                                 borderSide:
                                     BorderSide(color: Color(0xFFD9D9D9)),
@@ -121,11 +122,12 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
                                   MaterialPageRoute(
                                     builder: (context) => SearchScreen(
                                       userModel: currentUserModel!,
+                                      output: editingController.text.trim(),
                                     ),
                                   ),
                                 );
                               },
-                              icon: Icon(Icons.search),
+                              icon: const Icon(Icons.search),
                             )),
                       ],
                     ),
@@ -143,11 +145,11 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
                                 5.0), // Set the border radius
                           ),
                           child: Padding(
-                            padding: EdgeInsets.all(15),
+                            padding: const EdgeInsets.all(15),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: <Widget>[
-                                SizedBox(height: 5),
+                                const SizedBox(height: 5),
                                 Row(
                                   children: <Widget>[
                                     IconButton(
@@ -164,18 +166,18 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
                                           ),
                                         );
                                       },
-                                      icon: Icon(
+                                      icon: const Icon(
                                         Icons.layers,
                                         color: Colors.blueAccent,
                                       ),
                                     ),
                                   ],
                                 ),
-                                SizedBox(height: 5),
+                                const SizedBox(height: 5),
                                 Row(
                                   children: <Widget>[
                                     Container(
-                                      child: Text(
+                                      child: const Text(
                                         'TASKS',
                                         style: TextStyle(
                                             fontFamily: 'MontMed',
@@ -184,12 +186,12 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
                                     ),
                                   ],
                                 ),
-                                Divider(),
+                                const Divider(),
                                 Row(
                                   children: <Widget>[
                                     Text(
                                       '${currentUserModel!.userRole != 'Admin' ? TaskService().getJoinedTaskNumber(taskMap, currentUserModel!.userId) : taskMap.length} on going',
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                           fontSize: 12, fontFamily: 'MontMed'),
                                     )
                                   ],
@@ -198,7 +200,7 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
                             ),
                           )),
                     ),
-                    SizedBox(width: 10),
+                    const SizedBox(width: 10),
                     Expanded(
                       child: Container(
                         decoration: BoxDecoration(
@@ -208,11 +210,11 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
                         ),
                         //height: 125,
                         child: Padding(
-                          padding: EdgeInsets.all(15),
+                          padding: const EdgeInsets.all(15),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
-                              SizedBox(height: 5),
+                              const SizedBox(height: 5),
                               Row(
                                 children: <Widget>[
                                   IconButton(
@@ -230,18 +232,18 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
                                         ),
                                       );
                                     },
-                                    icon: Icon(
+                                    icon: const Icon(
                                       Icons.folder,
                                       color: Colors.deepOrangeAccent,
                                     ),
                                   ),
                                 ],
                               ),
-                              SizedBox(height: 5),
+                              const SizedBox(height: 5),
                               Row(
                                 children: <Widget>[
                                   Container(
-                                    child: Text(
+                                    child: const Text(
                                       'PROJECTS',
                                       style: TextStyle(
                                           fontFamily: 'MontMed',
@@ -250,12 +252,12 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
                                   ),
                                 ],
                               ),
-                              Divider(),
+                              const Divider(),
                               Row(
                                 children: <Widget>[
                                   Text(
                                     '${currentUserModel!.userRole != 'Admin' ? ProjectServices().getJoinedProjectNumber(projectMap, currentUserModel!.userId) : projectMap.length} on going',
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                         fontSize: 12, fontFamily: 'MontMed'),
                                   )
                                 ],
@@ -273,29 +275,30 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
                     children: [
                       Expanded(
                         child: Container(
-                          padding: EdgeInsets.all(15),
+                          padding: const EdgeInsets.all(15),
                           color: Colors.indigo[50],
                           child: Row(
                             children: [
-                              Icon(Icons.playlist_remove_rounded,
+                              const Icon(Icons.playlist_remove_rounded,
                                   size: 30, color: Colors.redAccent),
-                              SizedBox(width: 10),
+                              const SizedBox(width: 10),
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text('Overdue:',
+                                  const Text('Overdue:',
                                       style: TextStyle(
                                           fontFamily: 'MontMed', fontSize: 12)),
                                   Text(
                                       '${currentUserModel!.userRole != 'Admin' ? taskService.getOverdouTaskNumber(taskMap, currentUserModel!.userId) : taskService.getAllOverdouTaskNumber(taskMap)} Task(s)',
-                                      style: TextStyle(fontFamily: 'MontMed'))
+                                      style: const TextStyle(
+                                          fontFamily: 'MontMed'))
                                 ],
                               ),
                             ],
                           ),
                         ),
                       ),
-                      SizedBox(width: 10),
+                      const SizedBox(width: 10),
                       Expanded(
                         child: Container(
                           padding: const EdgeInsets.all(15),
@@ -316,7 +319,7 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
                                     Text(
                                         '${currentUserModel!.userRole == 'Admin' ? projectServices.getAllCompleteProjectNumber(projectMap) : projectServices.getOverdueProjectNumber(projectMap, currentUserModel!.userId)} Project(s)',
                                         overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
+                                        style: const TextStyle(
                                           fontFamily: 'MontMed',
                                         ))
                                   ],
@@ -329,57 +332,59 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
                     ],
                   ),
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 Container(
                   child: Row(
                     children: [
                       Expanded(
                         child: Container(
-                          padding: EdgeInsets.all(15),
+                          padding: const EdgeInsets.all(15),
                           color: Colors.indigo[50],
                           child: Row(
                             children: [
-                              Icon(Icons.layers,
+                              const Icon(Icons.layers,
                                   size: 30, color: Colors.blueAccent),
-                              SizedBox(width: 10),
+                              const SizedBox(width: 10),
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text('Finalized:',
+                                  const Text('Finalized:',
                                       style: TextStyle(
                                           fontFamily: 'MontMed', fontSize: 12)),
                                   Text(
                                       '${currentUserModel!.userRole != 'Admin' ? taskService.getCompleteTaskNumber(taskMap, currentUserModel!.userId) : taskService.getAllCompleteTaskNumber(taskMap)} Task(s)',
                                       overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(fontFamily: 'MontMed'))
+                                      style: const TextStyle(
+                                          fontFamily: 'MontMed'))
                                 ],
                               ),
                             ],
                           ),
                         ),
                       ),
-                      SizedBox(width: 10),
+                      const SizedBox(width: 10),
                       Expanded(
                         child: Container(
-                          padding: EdgeInsets.all(15),
+                          padding: const EdgeInsets.all(15),
                           color: Colors.deepOrange[50],
                           child: Row(
                             children: [
-                              Icon(Icons.folder_special,
+                              const Icon(Icons.folder_special,
                                   size: 30, color: Colors.green),
-                              SizedBox(width: 10),
+                              const SizedBox(width: 10),
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text('Finalized:',
+                                    const Text('Finalized:',
                                         style: TextStyle(
                                             fontFamily: 'MontMed',
                                             fontSize: 12)),
                                     Text(
                                         '${currentUserModel!.userRole != 'Admin' ? projectServices.getCompleteProjectNumber(projectMap, currentUserModel!.userId) : projectServices.getAllCompleteProjectNumber(projectMap)} Project(s)',
                                         overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(fontFamily: 'MontMed'))
+                                        style: const TextStyle(
+                                            fontFamily: 'MontMed'))
                                   ],
                                 ),
                               ),
@@ -392,7 +397,7 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
                 ),
                 const SizedBox(height: 10),
                 Container(
-                  padding: EdgeInsets.all(5),
+                  padding: const EdgeInsets.all(5),
                   color: Colors.green[50],
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,

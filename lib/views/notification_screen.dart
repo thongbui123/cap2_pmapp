@@ -100,7 +100,9 @@ class _NotificationScreenState extends State<NotificationScreen> {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) => profile_screen(),
+                                        builder: (context) => profile_screen(
+                                          userModel: userModel,
+                                        ),
                                       ),
                                     );
                                   }

@@ -15,7 +15,8 @@ import '../models/user_model.dart';
 import '../services/image_services.dart';
 
 class profile_screen extends StatefulWidget {
-  const profile_screen({Key? key}) : super(key: key);
+  final UserModel userModel;
+  const profile_screen({Key? key, required this.userModel}) : super(key: key);
 
   @override
   State<profile_screen> createState() => _profile_screenState();
@@ -47,7 +48,11 @@ class _profile_screenState extends State<profile_screen> {
     if (user != null) {
       userRef = FirebaseDatabase.instance.ref().child('users').child(user!.uid);
     }
-    _getUserDetails();
+    if (widget.userModel.userId == user!.uid) {
+      _getUserDetails();
+    } else {
+      userModel = widget.userModel;
+    }
   }
 
   @override
@@ -101,57 +106,65 @@ class _profile_screenState extends State<profile_screen> {
                                             : NetworkImage(
                                                 userModel!.profileImage)),
                               ),
-                              Container(
-                                width: 10,
-                                height: 2,
-                                color: Colors.lightBlue,
+                              Visibility(
+                                visible: user!.uid == widget.userModel.userId,
+                                child: Container(
+                                  width: 10,
+                                  height: 2,
+                                  color: Colors.lightBlue,
+                                ),
                               ),
                               Ink(
                                 decoration: const ShapeDecoration(
                                   color: Colors.lightBlue,
                                   shape: CircleBorder(),
                                 ),
-                                child: IconButton(
-                                  icon: const Icon(
-                                    Icons.camera_alt,
-                                    size: 16,
+                                child: Visibility(
+                                  visible: user!.uid == widget.userModel.userId,
+                                  child: IconButton(
+                                    icon: const Icon(
+                                      Icons.camera_alt,
+                                      size: 16,
+                                    ),
+                                    color: Colors.white,
+                                    onPressed: () {
+                                      showModalBottomSheet(
+                                          context: context,
+                                          builder: (context) {
+                                            return Padding(
+                                              padding: const EdgeInsets.all(10),
+                                              child: Column(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  ListTile(
+                                                    leading:
+                                                        const Icon(Icons.image),
+                                                    title: const Text(
+                                                        'From Gallery'),
+                                                    onTap: () {
+                                                      _pickImageFromGallery;
+                                                      Navigator.of(context)
+                                                          .pop();
+                                                    },
+                                                  ),
+                                                  ListTile(
+                                                    leading: const Icon(
+                                                        Icons.camera_alt),
+                                                    title: const Text(
+                                                        'From Camera'),
+                                                    onTap: () {
+                                                      _pickImageFromCamera(
+                                                          ImageSource.camera);
+                                                      Navigator.of(context)
+                                                          .pop();
+                                                    },
+                                                  ),
+                                                ],
+                                              ),
+                                            );
+                                          });
+                                    },
                                   ),
-                                  color: Colors.white,
-                                  onPressed: () {
-                                    showModalBottomSheet(
-                                        context: context,
-                                        builder: (context) {
-                                          return Padding(
-                                            padding: const EdgeInsets.all(10),
-                                            child: Column(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                ListTile(
-                                                  leading:
-                                                      const Icon(Icons.image),
-                                                  title: const Text(
-                                                      'From Gallery'),
-                                                  onTap: () {
-                                                    _pickImageFromGallery;
-                                                    Navigator.of(context).pop();
-                                                  },
-                                                ),
-                                                ListTile(
-                                                  leading: const Icon(
-                                                      Icons.camera_alt),
-                                                  title:
-                                                      const Text('From Camera'),
-                                                  onTap: () {
-                                                    _pickImageFromCamera(
-                                                        ImageSource.camera);
-                                                    Navigator.of(context).pop();
-                                                  },
-                                                ),
-                                              ],
-                                            ),
-                                          );
-                                        });
-                                  },
                                 ),
                               ),
                             ],
@@ -216,11 +229,14 @@ class _profile_screenState extends State<profile_screen> {
                             subtitle: Text('+84 444 131 49',
                                 style: TextStyle(
                                     fontFamily: 'MontMed', fontSize: 14)),
-                            trailing: IconButton(
-                              onPressed: () {},
-                              icon: Icon(
-                                Icons.border_color,
-                                size: 15,
+                            trailing: Visibility(
+                              visible: user!.uid == widget.userModel.userId,
+                              child: IconButton(
+                                onPressed: () {},
+                                icon: Icon(
+                                  Icons.border_color,
+                                  size: 15,
+                                ),
                               ),
                             ),
                           ),
@@ -235,11 +251,14 @@ class _profile_screenState extends State<profile_screen> {
                                 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla tempus mollis odio, et feugiat sem tincidunt sed. Integer at porttitor massa. Ut ullamcorper eros non orci porta posuere.',
                                 style: TextStyle(
                                     fontFamily: 'MontMed', fontSize: 14)),
-                            trailing: IconButton(
-                              onPressed: () {},
-                              icon: Icon(
-                                Icons.border_color,
-                                size: 14,
+                            trailing: Visibility(
+                              visible: user!.uid == widget.userModel.userId,
+                              child: IconButton(
+                                onPressed: () {},
+                                icon: Icon(
+                                  Icons.border_color,
+                                  size: 14,
+                                ),
                               ),
                             ),
                           ),

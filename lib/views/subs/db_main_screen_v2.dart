@@ -38,7 +38,7 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
   List<TaskModel> joinedTaskList = [];
   bool _customTileExpanded0 = true;
   bool _customTileExpanded1 = true;
-
+  TextEditingController textEditingController = TextEditingController();
   List<Project> projects = [
     Project(name: 'Project A', numOfPeople: 5, color: Colors.blue),
     Project(name: 'Project B', numOfPeople: 3, color: Colors.green),
@@ -70,14 +70,14 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
         ? const Center(child: CircularProgressIndicator())
         : SafeArea(
             child: SingleChildScrollView(
-            padding: EdgeInsets.all(defaultPadding),
+            padding: const EdgeInsets.all(defaultPadding),
             child: Column(
               children: [
                 Row(
                   children: [
                     Text(
                       'WELCOME BACK, ${currentUserModel?.userFirstName.toUpperCase()}',
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontFamily: 'MontMed',
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
@@ -85,22 +85,23 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                     ),
                   ],
                 ),
-                Divider(),
-                SizedBox(height: 10),
+                const Divider(),
+                const SizedBox(height: 10),
                 Align(
                   child: Container(
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Expanded(
+                        Expanded(
                           child: TextField(
-                            style: TextStyle(
+                            controller: textEditingController,
+                            style: const TextStyle(
                               color: Colors.black,
                               fontFamily: 'MontMed',
                               fontWeight: FontWeight.normal,
                               fontSize: 16,
                             ),
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                               enabledBorder: UnderlineInputBorder(
                                 borderSide:
                                     BorderSide(color: Color(0xFFD9D9D9)),
@@ -130,17 +131,18 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                                   MaterialPageRoute(
                                     builder: (context) => SearchScreen(
                                       userModel: currentUserModel!,
+                                      output: textEditingController.text.trim(),
                                     ),
                                   ),
                                 );
                               },
-                              icon: Icon(Icons.search),
+                              icon: const Icon(Icons.search),
                             )),
                       ],
                     ),
                   ),
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
@@ -152,11 +154,11 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                                 5.0), // Set the border radius
                           ),
                           child: Padding(
-                            padding: EdgeInsets.all(15),
+                            padding: const EdgeInsets.all(15),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: <Widget>[
-                                SizedBox(height: 5),
+                                const SizedBox(height: 5),
                                 Row(
                                   children: <Widget>[
                                     IconButton(
@@ -173,18 +175,18 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                                           ),
                                         );
                                       },
-                                      icon: Icon(
+                                      icon: const Icon(
                                         Icons.layers,
                                         color: Colors.blueAccent,
                                       ),
                                     ),
                                   ],
                                 ),
-                                SizedBox(height: 5),
+                                const SizedBox(height: 5),
                                 Row(
                                   children: <Widget>[
                                     Container(
-                                      child: Text(
+                                      child: const Text(
                                         'TASKS',
                                         style: TextStyle(
                                             fontFamily: 'MontMed',
@@ -193,12 +195,12 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                                     ),
                                   ],
                                 ),
-                                Divider(),
+                                const Divider(),
                                 Row(
                                   children: <Widget>[
                                     Text(
                                       '${TaskService().getJoinedTaskNumber(taskMap, currentUserModel!.userId)} Task in Progress',
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                           fontSize: 12, fontFamily: 'MontMed'),
                                     )
                                   ],
@@ -207,7 +209,7 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                             ),
                           )),
                     ),
-                    SizedBox(width: 10),
+                    const SizedBox(width: 10),
                     Expanded(
                       child: Container(
                         decoration: BoxDecoration(
@@ -217,11 +219,11 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                         ),
                         //height: 125,
                         child: Padding(
-                          padding: EdgeInsets.all(15),
+                          padding: const EdgeInsets.all(15),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
-                              SizedBox(height: 5),
+                              const SizedBox(height: 5),
                               Row(
                                 children: <Widget>[
                                   IconButton(
@@ -239,18 +241,18 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                                         ),
                                       );
                                     },
-                                    icon: Icon(
+                                    icon: const Icon(
                                       Icons.folder,
                                       color: Colors.deepOrangeAccent,
                                     ),
                                   ),
                                 ],
                               ),
-                              SizedBox(height: 5),
+                              const SizedBox(height: 5),
                               Row(
                                 children: <Widget>[
                                   Container(
-                                    child: Text(
+                                    child: const Text(
                                       'PROJECTS',
                                       style: TextStyle(
                                           fontFamily: 'MontMed',
@@ -259,12 +261,12 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                                   ),
                                 ],
                               ),
-                              Divider(),
+                              const Divider(),
                               Row(
                                 children: <Widget>[
                                   Text(
                                     '${projectServices.getJoinedProjectNumber(projectMap, currentUserModel!.userId)} Project(s) Joined',
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                         fontSize: 12, fontFamily: 'MontMed'),
                                   )
                                 ],
@@ -276,30 +278,30 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                     ),
                   ],
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 Container(
-                  padding: EdgeInsets.all(10),
+                  padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
                     color: Colors.indigo[50],
                     borderRadius:
                         BorderRadius.circular(5.0), // Set the border radius
                   ),
                   child: ExpansionTile(
-                    shape: RoundedRectangleBorder(
+                    shape: const RoundedRectangleBorder(
                       borderRadius: BorderRadius.zero,
                     ),
                     initiallyExpanded: true,
                     title: Row(
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.sim_card_alert_outlined,
                           color: Colors.red,
                         ),
-                        SizedBox(width: 10),
+                        const SizedBox(width: 10),
                         Text(
                             'Overdue Tasks (${TaskService().getOverdouTaskNumber(taskMap, currentUserModel!.userId)})',
-                            style:
-                                TextStyle(fontFamily: 'MontMed', fontSize: 13)),
+                            style: const TextStyle(
+                                fontFamily: 'MontMed', fontSize: 13)),
                       ],
                     ),
                     trailing: Icon(
@@ -308,7 +310,7 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                           : Icons.arrow_drop_down,
                     ),
                     children: [
-                      Divider(),
+                      const Divider(),
                       Container(
                         child: Column(
                           children: overduoTaskList.map((task) {
@@ -319,23 +321,23 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                               title: Text('Task Name: ${task.taskName}',
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                       fontFamily: 'MontMed', fontSize: 13)),
                               subtitle: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Row(
                                     children: [
-                                      Icon(
+                                      const Icon(
                                         Icons.folder_open_sharp,
                                         size: 13,
                                       ),
-                                      SizedBox(width: 5),
+                                      const SizedBox(width: 5),
                                       Expanded(
                                         child: Text(
                                             'Project: ${projectServices.getProjectNameFromId(projectMap, task.projectId)}',
                                             overflow: TextOverflow.ellipsis,
-                                            style: TextStyle(
+                                            style: const TextStyle(
                                                 fontFamily: 'MontMed',
                                                 fontSize: 12)),
                                       )
@@ -343,7 +345,7 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                                   ),
                                 ],
                               ),
-                              trailing: Column(
+                              trailing: const Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Text('Priority: ',
@@ -368,29 +370,29 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                     },
                   ),
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 Container(
-                  padding: EdgeInsets.all(10),
+                  padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
                     color: Colors.indigo[50],
                     borderRadius:
                         BorderRadius.circular(5.0), // Set the border radius
                   ),
                   child: ExpansionTile(
-                    shape: RoundedRectangleBorder(
+                    shape: const RoundedRectangleBorder(
                       borderRadius: BorderRadius.zero,
                     ),
                     initiallyExpanded: true,
                     title: Container(
                       child: Row(
                         children: [
-                          Icon(
+                          const Icon(
                             Icons.task_outlined,
                             color: Colors.blue,
                           ),
-                          SizedBox(width: 10),
+                          const SizedBox(width: 10),
                           Text('Recent Tasks (${joinedTaskList.length})',
-                              style: TextStyle(
+                              style: const TextStyle(
                                   fontFamily: 'MontMed', fontSize: 13)),
                         ],
                       ),
@@ -401,7 +403,7 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                           : Icons.arrow_drop_down,
                     ),
                     children: [
-                      Divider(),
+                      const Divider(),
                       Container(
                         child: Column(
                           children: joinedTaskList.map((task) {
@@ -412,23 +414,23 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                               title: Text('Task Name: ${task.taskName}',
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                       fontFamily: 'MontMed', fontSize: 13)),
                               subtitle: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Row(
                                     children: [
-                                      Icon(
+                                      const Icon(
                                         Icons.folder_open_sharp,
                                         size: 13,
                                       ),
-                                      SizedBox(width: 5),
+                                      const SizedBox(width: 5),
                                       Expanded(
                                         child: Text(
                                             'Project: ${projectServices.getProjectNameFromId(projectMap, task.projectId)}',
                                             overflow: TextOverflow.ellipsis,
-                                            style: TextStyle(
+                                            style: const TextStyle(
                                                 fontFamily: 'MontMed',
                                                 fontSize: 12)),
                                       )
@@ -436,7 +438,7 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                                   ),
                                 ],
                               ),
-                              trailing: Column(
+                              trailing: const Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Text('Priority: ',
@@ -461,7 +463,7 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                     },
                   ),
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 Container(
                   color: Colors.deepOrange[50],
                   child: Container(
@@ -472,8 +474,8 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        SizedBox(height: 15),
-                        Row(
+                        const SizedBox(height: 15),
+                        const Row(
                           children: [
                             SizedBox(width: 20),
                             Text('RECENT PROJECTS',
@@ -482,8 +484,8 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                                     fontWeight: FontWeight.bold))
                           ],
                         ),
-                        SizedBox(height: 5),
-                        Padding(
+                        const SizedBox(height: 5),
+                        const Padding(
                           padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
                           child: Divider(),
                         ),
@@ -495,7 +497,7 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                                 child: Icon(Icons.folder, color: Colors.orange),
                               ),
                               title: Text(project.projectName,
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                       fontFamily: 'MontMed', fontSize: 13)),
                               subtitle: Text(
                                 '${project.projectMembers.length.toString()} Participants',
@@ -505,7 +507,7 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                             );
                           }).toList(),
                         ),
-                        SizedBox(height: 15),
+                        const SizedBox(height: 15),
                       ],
                     ),
                   ),

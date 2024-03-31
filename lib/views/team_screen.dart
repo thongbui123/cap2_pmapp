@@ -1,10 +1,11 @@
 import 'package:capstone2_project_management_app/models/team_model.dart';
+import 'package:capstone2_project_management_app/views/Testing.dart';
 import 'package:capstone2_project_management_app/views/subs/add_team_screen.dart';
-import 'package:capstone2_project_management_app/views/profile_screen.dart';
 import 'package:capstone2_project_management_app/views/update_team_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+
 import 'login_screen.dart';
 
 class TeamScreen extends StatefulWidget {
@@ -45,7 +46,7 @@ class _TeamScreenState extends State<TeamScreen> {
               onPressed: () {
                 Navigator.of(context)
                     .push(MaterialPageRoute(builder: (context) {
-                  return const profile_screen();
+                  return ProfileScreen();
                 }));
               },
               icon: const Icon(Icons.person)),

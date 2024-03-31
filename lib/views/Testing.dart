@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -84,212 +85,211 @@ class _ProfileScreenState extends State<ProfileScreen> {
       body: userModel == null
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    margin: const EdgeInsets.only(top: 20),
-                    child: Row(
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        GestureDetector(
-                          onTap: () {
-                            // Add action for tapping the avatar button
-                            print('Avatar button tapped');
-                            // Navigate to another page to choose an avatar
-                          },
-                          child: Column(
+                        Container(
+                          margin: const EdgeInsets.only(top: 20),
+                          child: Row(
                             children: [
-                              CircleAvatar(
-                                  radius: 60,
-                                  backgroundImage: showLocalFile
-                                      ? FileImage(imageFile!)
-                                  as ImageProvider
-                                      : userModel!.profileImage == ''
-                                      ? const NetworkImage(
-                                      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQGrQoGh518HulzrSYOTee8UO517D_j6h4AYQ&usqp=CAU')
-                                      : NetworkImage(userModel!
-                                      .profileImage) // Replace with your profile image asset
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.camera_alt),
-                                onPressed: () {
-                                  showModalBottomSheet(
-                                      context: context,
-                                      builder: (context) {
-                                        return Padding(
-                                          padding:
-                                          const EdgeInsets.all(10),
-                                          child: Column(
-                                            mainAxisSize:
-                                            MainAxisSize.min,
-                                            children: [
-                                              ListTile(
-                                                leading: const Icon(
-                                                    Icons.image),
-                                                title: const Text(
-                                                    'From Gallery'),
-                                                onTap: () {
-                                                  _pickImageFromGallery;
-                                                  Navigator.of(context)
-                                                      .pop();
-                                                },
-                                              ),
-                                              ListTile(
-                                                leading: const Icon(
-                                                    Icons.camera_alt),
-                                                title: const Text(
-                                                    'From Camera'),
-                                                onTap: () {
-                                                  _pickImageFromCamera(
-                                                      ImageSource.camera);
-                                                  Navigator.of(context)
-                                                      .pop();
-                                                },
-                                              ),
-                                            ],
-                                          ),
-                                        );
-                                      }
-                                  );
+                              GestureDetector(
+                                onTap: () {
+                                  // Add action for tapping the avatar button
+                                  print('Avatar button tapped');
+                                  // Navigate to another page to choose an avatar
                                 },
+                                child: Column(
+                                  children: [
+                                    CircleAvatar(
+                                        radius: 60,
+                                        backgroundImage: showLocalFile
+                                            ? FileImage(imageFile!)
+                                                as ImageProvider
+                                            : userModel!.profileImage == ''
+                                                ? const NetworkImage(
+                                                    'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQGrQoGh518HulzrSYOTee8UO517D_j6h4AYQ&usqp=CAU')
+                                                : NetworkImage(userModel!
+                                                    .profileImage) // Replace with your profile image asset
+                                        ),
+                                    IconButton(
+                                      icon: const Icon(Icons.camera_alt),
+                                      onPressed: () {
+                                        showModalBottomSheet(
+                                            context: context,
+                                            builder: (context) {
+                                              return Padding(
+                                                padding:
+                                                    const EdgeInsets.all(10),
+                                                child: Column(
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  children: [
+                                                    ListTile(
+                                                      leading: const Icon(
+                                                          Icons.image),
+                                                      title: const Text(
+                                                          'From Gallery'),
+                                                      onTap: () {
+                                                        _pickImageFromGallery;
+                                                        Navigator.of(context)
+                                                            .pop();
+                                                      },
+                                                    ),
+                                                    ListTile(
+                                                      leading: const Icon(
+                                                          Icons.camera_alt),
+                                                      title: const Text(
+                                                          'From Camera'),
+                                                      onTap: () {
+                                                        _pickImageFromCamera(
+                                                            ImageSource.camera);
+                                                        Navigator.of(context)
+                                                            .pop();
+                                                      },
+                                                    ),
+                                                  ],
+                                                ),
+                                              );
+                                            });
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 20),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      '${userModel?.userFirstName} ${userModel?.userLastName}',
+                                      style: const TextStyle(
+                                          fontSize: 24,
+                                          fontWeight: FontWeight.bold,
+                                          fontFamily: 'Robot',
+                                          color: Colors.redAccent),
+                                    ),
+                                    const Divider(
+                                      color: Colors.redAccent,
+                                    ),
+                                    const SizedBox(height: 0),
+                                    Text(
+                                      '${userModel?.userRole}',
+                                      style: const TextStyle(
+                                          fontSize: 16, fontFamily: 'Consolas'),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ],
                           ),
                         ),
-                        const SizedBox(width: 20),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                        const SizedBox(height: 20),
+                        const Divider(
+                          color: Colors.redAccent,
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            // Add action for tapping the email
+                            print('Email tapped');
+                          },
+                          child: Row(
                             children: [
+                              const Icon(Icons.email),
+                              const SizedBox(width: 20, height: 40),
                               Text(
-                                '${userModel?.userFirstName} ${userModel?.userLastName}',
-                                style: const TextStyle(
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.bold,
-                                    fontFamily: 'Robot',
-                                    color: Colors.redAccent),
-                              ),
-                              const Divider(
-                                color: Colors.redAccent,
-                              ),
-                              const SizedBox(height: 0),
-                              Text(
-                                '${userModel?.userRole}',
+                                '${userModel?.userEmail}',
                                 style: const TextStyle(
                                     fontSize: 16, fontFamily: 'Consolas'),
                               ),
                             ],
                           ),
                         ),
+                        const Divider(),
+                        const Row(
+                          children: [
+                            Icon(Icons.info),
+                            SizedBox(width: 20, height: 40),
+                            Expanded(
+                              child: Text(
+                                'Bio: Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+                                style: TextStyle(
+                                    fontSize: 16, fontFamily: 'Consolas'),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const Divider(),
+                        Row(
+                          children: [
+                            const Icon(Icons.phone),
+                            const SizedBox(width: 20, height: 40),
+                            Text(
+                              '+84 ${userModel?.userPhone}',
+                              style: const TextStyle(
+                                  fontSize: 16, fontFamily: 'Consolas'),
+                            ),
+                          ],
+                        ),
+                        const Divider(),
+                        Row(
+                          children: [
+                            const Icon(Icons.work),
+                            const SizedBox(width: 20, height: 40),
+                            Text(
+                              'Years of Experience: ${getYearExp(userModel!.dt)}',
+                              style: const TextStyle(
+                                  fontSize: 16, fontFamily: 'Consolas'),
+                            ),
+                          ],
+                        ),
+                        const Divider(),
+                        Row(
+                          children: [
+                            const Icon(Icons.school),
+                            const SizedBox(width: 20, height: 40),
+                            Text(
+                              'Status: ${userModel?.userRole}',
+                              style: const TextStyle(
+                                  fontSize: 16, fontFamily: 'Consolas'),
+                            ),
+                          ],
+                        ),
+                        const Divider(
+                          color: Colors.redAccent,
+                        ),
+                        const SizedBox(height: 20),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            _buildNumberWidget('Projects', '12', () {
+                              // Add action for tapping Related Projects
+                              print('Related Projects tapped');
+                            }),
+                            _buildSeparatorWidget(),
+                            _buildNumberWidget('Tasks', '8', () {
+                              // Add action for tapping Related Tasks
+                              print('Related Tasks tapped');
+                            }),
+                            _buildSeparatorWidget(),
+                            _buildNumberWidget('Collaborators', '4', () {
+                              // Add action for tapping Related People
+                              print('Related People tapped');
+                            }),
+                          ],
+                        ),
+                        const SizedBox(height: 40),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 20),
-                  const Divider(
-                    color: Colors.redAccent,
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      // Add action for tapping the email
-                      print('Email tapped');
-                    },
-                    child: Row(
-                      children: [
-                        const Icon(Icons.email),
-                        const SizedBox(width: 20, height: 40),
-                        Text(
-                          '${userModel?.userEmail}',
-                          style: const TextStyle(
-                              fontSize: 16, fontFamily: 'Consolas'),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const Divider(),
-                  const Row(
-                    children: [
-                      Icon(Icons.info),
-                      SizedBox(width: 20, height: 40),
-                      Expanded(
-                        child: Text(
-                          'Bio: Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-                          style: TextStyle(
-                              fontSize: 16, fontFamily: 'Consolas'),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const Divider(),
-                  Row(
-                    children: [
-                      const Icon(Icons.phone),
-                      const SizedBox(width: 20, height: 40),
-                      Text(
-                        '+84 ${userModel?.userPhone}',
-                        style: const TextStyle(
-                            fontSize: 16, fontFamily: 'Consolas'),
-                      ),
-                    ],
-                  ),
-                  const Divider(),
-                  Row(
-                    children: [
-                      const Icon(Icons.work),
-                      const SizedBox(width: 20, height: 40),
-                      Text(
-                        'Years of Experience: ${getYearExp(userModel!.dt)}',
-                        style: const TextStyle(
-                            fontSize: 16, fontFamily: 'Consolas'),
-                      ),
-                    ],
-                  ),
-                  const Divider(),
-                  Row(
-                    children: [
-                      const Icon(Icons.school),
-                      const SizedBox(width: 20, height: 40),
-                      Text(
-                        'Status: ${userModel?.userRole}',
-                        style: const TextStyle(
-                            fontSize: 16, fontFamily: 'Consolas'),
-                      ),
-                    ],
-                  ),
-                  const Divider(
-                    color: Colors.redAccent,
-                  ),
-                  const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      _buildNumberWidget('Projects', '12', () {
-                        // Add action for tapping Related Projects
-                        print('Related Projects tapped');
-                      }),
-                      _buildSeparatorWidget(),
-                      _buildNumberWidget('Tasks', '8', () {
-                        // Add action for tapping Related Tasks
-                        print('Related Tasks tapped');
-                      }),
-                      _buildSeparatorWidget(),
-                      _buildNumberWidget('Collaborators', '4', () {
-                        // Add action for tapping Related People
-                        print('Related People tapped');
-                      }),
-                    ],
-                  ),
-                  const SizedBox(height: 40),
                 ],
               ),
             ),
-          ],
-        ),
-      ),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Colors.black54,
         selectedItemColor: Colors.white,
@@ -312,7 +312,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ],
         selectedLabelStyle: const TextStyle(fontSize: 14, fontFamily: 'Robot'),
         unselectedLabelStyle:
-        const TextStyle(fontSize: 14, fontFamily: 'Robot'),
+            const TextStyle(fontSize: 14, fontFamily: 'Robot'),
       ),
     );
   }

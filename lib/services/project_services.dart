@@ -52,7 +52,12 @@ class ProjectServices {
       for (var project in projectMap.values) {
         ProjectModel projectModel =
             ProjectModel.fromMap(Map<String, dynamic>.from(project));
-        if (projectModel.projectName.contains(output)) {
+        if (projectModel.projectName
+                .toLowerCase()
+                .contains(output.toLowerCase()) ||
+            projectModel.projecctDescription
+                .toLowerCase()
+                .contains(output.toLowerCase())) {
           list.add(projectModel);
         }
       }

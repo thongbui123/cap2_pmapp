@@ -1,21 +1,29 @@
+import 'package:capstone2_project_management_app/models/phase_model.dart';
 import 'package:capstone2_project_management_app/models/project_model.dart';
 import 'package:capstone2_project_management_app/models/task_model.dart';
 import 'package:capstone2_project_management_app/models/user_model.dart';
+import 'package:capstone2_project_management_app/services/phase_services.dart';
 import 'package:capstone2_project_management_app/services/project_services.dart';
 import 'package:capstone2_project_management_app/services/task_services.dart';
 import 'package:capstone2_project_management_app/services/user_services.dart';
+import 'package:capstone2_project_management_app/views/profile_screen.dart';
+import 'package:capstone2_project_management_app/views/project_detail_screen.dart';
 import 'package:capstone2_project_management_app/views/stats/stats.dart';
 import 'package:capstone2_project_management_app/views/subs/db_side_menu.dart';
 import 'package:capstone2_project_management_app/views/subs/sub_widgets.dart';
+import 'package:capstone2_project_management_app/views/task_detail_screen.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 
 class SearchScreen extends StatefulWidget {
   final UserModel userModel;
-  final String? output;
-  const SearchScreen({Key? key, required this.userModel, this.output})
-      : super(key: key);
+  final String output;
+  const SearchScreen({
+    Key? key,
+    required this.userModel,
+    required this.output,
+  }) : super(key: key);
 
   @override
   State<SearchScreen> createState() => _SearchScreenState();
@@ -36,17 +44,15 @@ class _SearchScreenState extends State<SearchScreen> {
   ProjectServices projectServices = ProjectServices();
   TaskService taskService = TaskService();
   UserServices userServices = UserServices();
-  TextEditingController textEditingController = TextEditingController();
+  TextEditingController editingController = TextEditingController();
   Map projectMap = {};
   Map taskMap = {};
-  Map userMap = {};
-  String output = "";
+  Map<String, dynamic> userMap = {};
   @override
   void initState() {
     super.initState();
     userModel = widget.userModel;
-    output = widget.output ?? "";
-    textEditingController.text = output;
+    editingController.text = widget.output;
   }
 
   @override
@@ -56,6 +62,7 @@ class _SearchScreenState extends State<SearchScreen> {
           projectServices.reference.onValue,
           taskService.taskRef.onValue,
           userServices.databaseReference.onValue,
+          PhaseServices().phaseRef.onValue,
         ]),
         builder: (context, snapshot) {
           if (!snapshot.hasData || snapshot.hasError) {
@@ -64,14 +71,22 @@ class _SearchScreenState extends State<SearchScreen> {
           var event = snapshot.data![0] as DatabaseEvent;
           var value = event.snapshot.value as dynamic;
           projectMap = Map.from(value);
-          allProjects =
-              projectServices.getSearchedProjectList(projectMap, output);
+          allProjects = projectServices.getSearchedProjectList(
+              projectMap, editingController.text.toString());
           var event1 = snapshot.data![1] as DatabaseEvent;
           var value1 = event1.snapshot.value as dynamic;
           taskMap = Map.from(value1);
+          allTasks = taskService.getSearchTaskList(
+              taskMap, editingController.text.toString());
           var event2 = snapshot.data![2] as DatabaseEvent;
           var value2 = event2.snapshot.value as dynamic;
-          userMap = Map.from(value2);
+          userMap = Map<String, dynamic>.from(value2);
+          allPeople = userServices.getUserSearchedList(
+              userMap, editingController.text.toString());
+          var event3 = snapshot.data![3] as DatabaseEvent;
+          var value3 = event3.snapshot.value as dynamic;
+          Map phaseMap = Map<String, dynamic>.from(value3);
+
           return Scaffold(
             body: SafeArea(
               child: Row(
@@ -82,7 +97,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   ),
                   Expanded(
                       child: Padding(
-                    padding: EdgeInsets.all(defaultPadding),
+                    padding: const EdgeInsets.all(defaultPadding),
                     child: SingleChildScrollView(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -106,15 +121,16 @@ class _SearchScreenState extends State<SearchScreen> {
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  const Expanded(
+                                  Expanded(
                                     child: TextField(
-                                      style: TextStyle(
+                                      controller: editingController,
+                                      style: const TextStyle(
                                         color: Colors.black,
                                         fontFamily: 'MontMed',
                                         fontWeight: FontWeight.normal,
                                         fontSize: 16,
                                       ),
-                                      decoration: InputDecoration(
+                                      decoration: const InputDecoration(
                                         enabledBorder: UnderlineInputBorder(
                                           borderSide: BorderSide(
                                               color: Color(0xFFD9D9D9)),
@@ -139,29 +155,47 @@ class _SearchScreenState extends State<SearchScreen> {
                                   Container(
                                       height: 50,
                                       child: IconButton(
-                                        onPressed: () {},
-                                        icon: Icon(Icons.search),
+                                        onPressed: () {
+                                          setState(() {
+                                            allProjects = projectServices
+                                                .getSearchedProjectList(
+                                                    projectMap,
+                                                    editingController.text
+                                                        .toString());
+                                            allTasks =
+                                                taskService.getSearchTaskList(
+                                                    taskMap,
+                                                    editingController.text
+                                                        .toString());
+                                            allPeople = userServices
+                                                .getUserSearchedList(
+                                                    userMap,
+                                                    editingController.text
+                                                        .toString());
+                                          });
+                                        },
+                                        icon: const Icon(Icons.search),
                                       )),
                                 ],
                               ),
                             ),
                           ),
-                          SizedBox(height: 5),
-                          Divider(),
-                          SizedBox(height: 5),
+                          const SizedBox(height: 5),
+                          const Divider(),
+                          const SizedBox(height: 5),
                           Container(
-                            padding: EdgeInsets.all(10),
+                            padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
                               color: Colors.indigo[50],
                               borderRadius: BorderRadius.circular(
                                   5.0), // Set the border radius
                             ),
                             child: ExpansionTile(
-                              shape: RoundedRectangleBorder(
+                              shape: const RoundedRectangleBorder(
                                 borderRadius: BorderRadius.zero,
                               ),
                               initiallyExpanded: true,
-                              title: Row(
+                              title: const Row(
                                 children: [
                                   Icon(
                                     Icons.folder,
@@ -179,21 +213,36 @@ class _SearchScreenState extends State<SearchScreen> {
                                     : Icons.arrow_drop_down,
                               ),
                               children: [
-                                Divider(),
+                                const Divider(),
                                 Container(
                                   child: Column(
                                     children: allProjects.map((project) {
                                       return ListTile(
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  ProjectDetailScreen(
+                                                      userModel: userModel!,
+                                                      projectModel: project,
+                                                      userMap: userMap,
+                                                      projectMap: projectMap,
+                                                      phraseMap: phaseMap,
+                                                      taskMap: taskMap),
+                                            ),
+                                          );
+                                        },
                                         leading: const CircleAvatar(
                                             child: Icon(Icons.folder,
                                                 color: Colors.orange)),
-                                        title: Text('${project}',
+                                        title: Text(project.projectName,
                                             maxLines: 2,
                                             overflow: TextOverflow.ellipsis,
-                                            style: TextStyle(
+                                            style: const TextStyle(
                                                 fontFamily: 'MontMed',
                                                 fontSize: 13)),
-                                        subtitle: Column(
+                                        subtitle: const Column(
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
                                           children: [
@@ -224,20 +273,20 @@ class _SearchScreenState extends State<SearchScreen> {
                               },
                             ),
                           ),
-                          SizedBox(height: 10),
+                          const SizedBox(height: 10),
                           Container(
-                            padding: EdgeInsets.all(10),
+                            padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
                               color: Colors.indigo[50],
                               borderRadius: BorderRadius.circular(
                                   5.0), // Set the border radius
                             ),
                             child: ExpansionTile(
-                              shape: RoundedRectangleBorder(
+                              shape: const RoundedRectangleBorder(
                                 borderRadius: BorderRadius.zero,
                               ),
                               initiallyExpanded: true,
-                              title: Row(
+                              title: const Row(
                                 children: [
                                   Icon(Icons.layers, color: Colors.blue),
                                   SizedBox(width: 10),
@@ -252,21 +301,61 @@ class _SearchScreenState extends State<SearchScreen> {
                                     : Icons.arrow_drop_down,
                               ),
                               children: [
-                                Divider(),
+                                const Divider(),
                                 Container(
                                   child: Column(
                                     children: allTasks.map((task) {
                                       return ListTile(
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  StreamBuilder<Object>(
+                                                      stream: PhaseServices()
+                                                          .phaseRef
+                                                          .child(task.phraseId)
+                                                          .onValue,
+                                                      builder:
+                                                          (context, snapshot) {
+                                                        if (snapshot.hasError ||
+                                                            !snapshot.hasData) {
+                                                          return loader();
+                                                        }
+                                                        var event = snapshot
+                                                                .data!
+                                                            as DatabaseEvent;
+                                                        var value = event
+                                                            .snapshot
+                                                            .value as dynamic;
+                                                        PhaseModel phaseModel =
+                                                            PhaseModel.fromMap(
+                                                                Map.from(
+                                                                    value));
+                                                        return TaskDetailScreen(
+                                                            taskModel: task,
+                                                            userMap: userMap,
+                                                            taskMap: taskMap,
+                                                            commentMap:
+                                                                commentMap,
+                                                            userModel:
+                                                                userModel!,
+                                                            phaseModel:
+                                                                phaseModel);
+                                                      }),
+                                            ),
+                                          );
+                                        },
                                         leading: const CircleAvatar(
                                             child: Icon(Icons.layers,
                                                 color: Colors.blue)),
-                                        title: Text('Task: ${task}',
+                                        title: Text('Task: ${task.taskName}',
                                             maxLines: 2,
                                             overflow: TextOverflow.ellipsis,
-                                            style: TextStyle(
+                                            style: const TextStyle(
                                                 fontFamily: 'MontMed',
                                                 fontSize: 13)),
-                                        subtitle: Column(
+                                        subtitle: const Column(
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
                                           children: [
@@ -297,20 +386,20 @@ class _SearchScreenState extends State<SearchScreen> {
                               },
                             ),
                           ),
-                          SizedBox(height: 10),
+                          const SizedBox(height: 10),
                           Container(
-                            padding: EdgeInsets.all(10),
+                            padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
                               color: Colors.indigo[50],
                               borderRadius: BorderRadius.circular(
                                   5.0), // Set the border radius
                             ),
                             child: ExpansionTile(
-                              shape: RoundedRectangleBorder(
+                              shape: const RoundedRectangleBorder(
                                 borderRadius: BorderRadius.zero,
                               ),
                               initiallyExpanded: true,
-                              title: Row(
+                              title: const Row(
                                 children: [
                                   Icon(Icons.people, color: Colors.brown),
                                   SizedBox(width: 10),
@@ -325,21 +414,30 @@ class _SearchScreenState extends State<SearchScreen> {
                                     : Icons.arrow_drop_down,
                               ),
                               children: [
-                                Divider(),
+                                const Divider(),
                                 Container(
                                   child: Column(
-                                    children: allPeople.map((project) {
+                                    children: allPeople.map((user) {
                                       return ListTile(
-                                        leading: const CircleAvatar(
-                                            child: Icon(Icons.person,
-                                                color: Colors.brown)),
-                                        title: Text('Name: ${project}',
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  profile_screen(
+                                                      userModel: user),
+                                            ),
+                                          );
+                                        },
+                                        leading: avatar(userMap, user.userId),
+                                        title: Text(
+                                            'Name: ${user.userFirstName} ${user.userLastName}',
                                             maxLines: 2,
                                             overflow: TextOverflow.ellipsis,
-                                            style: TextStyle(
+                                            style: const TextStyle(
                                                 fontFamily: 'MontMed',
                                                 fontSize: 13)),
-                                        subtitle: Column(
+                                        subtitle: const Column(
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
                                           children: [

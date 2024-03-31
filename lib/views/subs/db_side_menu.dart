@@ -29,7 +29,9 @@ class DbSideMenu extends StatelessWidget {
             leading: const Icon(Icons.account_circle, color: Colors.white),
             onTap: () {
               Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-                return const profile_screen();
+                return profile_screen(
+                  userModel: userModel,
+                );
               }));
               // Handle menu item tap
             },

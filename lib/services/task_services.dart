@@ -130,6 +130,24 @@ class TaskService {
     return count;
   }
 
+  List<TaskModel> getSearchTaskList(
+      Map<dynamic, dynamic> taskMap, String output) {
+    List<TaskModel> list = [];
+    if (output != "") {
+      for (var task in taskMap.values) {
+        TaskModel taskModel =
+            TaskModel.fromMap(Map<String, dynamic>.from(task));
+        if (taskModel.taskName.toLowerCase().contains(output.toLowerCase()) ||
+            taskModel.taskDescription
+                .toLowerCase()
+                .contains(output.toLowerCase())) {
+          list.add(taskModel);
+        }
+      }
+    }
+    return list;
+  }
+
   List<TaskModel> getOverdouTaskList(Map<dynamic, dynamic> taskMap, String id) {
     List<TaskModel> listOverdou = [];
     for (var task in taskMap.values) {

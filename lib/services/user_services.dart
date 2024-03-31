@@ -34,6 +34,32 @@ class UserServices {
     return userList;
   }
 
+  List<UserModel> getUserSearchedList(
+      Map<String, dynamic> userMap, String output) {
+    List<UserModel> userList = [];
+    if (output != "") {
+      for (var user in userMap.values) {
+        UserModel userModel =
+            UserModel.fromMap(Map<String, dynamic>.from(user));
+        String fullName =
+            "${userModel.userFirstName} ${userModel.userLastName}";
+        if (userModel.userFirstName
+                .toLowerCase()
+                .contains(output.toLowerCase()) ||
+            userModel.userLastName
+                .toLowerCase()
+                .contains(output.toLowerCase()) ||
+            fullName.toLowerCase().contains(output.toLowerCase()) ||
+            userModel.userRole.toLowerCase().contains(output.toLowerCase()) ||
+            userModel.userEmail.toLowerCase().contains(output.toLowerCase())) {
+          userList.add(userModel);
+        }
+      }
+    }
+
+    return userList;
+  }
+
   List<String> getAllLeaderStringList(Map<String, dynamic> userMap) {
     List<String> userList = [];
     for (var user in userMap.values) {
