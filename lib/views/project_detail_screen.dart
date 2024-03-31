@@ -33,6 +33,7 @@ class ProjectDetailScreen extends StatefulWidget {
 }
 
 List<String> currentList = [];
+List<String> allMembers = [];
 List<PhaseModel> listOfPhrase = [];
 
 class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
@@ -45,14 +46,15 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
   List<String> allMemberIds = [];
   late Map<String, dynamic> userMap;
   Map<String, PhaseModel> currentPhraseMap = {};
-  List<UserModel> currentList = [];
+  List<UserModel> currentListModel = [];
   bool _customTileExpanded = false;
   late Map<dynamic, dynamic> projectMap;
   late String currentPhraseName;
   late String currentPhraseId;
   late int selectedIndex;
-  late Map phraseMap;
+  late Map phaseMap;
   late Map taskMap;
+  late List<PhaseModel> listPhases;
   Map<int, String> mapPhraseIndex = {};
   late int memberLength;
   @override
@@ -64,12 +66,15 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
     projectMap = widget.projectMap;
     taskMap = widget.taskMap;
     currentPhraseName = _projectModel.projectStatus;
-    phraseMap = widget.phraseMap;
+    phaseMap = widget.phraseMap;
+    listPhases =
+        phraseServices.getPhaseListByProject(phaseMap, _projectModel.projectId);
     memberLength = _projectModel.projectMembers.length;
     allMembers = userServices.getUserDataList(userMap).cast<UserModel>();
     allMemberIds = userServices.getUserIdList(userMap);
-    mapPhraseIndex = phraseServices.getMapPhraseIndex(phraseMap);
-    selectedIndex = phraseServices.getPhraseIndex(phraseMap, currentPhraseName);
+    mapPhraseIndex = phraseServices.getMapPhaseIndex(listPhases);
+    selectedIndex =
+        phraseServices.getPhraseIndex(listPhases, currentPhraseName);
   }
 
   @override
@@ -232,18 +237,15 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                             fontSize: 14,
                           ),
                         ),
-                        trailing: Visibility(
-                          visible: _userModel.userRole != 'User',
-                          child: TextButton(
-                            onPressed: () {
-                              _showStateBottomSheet(
-                                  context, _projectModel.projectMembers);
-                            },
-                            child: const Text(
-                              'View All ',
-                              style: TextStyle(
-                                  fontFamily: 'MontMed', fontSize: 14),
-                            ),
+                        trailing: TextButton(
+                          onPressed: () {
+                            _showStateBottomSheet(context,
+                                _projectModel.projectMembers, allMemberIds);
+                          },
+                          child: const Text(
+                            'View All ',
+                            style:
+                                TextStyle(fontFamily: 'MontMed', fontSize: 14),
                           ),
                         ),
                       ),
@@ -322,7 +324,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                 title: const Text('Conclude Phrase',
                     style: TextStyle(fontFamily: 'MontMed', fontSize: 14)),
                 onTap: () {
-                  if (selectedIndex < phraseMap.length - 1) {
+                  if (selectedIndex < phaseMap.length - 1) {
                     setState(() {
                       selectedIndex++;
                       currentPhraseName = mapPhraseIndex[selectedIndex]!;
@@ -410,8 +412,8 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
     );
   }
 
-  void _showStateBottomSheet(
-      BuildContext context, List<String> currentStringList) {
+  void _showStateBottomSheet(BuildContext context,
+      List<String> currentStringList, List<String> allStaff) {
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
@@ -422,7 +424,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
           userMap: userMap,
           projectMap: projectMap,
           projectModel: _projectModel,
-          phraseMap: phraseMap,
+          phraseMap: phaseMap,
           userModel: _userModel,
           taskMap: taskMap,
         );
@@ -445,7 +447,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
 
   void _addMember(UserModel member) {
     setState(() {
-      currentList.add(member);
+      currentList.add(member.userId);
       allMembers.remove(member);
     });
   }

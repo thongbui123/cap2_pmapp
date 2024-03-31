@@ -5,6 +5,7 @@ import 'package:capstone2_project_management_app/services/project_services.dart'
 import 'package:capstone2_project_management_app/services/task_services.dart';
 import 'package:capstone2_project_management_app/views/list_of_project_screen.dart';
 import 'package:capstone2_project_management_app/views/list_of_tasks_screen.dart';
+import 'package:capstone2_project_management_app/views/search_screen.dart';
 import 'package:capstone2_project_management_app/views/stats/stats.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -123,7 +124,16 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                         Container(
                             height: 50,
                             child: IconButton(
-                              onPressed: () {},
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => SearchScreen(
+                                      userModel: currentUserModel!,
+                                    ),
+                                  ),
+                                );
+                              },
                               icon: Icon(Icons.search),
                             )),
                       ],

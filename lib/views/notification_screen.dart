@@ -1,11 +1,19 @@
 import 'package:capstone2_project_management_app/models/notification_model.dart';
+import 'package:capstone2_project_management_app/models/project_model.dart';
 import 'package:capstone2_project_management_app/models/user_model.dart';
 import 'package:capstone2_project_management_app/services/notification_services.dart';
+import 'package:capstone2_project_management_app/services/phase_services.dart';
+import 'package:capstone2_project_management_app/services/project_services.dart';
+import 'package:capstone2_project_management_app/services/task_services.dart';
 import 'package:capstone2_project_management_app/views/profile_screen.dart';
+import 'package:capstone2_project_management_app/views/project_detail_screen.dart';
 import 'package:capstone2_project_management_app/views/stats/stats.dart';
 import 'package:capstone2_project_management_app/views/subs/db_side_menu.dart';
+import 'package:capstone2_project_management_app/views/subs/sub_widgets.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:rxdart/streams.dart';
 
 class NotificationScreen extends StatefulWidget {
   final Map notificationMap;
@@ -93,6 +101,69 @@ class _NotificationScreenState extends State<NotificationScreen> {
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) => profile_screen(),
+                                      ),
+                                    );
+                                  }
+                                  if (notification.notificationType ==
+                                      'Project') {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) {
+                                          return StreamBuilder<List<Object>>(
+                                              stream: CombineLatestStream.list([
+                                                ProjectServices()
+                                                    .reference
+                                                    .child(notification
+                                                        .notificationRelatedId)
+                                                    .onValue,
+                                                ProjectServices()
+                                                    .reference
+                                                    .onValue,
+                                                PhaseServices()
+                                                    .phaseRef
+                                                    .onValue,
+                                                TaskService().taskRef.onValue,
+                                              ]),
+                                              builder: (context, snapshot) {
+                                                if (snapshot.hasError ||
+                                                    !snapshot.hasData) {
+                                                  return loader();
+                                                }
+
+                                                var event_0 = snapshot.data![0]
+                                                    as DatabaseEvent;
+                                                var event_1 = snapshot.data![1]
+                                                    as DatabaseEvent;
+                                                var event_2 = snapshot.data![2]
+                                                    as DatabaseEvent;
+                                                var event_3 = snapshot.data![3]
+                                                    as DatabaseEvent;
+                                                var value_0 = event_0
+                                                    .snapshot.value as dynamic;
+                                                var value_1 = event_1
+                                                    .snapshot.value as dynamic;
+                                                var value_2 = event_2
+                                                    .snapshot.value as dynamic;
+                                                var value_3 = event_3
+                                                    .snapshot.value as dynamic;
+                                                ProjectModel projectModel =
+                                                    ProjectModel.fromMap(
+                                                        Map.from(value_0));
+                                                Map projectMap =
+                                                    Map.from(value_1);
+                                                Map phraseMap =
+                                                    Map.from(value_2);
+                                                Map taskMap = Map.from(value_3);
+                                                return ProjectDetailScreen(
+                                                    userModel: userModel,
+                                                    projectModel: projectModel,
+                                                    userMap: userMap,
+                                                    projectMap: projectMap,
+                                                    phraseMap: phraseMap,
+                                                    taskMap: taskMap);
+                                              });
+                                        },
                                       ),
                                     );
                                   }

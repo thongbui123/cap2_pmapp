@@ -4,19 +4,20 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class PhaseServices {
-  Future<void> addPhrase(
+  DatabaseReference phaseRef = FirebaseDatabase.instance.ref().child('phases');
+  Future<void> addPhase(
     String phraseName,
     String projectId,
     List<String> listTasks,
     String phraseDescription,
   ) async {
     if (phraseName.isEmpty) {
-      Fluttertoast.showToast(msg: 'Please provide phrase name');
+      Fluttertoast.showToast(msg: 'Please provide phase name');
     }
     User? user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       DatabaseReference phraseRef =
-          FirebaseDatabase.instance.ref().child('phrases').child(projectId);
+          FirebaseDatabase.instance.ref().child('phases');
       String? phraseId = phraseRef.push().key;
       await phraseRef.child(phraseId!).set({
         'phraseId': phraseId,
@@ -33,8 +34,8 @@ class PhaseServices {
   Future<void> updatePhraseName(
       String projectId, String phraseId, String currentPhrase) async {
     DatabaseReference phraseRef =
-        FirebaseDatabase.instance.ref().child('phrases');
-    phraseRef.child(projectId).child(phraseId).update({
+        FirebaseDatabase.instance.ref().child('phases');
+    phraseRef.child(phraseId).update({
       'phraseName': currentPhrase,
     });
     Fluttertoast.showToast(msg: 'Phrase name has been changed successfully');
@@ -43,48 +44,63 @@ class PhaseServices {
   Future<void> updatePhraseTaskList(
       String projectId, String phraseId, List<String> listTasks) async {
     DatabaseReference phraseRef =
-        FirebaseDatabase.instance.ref().child('phrases');
-    phraseRef.child(projectId).child(phraseId).update({
+        FirebaseDatabase.instance.ref().child('phases');
+    phraseRef.child(phraseId).update({
       'listTasks': listTasks,
     });
     Fluttertoast.showToast(
         msg: 'Phrase task list has been updated successfully');
   }
 
-  Future<Map> getPhraseMap(String projectId) async {
+  List<PhaseModel> getPhaseListByProject(Map phaseMap, String projectId) {
+    List<PhaseModel> list = [];
+    for (var phase in phaseMap.values) {
+      PhaseModel phaseModel = PhaseModel.fromMap(Map.from(phase));
+      if (phaseModel.projectId == projectId) {
+        list.add(phaseModel);
+      }
+    }
+    return list;
+  }
+
+  Future<Map> getPhraseMap() async {
     DatabaseReference phraseRef =
-        FirebaseDatabase.instance.ref().child('phrases').child(projectId);
+        FirebaseDatabase.instance.ref().child('phases');
     DatabaseEvent databaseEvent =
         await phraseRef.orderByChild('timestamp').once();
     Map<dynamic, dynamic> phraseMap = {};
     if (databaseEvent.snapshot.value != null) {
       phraseMap = Map.from(databaseEvent.snapshot.value as dynamic);
-      List<MapEntry<dynamic, dynamic>> sortedEntries =
-          phraseMap.entries.toList();
-      sortedEntries.sort((a, b) {
-        return (a.value['timestamp'] as int).compareTo(b.value['timestamp']);
-      });
-      phraseMap = Map.fromEntries(sortedEntries.map((entry) {
-        return MapEntry(
-          entry.key,
-          {
-            'timestamp': entry.value['timestamp'],
-            'phraseId': entry.value['phraseId'],
-            'phraseName': entry.value['phraseName'],
-            'listTasks': entry.value['listTasks'],
-            'phraseDescription': entry.value['phraseDescription'],
-            'projectId': entry.value['projectId'],
-          },
-        );
-      }));
+      phraseMap = sortedPhaseMap(phraseMap);
     }
 //    _getProjectDetails();
     return phraseMap;
   }
 
-  String getNameFromId(Map<String, dynamic> phraseMap, String id) {
+  Map<dynamic, dynamic> sortedPhaseMap(Map<dynamic, dynamic> phraseMap) {
+    List<MapEntry<dynamic, dynamic>> sortedEntries = phraseMap.entries.toList();
+    sortedEntries.sort((a, b) {
+      return (a.value['timestamp'] as int).compareTo(b.value['timestamp']);
+    });
+    phraseMap = Map.fromEntries(sortedEntries.map((entry) {
+      return MapEntry(
+        entry.key,
+        {
+          'timestamp': entry.value['timestamp'],
+          'phraseId': entry.value['phraseId'],
+          'phraseName': entry.value['phraseName'],
+          'listTasks': entry.value['listTasks'],
+          'phraseDescription': entry.value['phraseDescription'],
+          'projectId': entry.value['projectId'],
+        },
+      );
+    }));
+    return phraseMap;
+  }
+
+  String getNameFromId(Map<String, dynamic> phaseMap, String id) {
     Map<String, String> mapName = {};
-    for (var phrase in phraseMap.values) {
+    for (var phrase in phaseMap.values) {
       PhaseModel phraseModel =
           PhaseModel.fromMap(Map<String, dynamic>.from(phrase));
       mapName[phraseModel.phraseId] = phraseModel.phraseName;
@@ -95,14 +111,12 @@ class PhaseServices {
     return "";
   }
 
-  int getPhraseIndex(Map<dynamic, dynamic> phraseMap, String phraseName) {
+  int getPhraseIndex(List<PhaseModel> phaseList, String phaseName) {
     Map<String, int> mapName = {};
     int num = 0;
-    for (var phrase in phraseMap.values) {
-      PhaseModel phraseModel =
-          PhaseModel.fromMap(Map<String, dynamic>.from(phrase));
-      mapName[phraseModel.phraseName] = num;
-      if (phraseModel.phraseName == phraseName) {
+    for (var phrase in phaseList) {
+      mapName[phrase.phraseName] = num;
+      if (phrase.phraseName == phaseName) {
         return num;
       }
       num++;
@@ -111,38 +125,46 @@ class PhaseServices {
   }
 
   PhaseModel? getPhraseModelFromName(
-      Map<dynamic, dynamic> phraseMap, String phraseName) {
+      Map<dynamic, dynamic> phaseMap, String phaseName) {
     PhaseModel? result;
-    for (var phrase in phraseMap.values) {
+    for (var phrase in phaseMap.values) {
       PhaseModel phraseModel =
           PhaseModel.fromMap(Map<String, dynamic>.from(phrase));
-      if (phraseModel.phraseName == phraseName) {
+      if (phraseModel.phraseName == phaseName) {
         result = phraseModel;
       }
     }
     return result;
   }
 
-  PhaseModel? getCurrentPhraseModelFromProject(
-      Map<dynamic, dynamic> phraseMap, String projectId) {
+  PhaseModel getCurrentPhraseModelFromProject(
+      Map<dynamic, dynamic> phaseMap, String projectId, String projectStatus) {
     PhaseModel? result;
-    for (var phrase in phraseMap.values) {
-      PhaseModel phraseModel =
-          PhaseModel.fromMap(Map<String, dynamic>.from(phrase));
-      if (phraseModel.projectId == projectId) {
-        result = phraseModel;
+    for (var phrase in phaseMap.values) {
+      PhaseModel phaseModel = PhaseModel.fromMap(Map.from(phrase));
+      if (phaseModel.projectId == projectId &&
+          phaseModel.phraseName == projectStatus) {
+        result = phaseModel;
       }
     }
-    return result;
+    return result!;
   }
 
-  Map<int, String> getMapPhraseIndex(Map<dynamic, dynamic> phraseMap) {
+  Future<void> deleteTaskInPhase(PhaseModel phaseModel, String taskId) async {
+    List<String> listTasks = phaseModel.listTasks;
+    if (listTasks.contains(taskId)) {
+      listTasks.remove(taskId);
+    }
+    await phaseRef.child(phaseModel.phraseId).update({
+      'listTasks': listTasks,
+    });
+  }
+
+  Map<int, String> getMapPhaseIndex(List<PhaseModel> phaseList) {
     Map<int, String> mapName = {};
     int num = 0;
-    for (var phrase in phraseMap.values) {
-      PhaseModel phraseModel =
-          PhaseModel.fromMap(Map<String, dynamic>.from(phrase));
-      mapName[num] = phraseModel.phraseName;
+    for (var phase in phaseList) {
+      mapName[num] = phase.phraseName;
       num++;
     }
     print(mapName);

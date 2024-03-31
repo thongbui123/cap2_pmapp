@@ -1,9 +1,14 @@
 import 'package:capstone2_project_management_app/models/comment_model.dart';
+import 'package:capstone2_project_management_app/models/phase_model.dart';
+import 'package:capstone2_project_management_app/models/project_model.dart';
 import 'package:capstone2_project_management_app/models/task_model.dart';
 import 'package:capstone2_project_management_app/models/user_model.dart';
 import 'package:capstone2_project_management_app/services/comment_service.dart';
+import 'package:capstone2_project_management_app/services/phase_services.dart';
+import 'package:capstone2_project_management_app/services/project_services.dart';
 import 'package:capstone2_project_management_app/services/task_services.dart';
 import 'package:capstone2_project_management_app/services/user_services.dart';
+import 'package:capstone2_project_management_app/views/list_of_tasks_screen.dart';
 import 'package:capstone2_project_management_app/views/stats/stats.dart';
 import 'package:capstone2_project_management_app/views/subs/db_side_menu.dart';
 import 'package:capstone2_project_management_app/views/subs/sub_widgets.dart';
@@ -19,25 +24,23 @@ class TaskDetailScreen extends StatefulWidget {
   final Map taskMap;
   final Map commentMap;
   final UserModel userModel;
+  final PhaseModel phaseModel;
   const TaskDetailScreen(
       {super.key,
       required this.taskModel,
       required this.userMap,
       required this.taskMap,
       required this.commentMap,
-      required this.userModel});
+      required this.userModel,
+      required this.phaseModel});
 
   @override
   State<TaskDetailScreen> createState() => _TaskDetailScreenState();
 }
 
-List<String> allMembers = [
-  'User 1',
-  'User 2',
-  'User 3',
-];
+List<String> allMembers = [];
 
-List<String> currentList = ['Vincent', 'Jackie', 'David'];
+List<String> currentList = [];
 
 List<String> comments = [
   'How is the tasks',
@@ -59,14 +62,16 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   DatabaseReference? userRef;
   UserModel? currentUserModel;
   late List<CommentModel> listComments;
+  late PhaseModel phaseModel;
   //final databaseReference = FirebaseDatabase.instance.ref();
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     taskModel = widget.taskModel;
-    userMap = widget.userMap;
-    taskMap = widget.taskMap;
+    phaseModel = widget.phaseModel;
+    //userMap = widget.userMap;
+    //taskMap = widget.taskMap;
     commentMap = widget.commentMap;
     currentUserModel = widget.userModel;
     listComments =
@@ -90,7 +95,8 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                   width: 50.0,
                   decoration: new BoxDecoration(
                       color: Colors.blue,
-                      borderRadius: new BorderRadius.all(Radius.circular(50))),
+                      borderRadius:
+                          new BorderRadius.all(const Radius.circular(50))),
                   child: CircleAvatar(
                       radius: 50,
                       backgroundImage: CommentBox.commentImageParser(
@@ -99,10 +105,11 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
               ),
               title: Text(
                 data[i]['name'],
-                style: TextStyle(fontWeight: FontWeight.bold),
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
               subtitle: Text(data[i]['message']),
-              trailing: Text(data[i]['date'], style: TextStyle(fontSize: 10)),
+              trailing:
+                  Text(data[i]['date'], style: const TextStyle(fontSize: 10)),
             ),
           )
       ],
@@ -116,6 +123,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
           CommentService().databaseReference.onValue,
           TaskService().taskRef.onValue,
           UserServices().databaseReference.onValue,
+          TaskService().taskRef.child(taskModel.taskId).onValue,
         ]),
         builder: (context, snapshot) {
           if (snapshot.hasError || !snapshot.hasData) {
@@ -124,12 +132,30 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
           var eventComment = snapshot.data![0] as DatabaseEvent;
           var eventTask = snapshot.data![1] as DatabaseEvent;
           var eventUser = snapshot.data![2] as DatabaseEvent;
+          var eventTaskModel = snapshot.data![3] as DatabaseEvent;
           var dynamicComment = eventComment.snapshot.value as dynamic;
           var dynamicTask = eventTask.snapshot.value as dynamic;
           var dynamicUser = eventUser.snapshot.value as dynamic;
+          var dynamicTaskModel = eventTaskModel.snapshot.value as dynamic;
           commentMap = Map.from(dynamicComment);
           taskMap = Map.from(dynamicTask);
           userMap = Map.from(dynamicUser);
+          if (dynamicTaskModel == null) {
+            return StreamBuilder<Object>(
+                stream: ProjectServices().reference.onValue,
+                builder: (context, snapshot) {
+                  if (snapshot.hasError || !snapshot.hasData) {
+                    return loader();
+                  }
+                  var event = snapshot.data! as DatabaseEvent;
+                  var value = event.snapshot.value as dynamic;
+                  return ListOfTaskScreen(
+                      userModel: currentUserModel!,
+                      projectMap: Map.from(value),
+                      taskMap: taskMap);
+                });
+          }
+          taskModel = TaskModel.fromMap(Map.from(dynamicTaskModel));
           listComments =
               CommentService().getListAllComments(commentMap, taskModel.taskId);
           return Scaffold(
@@ -142,7 +168,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                   ),
                   Expanded(
                       child: Padding(
-                    padding: EdgeInsets.all(defaultPadding),
+                    padding: const EdgeInsets.all(defaultPadding),
                     child: SingleChildScrollView(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -154,70 +180,71 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                                   onPressed: () {
                                     Navigator.pop(context);
                                   }),
-                              Text(
+                              const Text(
                                 'TASK',
                                 style: TextStyle(
-                                  fontFamily: 'Anurati',
-                                  fontSize: 30,
-                                ),
+                                    fontFamily: 'MontMed',
+                                    fontSize: 30,
+                                    fontWeight: FontWeight.bold),
                               ),
                             ],
                           ),
-                          Divider(),
+                          const Divider(),
                           ListTile(
-                            leading: CircleAvatar(
+                            leading: const CircleAvatar(
                                 child: Icon(Icons.layers,
                                     color: Colors.blueAccent)),
                             title: Text(
                                 'Task Name: ${taskModel.taskName.toUpperCase()}',
-                                style: TextStyle(
+                                style: const TextStyle(
                                     fontFamily: 'MontMed',
                                     color: Colors.black,
                                     fontSize: 13)),
                             subtitle: Text(
                               'Current State: ${taskModel.taskStatus}',
-                              style: TextStyle(
+                              style: const TextStyle(
                                   fontFamily: 'MontMed', fontSize: 12),
                             ),
                           ),
-                          SizedBox(height: 5),
+                          const SizedBox(height: 5),
                           Container(
                             width: 50,
                             height: 1,
                             color: Colors.black,
                           ),
-                          SizedBox(height: 5),
+                          const SizedBox(height: 5),
                           Text(
                             '${taskModel.taskDescription}',
-                            style: TextStyle(
+                            style: const TextStyle(
                                 fontFamily: 'MontMed',
                                 color: Colors.black87,
                                 fontSize: 12),
                           ),
-                          SizedBox(height: 10),
-                          Divider(),
+                          const SizedBox(height: 10),
+                          const Divider(),
                           ListTile(
                             leading: avatar(userMap, taskModel.assignById),
-                            title: Text('Assigned by: ',
+                            title: const Text('Assigned by: ',
                                 style: TextStyle(
                                     fontFamily: 'MontMed',
                                     fontSize: 12,
                                     color: Colors.black54)),
                             subtitle: Text(
                                 '${UserServices().getNameFromId(userMap, taskModel.assignById)}',
-                                style: TextStyle(
+                                style: const TextStyle(
                                     fontFamily: 'MontMed', fontSize: 14)),
                             trailing: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  SizedBox(height: 8),
-                                  Text('Priority: ',
+                                  const SizedBox(height: 8),
+                                  const Text('Priority: ',
                                       style: TextStyle(
                                           fontFamily: 'MontMed',
                                           fontSize: 12,
                                           color: Colors.black54)),
                                   Padding(
-                                    padding: EdgeInsets.fromLTRB(0, 0, 40, 0),
+                                    padding:
+                                        const EdgeInsets.fromLTRB(0, 0, 40, 0),
                                     child: Text(
                                         taskModel.taskPriority.toUpperCase(),
                                         style: TextStyle(
@@ -234,46 +261,46 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                                   )
                                 ]),
                           ),
-                          Divider(),
+                          const Divider(),
                           ListTile(
-                            leading: CircleAvatar(
+                            leading: const CircleAvatar(
                               child: Icon(Icons.calendar_month),
                             ),
-                            title: Text('Start Date: ',
+                            title: const Text('Start Date: ',
                                 style: TextStyle(
                                     fontFamily: 'MontMed',
                                     fontSize: 12,
                                     color: Colors.black54)),
                             subtitle: Text('${taskModel.taskStartDate}',
-                                style: TextStyle(
+                                style: const TextStyle(
                                     fontFamily: 'MontMed', fontSize: 14)),
                             trailing: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  SizedBox(height: 8),
-                                  Text('End Date: ',
+                                  const SizedBox(height: 8),
+                                  const Text('End Date: ',
                                       style: TextStyle(
                                           fontFamily: 'MontMed',
                                           fontSize: 12,
                                           color: Colors.black54)),
                                   Text('${taskModel.taskEndDate}',
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                           fontFamily: 'MontMed', fontSize: 14))
                                 ]),
                           ),
-                          Divider(),
+                          const Divider(),
                           ListTile(
-                            leading: CircleAvatar(
+                            leading: const CircleAvatar(
                               child: Icon(Icons.comment),
                             ),
-                            title: Text('Comments Related: ',
+                            title: const Text('Comments Related: ',
                                 style: TextStyle(
                                     fontFamily: 'MontMed',
                                     fontSize: 12,
                                     color: Colors.black54)),
                             subtitle: Text(
                                 '${CommentService().getListAllCommentLength(commentMap, taskModel.taskId)} comment(s) ',
-                                style: TextStyle(
+                                style: const TextStyle(
                                     fontFamily: 'MontMed', fontSize: 14)),
                             trailing: TextButton(
                                 onPressed: () {
@@ -283,60 +310,62 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                                     style: TextStyle(
                                         fontFamily: 'MontMed', fontSize: 14))),
                           ),
-                          Divider(),
+                          const Divider(),
                           ListTile(
-                            leading: CircleAvatar(
+                            leading: const CircleAvatar(
                               child: Icon(Icons.people),
                             ),
-                            title: Text('Participants: ',
+                            title: const Text('Participants: ',
                                 style: TextStyle(
                                     fontFamily: 'MontMed',
                                     fontSize: 12,
                                     color: Colors.black54)),
                             subtitle: Text(
                                 '${taskModel.taskMembers.length} members ',
-                                style: TextStyle(
+                                style: const TextStyle(
                                     fontFamily: 'MontMed', fontSize: 14)),
                             trailing: TextButton(
                                 onPressed: () {
+                                  currentList = taskModel.taskMembers;
+
                                   _showStateBottomSheet(context);
                                 },
-                                child: Text('View All ',
+                                child: const Text('View All ',
                                     style: TextStyle(
                                         fontFamily: 'MontMed', fontSize: 14))),
                           ),
-                          Divider(),
+                          const Divider(),
                           ListTile(
-                            leading: CircleAvatar(
+                            leading: const CircleAvatar(
                               child: Icon(Icons.settings),
                             ),
-                            title: Text('Task Modification: ',
+                            title: const Text('Task Modification: ',
                                 style: TextStyle(
                                     fontFamily: 'MontMed',
                                     fontSize: 12,
                                     color: Colors.black54)),
-                            subtitle: Text('Advanced Options',
+                            subtitle: const Text('Advanced Options',
                                 style: TextStyle(
                                     fontFamily: 'MontMed', fontSize: 14)),
                             trailing: TextButton(
                                 onPressed: () {
                                   _showStateBottomSheet3(context);
                                 },
-                                child: Text('View All ',
+                                child: const Text('View All ',
                                     style: TextStyle(
                                         fontFamily: 'MontMed', fontSize: 14))),
                           ),
-                          Divider(),
+                          const Divider(),
                           ListTile(
-                            leading: CircleAvatar(
+                            leading: const CircleAvatar(
                               child: Icon(Icons.check),
                             ),
-                            title: Text('Task Submit: ',
+                            title: const Text('Task Submit: ',
                                 style: TextStyle(
                                     fontFamily: 'MontMed',
                                     fontSize: 12,
                                     color: Colors.black54)),
-                            subtitle: Text('Finalize This Task',
+                            subtitle: const Text('Finalize This Task',
                                 style: TextStyle(
                                     fontFamily: 'MontMed', fontSize: 14)),
                             trailing: TextButton(
@@ -347,10 +376,10 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                                     taskModel.taskStatus != 'Complete'
                                         ? 'SUBMIT'
                                         : 'UNSUBMIT',
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                         fontFamily: 'MontMed', fontSize: 14))),
                           ),
-                          Divider(),
+                          const Divider(),
                         ],
                       ),
                     ),
@@ -367,8 +396,8 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Task Submit Confirmation'),
-          content: Text('Do you want to submit this task?'),
+          title: const Text('Task Submit Confirmation'),
+          content: const Text('Do you want to submit this task?'),
           actions: <Widget>[
             TextButton(
               onPressed: () {
@@ -376,14 +405,14 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                 _updateTaskStatus();
                 Navigator.of(context).pop(true);
               },
-              child: Text('Yes'),
+              child: const Text('Yes'),
             ),
             TextButton(
               onPressed: () {
                 // Handle 'No' button tap
                 Navigator.of(context).pop(false);
               },
-              child: Text('No'),
+              child: const Text('No'),
             ),
           ],
         );
@@ -454,7 +483,10 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
-        return StatefulBottomSheetWidget3();
+        return StatefulBottomSheetWidget3(
+          taskModel: taskModel,
+          phaseModel: phaseModel,
+        );
       },
     );
   }
@@ -481,6 +513,7 @@ class _StatefulBottomSheetWidgetState extends State<StatefulBottomSheetWidget> {
   late Map<String, dynamic> userMap;
   late Map taskMap;
   late UserModel currentUserModel;
+  late ProjectModel projectModel;
   @override
   void initState() {
     // TODO: implement initState
@@ -493,79 +526,119 @@ class _StatefulBottomSheetWidgetState extends State<StatefulBottomSheetWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.fromLTRB(10, 0, 10, 10),
-      child: Column(
-        children: [
-          SizedBox(height: 20),
-          Row(
-            children: [
-              SizedBox(width: 25),
-              Text('Members:',
-                  style: TextStyle(fontFamily: 'MontMed', fontSize: 16)),
-            ],
-          ),
-          SizedBox(height: 5),
-          Divider(),
-          Visibility(
-            visible: currentUserModel!.userRole == 'Team Leader' ||
-                currentUserModel!.userRole == 'Admin',
-            child: TextButton(
-              onPressed: _showMemberSelectionDialog,
-              child: const Row(
-                children: [
-                  Icon(
-                    Icons.add,
-                    color: Colors.blueAccent,
-                  ),
-                  SizedBox(width: 10),
-                  Text(
-                    'Assign New Member',
-                    style: TextStyle(
-                        fontFamily: 'MontMed', color: Colors.blueAccent),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          SizedBox(height: 10),
-          Expanded(
-              child: SingleChildScrollView(
+    return StreamBuilder<List<Object>>(
+        stream: CombineLatestStream.list([
+          UserServices().databaseReference.onValue,
+          TaskService().taskRef.onValue,
+          ProjectServices().reference.child(taskModel.projectId).onValue,
+        ]),
+        builder: (context, snapshot) {
+          if (snapshot.hasError || !snapshot.hasData) return loader();
+          var eventUser = snapshot.data![0] as DatabaseEvent;
+          var eventTask = snapshot.data![1] as DatabaseEvent;
+          var eventProjectModel = snapshot.data![2] as DatabaseEvent;
+          var dynamicUser = eventUser.snapshot.value as dynamic;
+          var dynamicTask = eventTask.snapshot.value as dynamic;
+          var dynamicProjectModel = eventProjectModel.snapshot.value as dynamic;
+          userMap = Map.from(dynamicUser);
+          taskMap = Map.from(dynamicTask);
+          projectModel = ProjectModel.fromMap(Map.from(dynamicProjectModel));
+          return Container(
+            padding: const EdgeInsets.fromLTRB(10, 0, 10, 10),
             child: Column(
-              children: ListTile.divideTiles(
-                context:
-                    context, // Make sure to provide the BuildContext if this code is inside a widget build method
-                tiles: taskModel.taskMembers.map((member) {
-                  return ListTile(
-                    leading: avatar(userMap, member),
-                    title: Text(UserServices().getNameFromId(userMap, member),
-                        style: TextStyle(fontFamily: 'MontMed', fontSize: 13)),
-                    subtitle: Text(
-                      '${TaskService().getJoinedTaskNumber(taskMap, member)} Tasks Involved',
-                      style:
-                          const TextStyle(fontFamily: 'MontMed', fontSize: 12),
+              children: [
+                const SizedBox(height: 20),
+                const Row(
+                  children: [
+                    SizedBox(width: 25),
+                    Text('Members:',
+                        style: TextStyle(fontFamily: 'MontMed', fontSize: 16)),
+                  ],
+                ),
+                const SizedBox(height: 5),
+                const Divider(),
+                Visibility(
+                  visible: (currentUserModel.userRole == 'Team Leader' ||
+                      currentUserModel.userRole == 'Admin'),
+                  child: TextButton(
+                    onPressed: () {
+                      setState(() {
+                        allMembers = projectModel.projectMembers;
+                        currentList = taskModel.taskMembers;
+                        for (var member in currentList) {
+                          if (allMembers.contains(member)) {
+                            allMembers.remove(member);
+                          }
+                        }
+                      });
+                      showMemberSelectionDialog(userMap, taskMap, taskModel);
+                    },
+                    child: const Row(
+                      children: [
+                        Icon(
+                          Icons.add,
+                          color: Colors.blueAccent,
+                        ),
+                        SizedBox(width: 10),
+                        Text(
+                          'Assign New Member',
+                          style: TextStyle(
+                              fontFamily: 'MontMed', color: Colors.blueAccent),
+                        ),
+                      ],
                     ),
-                    trailing: TextButton(
-                        onPressed: () {
-                          setState(() {
-                            _showDeleteMemberDialog(
-                                member, taskModel.taskMembers);
-                          });
-                        },
-                        child: Text('Remove',
-                            style: TextStyle(
-                                fontFamily: 'MontMed', fontSize: 12))),
-                  );
-                }),
-              ).toList(),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Expanded(
+                    child: SingleChildScrollView(
+                  child: Column(
+                    children: ListTile.divideTiles(
+                      context:
+                          context, // Make sure to provide the BuildContext if this code is inside a widget build method
+                      tiles: currentList.map((member) {
+                        return ListTile(
+                          leading: avatar(userMap, member),
+                          title: Text(
+                              UserServices().getNameFromId(userMap, member),
+                              style: const TextStyle(
+                                  fontFamily: 'MontMed', fontSize: 13)),
+                          subtitle: Text(
+                            '${TaskService().getJoinedTaskNumber(taskMap, member)} Tasks Involved',
+                            style: const TextStyle(
+                                fontFamily: 'MontMed', fontSize: 12),
+                          ),
+                          trailing: Visibility(
+                            visible: currentUserModel.userRole != 'User',
+                            child: TextButton(
+                                onPressed: () {
+                                  setState(() {
+                                    _showDeleteMemberDialog(member);
+                                  });
+                                  TaskService()
+                                      .taskRef
+                                      .child(taskModel.taskId)
+                                      .update({
+                                    'taskMembers': currentList,
+                                  });
+                                },
+                                child: const Text('Remove',
+                                    style: TextStyle(
+                                        fontFamily: 'MontMed', fontSize: 12))),
+                          ),
+                        );
+                      }),
+                    ).toList(),
+                  ),
+                )),
+              ],
             ),
-          )),
-        ],
-      ),
-    );
+          );
+        });
   }
 
-  Future<void> _showMemberSelectionDialog() async {
+  Future<void> showMemberSelectionDialog(
+      Map<String, dynamic> userMap, Map taskMap, TaskModel taskModel) async {
     await showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -574,37 +647,45 @@ class _StatefulBottomSheetWidgetState extends State<StatefulBottomSheetWidget> {
             'MEMBERS',
             style: TextStyle(fontFamily: 'Anurati'),
           ),
-          content: SingleChildScrollView(
-            child: Column(
-              children: allMembers.map((user) {
-                return Column(
-                  children: <Widget>[
-                    ListTile(
-                      leading: const CircleAvatar(
-                        child: Icon(
-                          Icons.person,
-                        ),
-                      ),
-                      title: Text(user,
-                          style:
-                              TextStyle(fontFamily: 'MontMed', fontSize: 13)),
-                      subtitle: Text(
-                        '2 Tasks Involved',
-                        style: TextStyle(fontFamily: 'MontMed', fontSize: 12),
-                      ),
-                      onTap: () {
-                        setState(() {
-                          currentList.add(user);
-                        });
-                        Navigator.of(context).pop(); // Close the dialog
-                      },
-                    ),
-                    const Divider(height: 0),
-                  ],
-                );
-              }).toList(),
-            ),
-          ),
+          content: allMembers.isEmpty
+              ? const Text('There is no member here',
+                  style: TextStyle(fontSize: 16))
+              : SingleChildScrollView(
+                  child: Column(
+                    children: allMembers.map((member) {
+                      return Column(
+                        children: <Widget>[
+                          ListTile(
+                            leading: avatar(userMap, member),
+                            title: Text(
+                                UserServices().getNameFromId(userMap, member),
+                                style: const TextStyle(
+                                    fontFamily: 'MontMed', fontSize: 13)),
+                            subtitle: Text(
+                              '${TaskService().getJoinedTaskListFromProject(taskMap, member, projectModel.projectId).length} Task(s) Involved',
+                              style: const TextStyle(
+                                  fontFamily: 'MontMed', fontSize: 12),
+                            ),
+                            onTap: () {
+                              setState(() {
+                                currentList.add(member);
+                                allMembers.remove(member);
+                              });
+                              TaskService()
+                                  .taskRef
+                                  .child(taskModel.taskId)
+                                  .update({
+                                'taskMembers': currentList,
+                              });
+                              Navigator.of(context).pop(); // Close the dialog
+                            },
+                          ),
+                          const Divider(height: 0),
+                        ],
+                      );
+                    }).toList(),
+                  ),
+                ),
           actions: <Widget>[
             TextButton(
               onPressed: () {
@@ -621,8 +702,7 @@ class _StatefulBottomSheetWidgetState extends State<StatefulBottomSheetWidget> {
     );
   }
 
-  Future<void> _showDeleteMemberDialog(
-      String member, List<String> allStaff) async {
+  Future<void> _showDeleteMemberDialog(String member) async {
     return showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
@@ -642,7 +722,7 @@ class _StatefulBottomSheetWidgetState extends State<StatefulBottomSheetWidget> {
               onPressed: () {
                 setState(() {
                   currentList.remove(member);
-                  allStaff.add(member);
+                  allMembers.add(member);
                 });
                 Navigator.of(context).pop();
               },
@@ -685,6 +765,7 @@ class _StatefulCommentSheetWidgetState
   late String taskId;
   var commentController = TextEditingController();
   List<CommentModel> listComments = [];
+
   @override
   void initState() {
     // TODO: implement initState
@@ -715,7 +796,7 @@ class _StatefulCommentSheetWidgetState
           listComments =
               CommentService().getListAllComments(commentMap, taskId);
           return Container(
-            padding: EdgeInsets.fromLTRB(10, 0, 10, 10),
+            padding: const EdgeInsets.fromLTRB(10, 0, 10, 10),
             child: Column(
               children: [
                 const SizedBox(height: 20),
@@ -767,7 +848,7 @@ class _StatefulCommentSheetWidgetState
                       },
                       icon: const Icon(Icons.send),
                     )),
-                Divider(),
+                const Divider(),
                 Expanded(
                     child: SingleChildScrollView(
                   child: Column(
@@ -780,7 +861,7 @@ class _StatefulCommentSheetWidgetState
                             title: Text(
                                 UserServices().getNameFromId(
                                     userMap, comment.commentAuthor),
-                                style: TextStyle(
+                                style: const TextStyle(
                                     fontFamily: 'MontMed',
                                     fontSize: 12,
                                     fontWeight: FontWeight.bold)),
@@ -792,7 +873,7 @@ class _StatefulCommentSheetWidgetState
                                   color: Colors.black),
                             ),
                             trailing: Text('${comment.commentDate}',
-                                style: TextStyle(fontFamily: 'MontMed')));
+                                style: const TextStyle(fontFamily: 'MontMed')));
                       }),
                     ).toList(),
                   ),
@@ -806,40 +887,15 @@ class _StatefulCommentSheetWidgetState
   Future<void> addComment() async {
     CommentService commentService = CommentService();
     commentService.addComment(commentController.text, taskId);
-    // DatabaseEvent commentDatabaseEvent =
-    //     await commentService.databaseReference.child('comments').once();
-    // if (commentDatabaseEvent.snapshot.value != null &&
-    //     commentDatabaseEvent.snapshot.value is Map) {
-    //   commentMap = Map.from(commentDatabaseEvent.snapshot.value as dynamic);
-    //   List<MapEntry<dynamic, dynamic>> sortedEntries =
-    //       commentMap.entries.toList();
-    //   sortedEntries.sort((a, b) {
-    //     return (b.value['timestamp'] as int)
-    //         .compareTo(a.value['timestamp'] as int);
-    //   });
-    //   commentMap = Map.fromEntries(
-    //     sortedEntries.map(
-    //       (entry) {
-    //         return MapEntry(
-    //           entry.key,
-    //           {
-    //             'timestamp': entry.value['timestamp'],
-    //             'commentId': entry.value['commentId'],
-    //             'commentContent': entry.value['commentContent'],
-    //             'commentAuthor': entry.value['commentAuthor'],
-    //             'commentDate': entry.value['commentDate'],
-    //             'taskId': entry.value['taskId'],
-    //           },
-    //         );
-    //       },
-    //     ),
-    //   );
-    //   listComments = commentService.getListAllComments(commentMap, taskId);
-    // }
   }
 }
 
 class StatefulBottomSheetWidget3 extends StatefulWidget {
+  final TaskModel taskModel;
+  final PhaseModel phaseModel;
+  const StatefulBottomSheetWidget3(
+      {super.key, required this.taskModel, required this.phaseModel});
+
   @override
   _StatefulBottomSheetWidget3State createState() =>
       _StatefulBottomSheetWidget3State();
@@ -847,59 +903,143 @@ class StatefulBottomSheetWidget3 extends StatefulWidget {
 
 class _StatefulBottomSheetWidget3State
     extends State<StatefulBottomSheetWidget3> {
+  late TaskModel taskModel;
+  late PhaseModel phaseModel;
+  User? user;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    taskModel = widget.taskModel;
+    phaseModel = widget.phaseModel;
+    user = FirebaseAuth.instance.currentUser;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.fromLTRB(10, 0, 10, 10),
-      child: Column(
-        children: [
-          SizedBox(height: 20),
-          Row(
-            children: [
-              SizedBox(width: 25),
-              Text('Task Modification:',
-                  style: TextStyle(fontFamily: 'MontMed', fontSize: 16)),
-            ],
-          ),
-          SizedBox(height: 5),
-          Divider(),
-          ListTile(
-            leading: CircleAvatar(
-              child: Icon(Icons.playlist_add_check),
-            ),
-            title: Text('Mark as Done',
-                style: TextStyle(fontFamily: 'MontMed', fontSize: 13)),
-            subtitle: Text('Task Completion and Storage',
-                style: TextStyle(fontFamily: 'MontMed', fontSize: 12)),
-            onTap: () {
-              //TaskService().updateTaskStatusOverdue(taskId)
-            },
-          ),
-          Divider(),
-          ListTile(
-            leading: CircleAvatar(
-              child: Icon(Icons.playlist_remove),
-            ),
-            title: Text('Relaunch Task',
-                style: TextStyle(fontFamily: 'MontMed', fontSize: 13)),
-            subtitle: Text('Mark as Undone and Redo Task',
-                style: TextStyle(fontFamily: 'MontMed', fontSize: 12)),
-            onTap: () {},
-          ),
-          Divider(),
-          ListTile(
-            leading: CircleAvatar(
-              child: Icon(Icons.delete_outline),
-            ),
-            title: Text('Dispose Task',
-                style: TextStyle(fontFamily: 'MontMed', fontSize: 13)),
-            subtitle: Text('Delete Task and Remove from Storage',
-                style: TextStyle(fontFamily: 'MontMed', fontSize: 12)),
-            onTap: () {},
-          ),
-          Divider(),
-        ],
-      ),
-    );
+    return user == null
+        ? loader()
+        : StreamBuilder<List<Object>>(
+            stream: CombineLatestStream.list([
+              UserServices().databaseReference.child(user!.uid).onValue,
+              ProjectServices().reference.onValue,
+              TaskService().taskRef.onValue,
+              TaskService().taskRef.child(taskModel.taskId).onValue,
+              PhaseServices().phaseRef.child(phaseModel.phraseId).onValue,
+            ]),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData || snapshot.hasError) return loader();
+              var userEvent = snapshot.data![0] as DatabaseEvent;
+              var projectEvent = snapshot.data![1] as DatabaseEvent;
+              var taskEvent = snapshot.data![2] as DatabaseEvent;
+              var taskModelEvent = snapshot.data![3] as DatabaseEvent;
+              var phaseEvent = snapshot.data![4] as DatabaseEvent;
+              var userValue = userEvent.snapshot.value as dynamic;
+              var projectValue = projectEvent.snapshot.value as dynamic;
+              var taskValue = taskEvent.snapshot.value as dynamic;
+              var taskModelValue = taskModelEvent.snapshot.value as dynamic;
+              var phaseValue = phaseEvent.snapshot.value as dynamic;
+              UserModel userModel = UserModel.fromMap(Map.from(userValue));
+              Map projectMap = Map.from(projectValue);
+              Map taskMap = Map.from(taskValue);
+              phaseModel = PhaseModel.fromMap(Map.from(phaseValue));
+              if (taskModelValue == null) {
+                return ListOfTaskScreen(
+                    userModel: userModel,
+                    projectMap: projectMap,
+                    taskMap: taskMap);
+              }
+              taskModel = TaskModel.fromMap(Map.from(taskModelValue));
+              return Container(
+                padding: const EdgeInsets.fromLTRB(10, 0, 10, 10),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 20),
+                    const Row(
+                      children: [
+                        SizedBox(width: 25),
+                        Text('Task Modification:',
+                            style:
+                                TextStyle(fontFamily: 'MontMed', fontSize: 16)),
+                      ],
+                    ),
+                    const SizedBox(height: 5),
+                    const Divider(),
+                    ListTile(
+                      leading: const CircleAvatar(
+                        child: Icon(Icons.playlist_add_check),
+                      ),
+                      title: const Text('Mark as Done',
+                          style:
+                              TextStyle(fontFamily: 'MontMed', fontSize: 13)),
+                      subtitle: const Text('Task Completion and Storage',
+                          style:
+                              TextStyle(fontFamily: 'MontMed', fontSize: 12)),
+                      onTap: () {
+                        TaskService()
+                            .taskRef
+                            .child(taskModel.taskId)
+                            .update({'taskStatus': 'Complete'});
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                    const Divider(),
+                    ListTile(
+                      leading: const CircleAvatar(
+                        child: Icon(Icons.playlist_remove),
+                      ),
+                      title: const Text('Relaunch Task',
+                          style:
+                              TextStyle(fontFamily: 'MontMed', fontSize: 13)),
+                      subtitle: const Text('Mark as Undone and Redo Task',
+                          style:
+                              TextStyle(fontFamily: 'MontMed', fontSize: 12)),
+                      onTap: () {
+                        TaskService()
+                            .taskRef
+                            .child(taskModel.taskId)
+                            .update({'taskStatus': 'Incomplete'});
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                    const Divider(),
+                    ListTile(
+                      leading: const CircleAvatar(
+                        child: Icon(Icons.delete_outline),
+                      ),
+                      title: const Text('Dispose Task',
+                          style:
+                              TextStyle(fontFamily: 'MontMed', fontSize: 13)),
+                      subtitle: const Text(
+                          'Delete Task and Remove from Storage',
+                          style:
+                              TextStyle(fontFamily: 'MontMed', fontSize: 12)),
+                      onTap: () async {
+                        await TaskService()
+                            .taskRef
+                            .child(taskModel.taskId)
+                            .remove();
+                        await PhaseServices()
+                            .deleteTaskInPhase(phaseModel, taskModel.taskId);
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) {
+                              return ListOfTaskScreen(
+                                projectMap: projectMap,
+                                userModel: userModel,
+                                taskMap: taskMap,
+                              );
+                            },
+                          ),
+                          (Route<dynamic> route) => false,
+                        );
+                      },
+                    ),
+                    const Divider(),
+                  ],
+                ),
+              );
+            });
   }
 }

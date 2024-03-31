@@ -17,6 +17,7 @@ import 'package:capstone2_project_management_app/views/task_create_screen.dart';
 import 'package:capstone2_project_management_app/views/task_detail_screen.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class ListOfTaskScreen extends StatefulWidget {
@@ -36,10 +37,12 @@ class ListOfTaskScreen extends StatefulWidget {
   State<ListOfTaskScreen> createState() => _ListOfTaskScreenState();
 }
 
+PhaseModel? phaseModel;
+
 class _ListOfTaskScreenState extends State<ListOfTaskScreen> {
   late UserModel currentUserModel;
   late ProjectModel? projectModel;
-  late PhaseModel? phraseModel;
+  //late PhaseModel? phaseModel;
   late Map<String, dynamic> userMap;
   late Map<String, dynamic> commentMap;
   late Map<dynamic, dynamic> projectMap;
@@ -47,7 +50,7 @@ class _ListOfTaskScreenState extends State<ListOfTaskScreen> {
   List<TaskModel> listJoinedTasks = [];
   List<TaskModel> listCompleteTasks = [];
   List<TaskModel> listOverdueTasks = [];
-  late Map phraseMap = {};
+  late Map phaseMap = {};
   late Map taskMap;
   late int taskLength;
   late Map<DateTime, List<TaskModel>> calendarTaskEvents;
@@ -59,22 +62,22 @@ class _ListOfTaskScreenState extends State<ListOfTaskScreen> {
   void initState() {
     currentUserModel = widget.userModel;
     projectMap = widget.projectMap;
+    taskMap = widget.taskMap;
     listJoinedProjects =
         projectServices.getJoinedProjectList(projectMap, currentUserModel);
     projectModel = (widget.projectModel == null)
         ? listJoinedProjects.first
         : widget.projectModel;
-    taskMap = widget.taskMap;
-    listCompleteTasks = taskService.getCompleteTaskListByProject(
-        taskMap, currentUserModel!.userId, projectModel!.projectId);
-    listJoinedTasks = taskService.getJoinedTaskListFromProject(
-        taskMap, currentUserModel.userId, projectModel!.projectId);
-    listOverdueTasks = taskService.getOverdouTaskListFromProject(
-        taskMap, currentUserModel.userId, projectModel!.projectId);
-    taskLength = taskService.getJoinedTaskNumberFromProject(
-        taskMap, currentUserModel.userId, projectModel!.projectId);
-    _getPhraseData();
-    _fetchCalendarEvents();
+    // listCompleteTasks = taskService.getCompleteTaskListByProject(
+    //     taskMap, currentUserModel!.userId, projectModel!.projectId);
+    // listJoinedTasks = taskService.getJoinedTaskListFromProject(
+    //     taskMap, currentUserModel.userId, projectModel!.projectId);
+    // listOverdueTasks = taskService.getOverdouTaskListFromProject(
+    //     taskMap, currentUserModel.userId, projectModel!.projectId);
+    // taskLength = taskService.getJoinedTaskNumberFromProject(
+    //     taskMap, currentUserModel.userId, projectModel!.projectId);
+    //_getPhraseData();
+    //_fetchCalendarEvents();
     super.initState();
   }
 
@@ -105,200 +108,244 @@ class _ListOfTaskScreenState extends State<ListOfTaskScreen> {
   }
 
   Future<void> _getPhraseData() async {
-    DatabaseReference phraseRef = FirebaseDatabase.instance
-        .ref()
-        .child('phrases')
-        .child(projectModel!.projectId);
+    DatabaseReference phraseRef =
+        FirebaseDatabase.instance.ref().child('phases');
+
     DatabaseEvent snapshot = await phraseRef.orderByChild('timestamp').once();
     if (snapshot.snapshot.value != null && snapshot.snapshot.value is Map) {
+      phaseMap = Map.from(snapshot.snapshot.value as dynamic);
+      phaseModel = PhaseServices()
+          .getPhraseModelFromName(phaseMap, projectModel!.projectStatus);
+      //taskLength = phraseModel!.listTasks.length;
+      List<MapEntry<dynamic, dynamic>> sortedEntries =
+          phaseMap.entries.toList();
+      sortedEntries.sort((a, b) {
+        return (a.value['timestamp'] as int)
+            .compareTo(b.value['timestamp'] as int);
+      });
       setState(() {
-        phraseMap = Map.from(snapshot.snapshot.value as dynamic);
-        phraseModel = PhaseServices()
-            .getPhraseModelFromName(phraseMap, projectModel!.projectStatus);
-        //taskLength = phraseModel!.listTasks.length;
-        List<MapEntry<dynamic, dynamic>> sortedEntries =
-            phraseMap.entries.toList();
-        sortedEntries.sort((a, b) {
-          return (a.value['timestamp'] as int)
-              .compareTo(b.value['timestamp'] as int);
-        });
-        setState(() {
-          phraseMap = Map.fromEntries(
-            sortedEntries.map(
-              (entry) {
-                return MapEntry(
-                  entry.key,
-                  {
-                    'timestamp': entry.value['timestamp'],
-                    'phraseId': entry.value['phraseId'],
-                    'phraseName': entry.value['phraseName'],
-                    'listTasks': entry.value['listTasks'],
-                    'phraseDescription': entry.value['phraseDescription'],
-                    'projectId': entry.value['projectId'],
-                  },
-                );
-              },
-            ),
-          );
-          phraseModel = phraseServices.getCurrentPhraseModelFromProject(
-              phraseMap, projectModel!.projectId);
-        });
+        phaseMap = Map.fromEntries(
+          sortedEntries.map(
+            (entry) {
+              return MapEntry(
+                entry.key,
+                {
+                  'timestamp': entry.value['timestamp'],
+                  'phraseId': entry.value['phraseId'],
+                  'phraseName': entry.value['phraseName'],
+                  'listTasks': entry.value['listTasks'],
+                  'phraseDescription': entry.value['phraseDescription'],
+                  'projectId': entry.value['projectId'],
+                },
+              );
+            },
+          ),
+        );
+        phaseModel = phraseServices.getCurrentPhraseModelFromProject(
+            phaseMap, projectModel!.projectId, projectModel!.projectStatus);
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      floatingActionButton: Visibility(
-        visible: currentUserModel.userRole != 'User',
-        child: FloatingActionButton(
-          onPressed: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => _getTaskCreateScreen(),
+    return StreamBuilder<List<Object>>(
+        stream: CombineLatestStream.list([
+          UserServices().databaseReference.onValue,
+          TaskService().taskRef.onValue,
+          ProjectServices().reference.onValue,
+          PhaseServices().phaseRef.onValue,
+        ]),
+        builder: (context, snapshot) {
+          if (snapshot.hasError || !snapshot.hasData) {
+            return loader();
+          }
+          var eventUser = snapshot.data![0] as DatabaseEvent;
+          var valueUser = eventUser.snapshot.value as dynamic;
+          Map mapUser = Map.from(valueUser);
+          var eventTask = snapshot.data![1] as DatabaseEvent;
+          var valueTask = eventTask.snapshot.value as dynamic;
+          taskMap = Map.from(valueTask);
+          var eventProject = snapshot.data![2] as DatabaseEvent;
+          var valueProject = eventProject.snapshot.value as dynamic;
+          projectMap = Map.from(valueProject);
+          var eventPhase = snapshot.data![3] as DatabaseEvent;
+          var valuePhase = eventPhase.snapshot.value as dynamic;
+          phaseMap = Map.from(valuePhase);
+          phaseMap = PhaseServices().sortedPhaseMap(phaseMap);
+          phaseModel = PhaseServices().getCurrentPhraseModelFromProject(
+              phaseMap, projectModel!.projectId, projectModel!.projectStatus);
+          listJoinedProjects = projectServices.getJoinedProjectList(
+              projectMap, currentUserModel);
+          projectModel = (widget.projectModel == null)
+              ? listJoinedProjects.first
+              : widget.projectModel;
+          listCompleteTasks = taskService.getCompleteTaskListByProject(
+              taskMap, currentUserModel.userId, projectModel!.projectId);
+          listJoinedTasks = taskService.getJoinedTaskListFromProject(
+              taskMap, currentUserModel.userId, projectModel!.projectId);
+          listOverdueTasks = taskService.getOverdouTaskListFromProject(
+              taskMap, currentUserModel.userId, projectModel!.projectId);
+          taskLength = taskService.getJoinedTaskNumberFromProject(
+              taskMap, currentUserModel.userId, projectModel!.projectId);
+          _fetchCalendarEvents();
+          return Scaffold(
+            floatingActionButton: Visibility(
+              visible: currentUserModel.userRole != 'User',
+              child: FloatingActionButton(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => _getTaskCreateScreen(),
+                    ),
+                  );
+                },
+                backgroundColor: Colors.blueAccent,
+                tooltip:
+                    'Add Project', // Optional tooltip text shown on long-press
+                child: const Icon(
+                  Icons.playlist_add,
+                  color: Colors.white,
+                ), // Updated icon for the FAB
               ),
-            );
-          },
-          backgroundColor: Colors.blueAccent,
-          tooltip: 'Add Project', // Optional tooltip text shown on long-press
-          child: const Icon(
-            Icons.playlist_add,
-            color: Colors.white,
-          ), // Updated icon for the FAB
-        ),
-      ),
-      body: SafeArea(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            DbSideMenu(
-              userModel: currentUserModel,
             ),
-            Expanded(
-                child: Padding(
-                    padding: const EdgeInsets.all(defaultPadding),
-                    child: SingleChildScrollView(
-                        child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Row(
-                          children: [
-                            Text(
-                              'TASKS',
-                              style: TextStyle(
-                                fontFamily: 'Anurati',
-                                fontSize: 30,
+            body: SafeArea(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  DbSideMenu(
+                    userModel: currentUserModel,
+                  ),
+                  Expanded(
+                      child: Padding(
+                          padding: const EdgeInsets.all(defaultPadding),
+                          child: SingleChildScrollView(
+                              child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Row(
+                                children: [
+                                  Text(
+                                    'TASKS',
+                                    style: TextStyle(
+                                      fontFamily: 'Anurati',
+                                      fontSize: 30,
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ),
-                          ],
-                        ),
-                        const Divider(),
-                        ListTile(
-                          leading: const CircleAvatar(
-                              child:
-                                  Icon(Icons.folder, color: Colors.blueAccent)),
-                          onTap: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) {
-                                  return _getProjectDetailScreen();
+                              const Divider(),
+                              ListTile(
+                                leading: const CircleAvatar(
+                                    child: Icon(Icons.folder,
+                                        color: Colors.blueAccent)),
+                                onTap: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) {
+                                        return _getProjectDetailScreen();
+                                      },
+                                    ),
+                                  );
                                 },
-                              ),
-                            );
-                          },
-                          title: Text(projectModel!.projectName,
-                              style: const TextStyle(
-                                  fontFamily: 'MontMed', fontSize: 13)),
-                          subtitle: Text(
-                            '$taskLength Task(s)',
-                            style: const TextStyle(
-                                fontFamily: 'MontMed', fontSize: 12),
-                          ),
-                          trailing: TextButton(
-                            onPressed: () {
-                              _showProjectSelectionDialog();
-                            },
-                            child: const Text('Switch',
-                                style: TextStyle(
-                                    fontFamily: 'MontMed', fontSize: 12)),
-                          ),
-                        ),
-                        const SizedBox(height: 5),
-                        const Divider(),
-                        const SizedBox(height: 5),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            TextButton(
-                              onPressed: () {
-                                _showFilterDrawer(context);
-                              },
-                              child: const Row(
-                                children: [
-                                  Icon(Icons.filter_list, size: 15),
-                                  SizedBox(width: 10),
-                                  Text(
-                                    'Filter',
-                                    style: TextStyle(
-                                        fontFamily: 'MontMed', fontSize: 14),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(width: 5),
-                            Container(width: 1, height: 25, color: Colors.grey),
-                            const SizedBox(width: 5),
-                            TextButton(
-                              onPressed: () {
-                                _showOrderDrawer(context);
-                              },
-                              child: const Row(
-                                children: [
-                                  Icon(Icons.import_export, size: 15),
-                                  SizedBox(width: 10),
-                                  Text(
-                                    'Order',
-                                    style: TextStyle(
-                                        fontFamily: 'MontMed', fontSize: 14),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(width: 5),
-                            Container(width: 1, height: 25, color: Colors.grey),
-                            const SizedBox(width: 5),
-                            TextButton(
-                              onPressed: () {
-                                _showStateDrawer(context);
-                              },
-                              child: const Row(
-                                children: [
-                                  Icon(Icons.flag_outlined, size: 15),
-                                  SizedBox(width: 10),
-                                  Text('Priority',
+                                title: Text(projectModel!.projectName,
+                                    style: const TextStyle(
+                                        fontFamily: 'MontMed', fontSize: 13)),
+                                subtitle: Text(
+                                  '$taskLength Task(s)',
+                                  style: const TextStyle(
+                                      fontFamily: 'MontMed', fontSize: 12),
+                                ),
+                                trailing: TextButton(
+                                  onPressed: () {
+                                    _showProjectSelectionDialog();
+                                  },
+                                  child: const Text('Switch',
                                       style: TextStyle(
-                                          fontFamily: 'MontMed', fontSize: 14)),
+                                          fontFamily: 'MontMed', fontSize: 12)),
+                                ),
+                              ),
+                              const SizedBox(height: 5),
+                              const Divider(),
+                              const SizedBox(height: 5),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  TextButton(
+                                    onPressed: () {
+                                      _showFilterDrawer(context);
+                                    },
+                                    child: const Row(
+                                      children: [
+                                        Icon(Icons.filter_list, size: 15),
+                                        SizedBox(width: 10),
+                                        Text(
+                                          'Filter',
+                                          style: TextStyle(
+                                              fontFamily: 'MontMed',
+                                              fontSize: 14),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(width: 5),
+                                  Container(
+                                      width: 1, height: 25, color: Colors.grey),
+                                  const SizedBox(width: 5),
+                                  TextButton(
+                                    onPressed: () {
+                                      _showOrderDrawer(context);
+                                    },
+                                    child: const Row(
+                                      children: [
+                                        Icon(Icons.import_export, size: 15),
+                                        SizedBox(width: 10),
+                                        Text(
+                                          'Order',
+                                          style: TextStyle(
+                                              fontFamily: 'MontMed',
+                                              fontSize: 14),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(width: 5),
+                                  Container(
+                                      width: 1, height: 25, color: Colors.grey),
+                                  const SizedBox(width: 5),
+                                  TextButton(
+                                    onPressed: () {
+                                      _showStateDrawer(context);
+                                    },
+                                    child: const Row(
+                                      children: [
+                                        Icon(Icons.flag_outlined, size: 15),
+                                        SizedBox(width: 10),
+                                        Text('Priority',
+                                            style: TextStyle(
+                                                fontFamily: 'MontMed',
+                                                fontSize: 14)),
+                                      ],
+                                    ),
+                                  ),
                                 ],
                               ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 5),
-                        const Divider(),
-                        ExpansionTileTasks(
-                          projectMap: projectMap,
-                          taskMap: taskMap,
-                          currentUserModel: currentUserModel,
-                          projectModel: projectModel!,
-                          taskCalendarEvents: calendarTaskEvents,
-                        ),
-                      ],
-                    ))))
-          ],
-        ),
-      ),
-    );
+                              const SizedBox(height: 5),
+                              const Divider(),
+                              ExpansionTileTasks(
+                                projectMap: projectMap,
+                                taskMap: taskMap,
+                                currentUserModel: currentUserModel,
+                                projectModel: projectModel!,
+                                taskCalendarEvents: calendarTaskEvents,
+                              ),
+                            ],
+                          ))))
+                ],
+              ),
+            ),
+          );
+        });
   }
 
   FutureBuilder<Map<String, dynamic>> _getTaskCreateScreen() {
@@ -319,7 +366,7 @@ class _ListOfTaskScreenState extends State<ListOfTaskScreen> {
               currentUserModel: currentUserModel,
               userMap: userMap,
               projectModel: projectModel!,
-              phraseMap: phraseMap,
+              phraseMap: phaseMap,
               taskMap: taskMap,
             ),
           );
@@ -346,7 +393,7 @@ class _ListOfTaskScreenState extends State<ListOfTaskScreen> {
               userMap: userMap,
               userModel: currentUserModel,
               projectMap: projectMap,
-              phraseMap: phraseMap,
+              phraseMap: phaseMap,
               taskMap: taskMap,
             ),
           );
@@ -950,6 +997,7 @@ class _ExpansionTileTasksState extends State<ExpansionTileTasks> {
                             taskMap: taskMap,
                             commentMap: commentMap,
                             userModel: currentUserModel,
+                            phaseModel: phaseModel!,
                           );
                         }
                       },

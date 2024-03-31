@@ -1,11 +1,14 @@
 import 'package:capstone2_project_management_app/models/project_model.dart';
 import 'package:capstone2_project_management_app/models/user_model.dart';
+import 'package:capstone2_project_management_app/services/notification_services.dart';
 import 'package:capstone2_project_management_app/services/project_services.dart';
 import 'package:capstone2_project_management_app/services/user_services.dart';
 import 'package:capstone2_project_management_app/views/project_detail_screen.dart';
 import 'package:capstone2_project_management_app/views/subs/sub_widgets.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:rxdart/rxdart.dart';
 
 class StatefulBottomSheetWidget extends StatefulWidget {
   final ProjectModel projectModel;
@@ -51,6 +54,7 @@ class _StatefulBottomSheetWidgetState extends State<StatefulBottomSheetWidget> {
   ProjectServices projectServices = ProjectServices();
   late DatabaseReference projectRef;
   String selectedMember = '';
+  Map<String, bool> mapGetNotification = {};
   @override
   void initState() {
     // TODO: implement initState
@@ -69,111 +73,164 @@ class _StatefulBottomSheetWidgetState extends State<StatefulBottomSheetWidget> {
         .child(projectModel.projectId);
     allLeader = userServices.getAllLeaderStringList(userMap);
     allStaff = userServices.getAllUserStringList(userMap);
+    currentList.forEach((element) {
+      if (allStaff.contains(element)) {
+        allStaff.remove(element);
+      }
+    });
+    currentList.forEach((element) {
+      mapGetNotification[element] = false;
+    });
     selectedMember = projectModel.projectMembers.first;
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(10),
-      child: Column(
-        children: [
-          const SizedBox(height: 10),
-          Container(
-              child: TextButton(
-            onPressed: () => _showMemberSelectionDialog(allStaff),
-            child: const Row(
+    return StreamBuilder<List<Object>>(
+        stream: CombineLatestStream.list([
+          ProjectServices().reference.onValue,
+          ProjectServices().reference.child(projectModel.projectId).onValue
+        ]),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData || snapshot.hasError) {
+            return loader();
+          }
+          var event0 = snapshot.data![0] as DatabaseEvent;
+          var event1 = snapshot.data![1] as DatabaseEvent;
+          var value0 = event0.snapshot.value as dynamic;
+          var value1 = event1.snapshot.value as dynamic;
+          projectMap = Map.from(value0);
+          projectModel = ProjectModel.fromMap(Map.from(value1));
+          return Container(
+            padding: const EdgeInsets.all(10),
+            child: Column(
               children: [
-                Icon(
-                  Icons.add,
-                  color: Colors.blueAccent,
-                ),
-                SizedBox(width: 10),
-                Text(
-                  'Add New Participant',
-                  style: TextStyle(
-                      fontFamily: 'MontMed', color: Colors.blueAccent),
-                ),
-              ],
-            ),
-          )),
-          const SizedBox(height: 10),
-          Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                children: ListTile.divideTiles(
-                  context:
-                      context, // Make sure to provide the BuildContext if this code is inside a widget build method
-                  tiles: currentList.map((member) {
-                    return ListTile(
-                      leading: avatar(userMap, member),
-                      title: Text(userServices.getNameFromId(userMap, member),
-                          style: const TextStyle(
-                              fontFamily: 'MontMed', fontSize: 13)),
-                      subtitle: Text(
-                        'Joined project numbers: ${projectServices.getJoinedProjectNumber(projectMap, member)}',
-                        style: const TextStyle(
-                            fontFamily: 'MontMed', fontSize: 12),
-                      ),
-                      trailing: Ink(
-                        decoration: const ShapeDecoration(
-                          color: Colors.transparent,
-                          shape: CircleBorder(),
+                const SizedBox(height: 10),
+                Visibility(
+                  visible: currentUserModel.userRole != 'User',
+                  child: Container(
+                      child: TextButton(
+                    onPressed: () => _showMemberSelectionDialog(allStaff),
+                    child: const Row(
+                      children: [
+                        Icon(
+                          Icons.add,
+                          color: Colors.blueAccent,
                         ),
-                        child: (member != currentList.first)
-                            ? IconButton(
-                                icon: const Icon(Icons.delete),
-                                color: Colors.red,
-                                onPressed: () {
-                                  _showDeleteMemberDialog(member);
-                                },
-                              )
-                            : IconButton(
-                                icon: const Icon(Icons.change_circle),
-                                color: Colors.blueAccent,
-                                onPressed: () {
-                                  _showLeaderSelectionDialog(allLeader);
-                                },
+                        SizedBox(width: 10),
+                        Text(
+                          'Add New Participant',
+                          style: TextStyle(
+                              fontFamily: 'MontMed', color: Colors.blueAccent),
+                        ),
+                      ],
+                    ),
+                  )),
+                ),
+                const SizedBox(height: 10),
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: ListTile.divideTiles(
+                        context:
+                            context, // Make sure to provide the BuildContext if this code is inside a widget build method
+                        tiles: currentList.map((member) {
+                          return ListTile(
+                            leading: avatar(userMap, member),
+                            title: Text(
+                                userServices.getNameFromId(userMap, member),
+                                style: const TextStyle(
+                                    fontFamily: 'MontMed', fontSize: 13)),
+                            subtitle: Text(
+                              'Joined project numbers: ${projectServices.getJoinedProjectNumber(projectMap, member)}',
+                              style: const TextStyle(
+                                  fontFamily: 'MontMed', fontSize: 12),
+                            ),
+                            trailing: Ink(
+                              decoration: const ShapeDecoration(
+                                color: Colors.transparent,
+                                shape: CircleBorder(),
                               ),
-                      ),
-                    );
-                  }),
-                ).toList(),
-              ),
-            ),
-          ),
-          TextButton(
-              onPressed: () async {
-                DatabaseReference projectRef =
-                    FirebaseDatabase.instance.ref().child('projects');
-                projectRef.child(projectModel.projectId).update({
-                  'projectMembers': currentList,
-                });
-                DatabaseEvent snapshot = await projectRef.once();
-                if (snapshot.snapshot.value != null &&
-                    snapshot.snapshot.value is Map) {
-                  setState(() {
-                    projectMap = Map.from(snapshot.snapshot.value as dynamic);
-                  });
-                }
-                //Navigator.of(context).pop();
-                Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(
-                    builder: (context) => ProjectDetailScreen(
-                      projectModel: projectModel,
-                      userMap: userMap,
-                      projectMap: projectMap,
-                      phraseMap: phraseMap,
-                      userModel: currentUserModel,
-                      taskMap: taskMap,
+                              child: (member != currentList.first)
+                                  ? IconButton(
+                                      icon: const Icon(Icons.delete),
+                                      color: Colors.red,
+                                      onPressed: () {
+                                        _showDeleteMemberDialog(member);
+                                      },
+                                    )
+                                  : IconButton(
+                                      icon: const Icon(Icons.change_circle),
+                                      color: Colors.blueAccent,
+                                      onPressed: () {
+                                        _showLeaderSelectionDialog(allLeader);
+                                      },
+                                    ),
+                            ),
+                          );
+                        }),
+                      ).toList(),
                     ),
                   ),
-                );
-              },
-              child: const Text('SAVE')),
-        ],
-      ),
-    );
+                ),
+                TextButton(
+                    onPressed: () async {
+                      DatabaseReference projectRef =
+                          FirebaseDatabase.instance.ref().child('projects');
+                      await projectRef.child(projectModel.projectId).update({
+                        'projectMembers': currentList,
+                      });
+                      // DatabaseEvent snapshot = await projectRef.once();
+                      // if (snapshot.snapshot.value != null &&
+                      //     snapshot.snapshot.value is Map) {
+                      //   setState(() {
+                      //     projectMap =
+                      //         Map.from(snapshot.snapshot.value as dynamic);
+                      //   });
+                      // }
+                      //Navigator.of(context).pop();
+                      List<String> afterList = getAfterList(mapGetNotification);
+                      if (afterList.isNotEmpty) {
+                        String notificationContent =
+                            'You have been added to the project of ${projectModel.projectName.toUpperCase()} as Member role';
+                        NotificationService().addNotification(
+                            notificationContent,
+                            projectModel.projectId,
+                            afterList,
+                            'Project');
+                        Fluttertoast.showToast(
+                            msg:
+                                'You have been added new members to the project of ${projectModel.projectName.toUpperCase()}');
+                      }
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                          builder: (context) => ProjectDetailScreen(
+                            projectModel: projectModel,
+                            userMap: userMap,
+                            projectMap: projectMap,
+                            phraseMap: phraseMap,
+                            userModel: currentUserModel,
+                            taskMap: taskMap,
+                          ),
+                        ),
+                      );
+                      currentList = projectModel.projectMembers;
+                    },
+                    child: const Text('SAVE')),
+              ],
+            ),
+          );
+        });
+  }
+
+  List<String> getAfterList(Map<String, bool> map) {
+    List<String> afterList = [];
+    for (var element in map.keys) {
+      if (map[element] == true) {
+        afterList.add(element);
+      }
+    }
+    return afterList;
   }
 
   Future<void> _showMemberSelectionDialog(List<String> allMembers) async {
@@ -201,6 +258,7 @@ class _StatefulBottomSheetWidgetState extends State<StatefulBottomSheetWidget> {
                         setState(() {
                           currentList.add(user);
                           allStaff.remove(user);
+                          mapGetNotification[user] = true;
                         });
 
                         Navigator.of(context).pop();
@@ -300,6 +358,7 @@ class _StatefulBottomSheetWidgetState extends State<StatefulBottomSheetWidget> {
                 setState(() {
                   currentList.remove(member);
                   allStaff.add(member);
+                  mapGetNotification[member] = false;
                 });
                 Navigator.of(context).pop();
               },

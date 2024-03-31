@@ -35,6 +35,31 @@ class ProjectServices {
     return joinedProjects;
   }
 
+  List<ProjectModel> getAllProjectList(Map<dynamic, dynamic> projectMap) {
+    List<ProjectModel> list = [];
+    for (var project in projectMap.values) {
+      ProjectModel projectModel =
+          ProjectModel.fromMap(Map<String, dynamic>.from(project));
+      list.add(projectModel);
+    }
+    return list;
+  }
+
+  List<ProjectModel> getSearchedProjectList(
+      Map<dynamic, dynamic> projectMap, String output) {
+    List<ProjectModel> list = [];
+    if (output != "") {
+      for (var project in projectMap.values) {
+        ProjectModel projectModel =
+            ProjectModel.fromMap(Map<String, dynamic>.from(project));
+        if (projectModel.projectName.contains(output)) {
+          list.add(projectModel);
+        }
+      }
+    }
+    return list;
+  }
+
   String getProjectNameFromId(Map<dynamic, dynamic> projectMap, String id) {
     for (var project in projectMap.values) {
       ProjectModel projectModel =
@@ -85,6 +110,37 @@ class ProjectServices {
     return count;
   }
 
+  int getOverdueProjectNumber(Map<dynamic, dynamic> projectMap, String id) {
+    int count = 0;
+    for (var project in projectMap.values) {
+      ProjectModel projectModel =
+          ProjectModel.fromMap(Map<String, dynamic>.from(project));
+      DateTime now = DateTime.now();
+      DateTime endDate = DateTime.parse(projectModel.endDate);
+      if ((projectModel.projectMembers.contains(id) ||
+              projectModel.managerId == id ||
+              projectModel.leaderId == id) &&
+          now.isAfter(endDate)) {
+        count++;
+      }
+    }
+    return count;
+  }
+
+  int getAllOverdueProjectNumber(Map<dynamic, dynamic> projectMap, String id) {
+    int count = 0;
+    for (var project in projectMap.values) {
+      ProjectModel projectModel =
+          ProjectModel.fromMap(Map<String, dynamic>.from(project));
+      DateTime now = DateTime.now();
+      DateTime endDate = DateTime.parse(projectModel.endDate);
+      if (now.isAfter(endDate)) {
+        count++;
+      }
+    }
+    return count;
+  }
+
   int getCompleteProjectNumber(Map<dynamic, dynamic> projectMap, String id) {
     int count = 0;
     for (var project in projectMap.values) {
@@ -94,6 +150,18 @@ class ProjectServices {
               projectModel.managerId == id ||
               projectModel.leaderId == id) &&
           projectModel.projectStatus == 'Completed') {
+        count++;
+      }
+    }
+    return count;
+  }
+
+  int getAllCompleteProjectNumber(Map<dynamic, dynamic> projectMap) {
+    int count = 0;
+    for (var project in projectMap.values) {
+      ProjectModel projectModel =
+          ProjectModel.fromMap(Map<String, dynamic>.from(project));
+      if (projectModel.projectStatus == 'Completed') {
         count++;
       }
     }

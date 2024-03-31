@@ -40,7 +40,7 @@ class _ProjectCreateStep3State extends State<ProjectCreateStep3> {
   String teamLeaderIdController = "";
   Map<String, dynamic> projectMap = {};
   List<String> phaseNames = [];
-  List<Phase> phrasesList = [
+  List<Phase> phasesList = [
     Phase(
         phaseName: "Requirement and Gathering",
         phraseDescription: "Description"),
@@ -73,7 +73,7 @@ class _ProjectCreateStep3State extends State<ProjectCreateStep3> {
     teamLeaderIdController = widget.teamLeaderId;
     currentUserModel = widget.currentUserModel;
     projectMap = widget.projectMap;
-    for (var element in phrasesList) {
+    for (var element in phasesList) {
       phaseNames.add(element.phaseName);
     }
     super.initState();
@@ -115,7 +115,7 @@ class _ProjectCreateStep3State extends State<ProjectCreateStep3> {
                   ],
                 ),
                 Column(
-                  children: phrasesList.map((phase) {
+                  children: phasesList.map((phase) {
                     return Column(
                       children: <Widget>[
                         ListTile(
@@ -210,7 +210,7 @@ class _ProjectCreateStep3State extends State<ProjectCreateStep3> {
                         if (additionPhrases.isNotEmpty) {
                           for (var phase in additionPhrases) {
                             phaseNames.add(phase.phaseName);
-                            phrasesList.add(phase);
+                            phasesList.add(phase);
                           }
                         }
                         projectServices.addProject(
@@ -222,8 +222,8 @@ class _ProjectCreateStep3State extends State<ProjectCreateStep3> {
                             phaseNames,
                             currentUserModel);
                         //Navigator.popUntil(context, ModalRoute.withName('/'));
-                        for (var phase in phrasesList) {
-                          PhaseServices().addPhrase(
+                        for (var phase in phasesList) {
+                          PhaseServices().addPhase(
                             phase.phaseName,
                             projectServices.realProjectID,
                             [],

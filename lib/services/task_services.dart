@@ -207,12 +207,36 @@ class TaskService {
     return count;
   }
 
+  int getAllOverdouTaskNumber(Map<dynamic, dynamic> taskMap) {
+    int count = 0;
+    for (var task in taskMap.values) {
+      TaskModel taskModel = TaskModel.fromMap(Map<String, dynamic>.from(task));
+      DateTime now = DateTime.now();
+      DateTime endDate = DateTime.parse(taskModel.taskEndDate);
+      if (now.isAfter(endDate)) {
+        count++;
+      }
+    }
+    return count;
+  }
+
   int getCompleteTaskNumber(Map<dynamic, dynamic> taskMap, String id) {
     int count = 0;
     for (var task in taskMap.values) {
       TaskModel taskModel = TaskModel.fromMap(Map<String, dynamic>.from(task));
-      if (taskModel.taskMembers.contains(id) &&
+      if ((taskModel.taskMembers.contains(id) || taskModel.assignById == id) &&
           taskModel.taskStatus == 'Complete') {
+        count++;
+      }
+    }
+    return count;
+  }
+
+  int getAllCompleteTaskNumber(Map<dynamic, dynamic> taskMap) {
+    int count = 0;
+    for (var task in taskMap.values) {
+      TaskModel taskModel = TaskModel.fromMap(Map<String, dynamic>.from(task));
+      if (taskModel.taskStatus == 'Complete') {
         count++;
       }
     }

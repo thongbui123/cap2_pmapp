@@ -40,32 +40,6 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
   List<ProjectModel> joinedProjects = [];
   int overdouProjectNumber = 0;
   List<TaskModel> listAllTasks = [];
-  Future<void> getProjectMap() async {
-    DatabaseEvent databaseEvent =
-        await databaseReference.child('projects').once();
-    if (databaseEvent.snapshot.value != null) {
-      projectMap = Map.from(databaseEvent.snapshot.value as dynamic);
-      _getProjectDetails();
-    }
-  }
-
-  Future<void> _getProjectDetails() async {
-    for (var project in projectMap.values) {
-      ProjectModel projectModel =
-          ProjectModel.fromMap(Map<String, dynamic>.from(project));
-      allProjects.add(projectModel);
-      if (projectModel.leaderId == currentUserModel?.userId) {
-        joinedProjects.add(projectModel);
-      }
-      if (projectModel.startDate != "" && projectModel.endDate != "") {
-        DateFormat format = DateFormat('yyyy-MM-dd');
-        DateTime getEndDate = format.parse(projectModel.endDate);
-        if (DateTime.now().isAfter(getEndDate)) {
-          overdouProjectNumber++;
-        }
-      }
-    }
-  }
 
   @override
   initState() {
@@ -75,25 +49,18 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
     taskMap = widget.taskMap;
     listAllTasks = taskService.getTaskListOnlyContainUser(
         taskMap, currentUserModel!.userId);
-    _getData();
-    //_getProjectDetails();
-  }
-
-  _getData() async {
-    await getProjectMap();
-    await _getProjectDetails();
-    //projectMap = await projectServices.getProjectMap();
+    allProjects = projectServices.getAllProjectList(projectMap);
+    joinedProjects =
+        projectServices.getJoinedProjectList(projectMap, currentUserModel!);
   }
 
   @override
   Widget build(BuildContext context) {
-    return projectMap.isEmpty
-        ? const Center(
-            child: Column(
-            children: [CircularProgressIndicator(), Text('Please')],
-          ))
-        : SafeArea(
-            child: SingleChildScrollView(
+    return StreamBuilder<List<Object>>(
+        stream: null,
+        builder: (context, snapshot) {
+          return SafeArea(
+              child: SingleChildScrollView(
             padding: const EdgeInsets.all(defaultPadding),
             child: Column(
               children: [
@@ -221,7 +188,7 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
                                 Row(
                                   children: <Widget>[
                                     Text(
-                                      '${TaskService().getJoinedTaskNumber(taskMap, currentUserModel!.userId)} on going',
+                                      '${currentUserModel!.userRole != 'Admin' ? TaskService().getJoinedTaskNumber(taskMap, currentUserModel!.userId) : taskMap.length} on going',
                                       style: TextStyle(
                                           fontSize: 12, fontFamily: 'MontMed'),
                                     )
@@ -287,7 +254,7 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
                               Row(
                                 children: <Widget>[
                                   Text(
-                                    '${ProjectServices().getJoinedProjectNumber(projectMap, currentUserModel!.userId)} on going',
+                                    '${currentUserModel!.userRole != 'Admin' ? ProjectServices().getJoinedProjectNumber(projectMap, currentUserModel!.userId) : projectMap.length} on going',
                                     style: TextStyle(
                                         fontSize: 12, fontFamily: 'MontMed'),
                                   )
@@ -320,7 +287,7 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
                                       style: TextStyle(
                                           fontFamily: 'MontMed', fontSize: 12)),
                                   Text(
-                                      '${taskService.getOverdouTaskNumber(taskMap, currentUserModel!.userId)} Task(s)',
+                                      '${currentUserModel!.userRole != 'Admin' ? taskService.getOverdouTaskNumber(taskMap, currentUserModel!.userId) : taskService.getAllOverdouTaskNumber(taskMap)} Task(s)',
                                       style: TextStyle(fontFamily: 'MontMed'))
                                 ],
                               ),
@@ -346,7 +313,8 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
                                         style: TextStyle(
                                             fontFamily: 'MontMed',
                                             fontSize: 12)),
-                                    Text('$overdouProjectNumber Project(s)',
+                                    Text(
+                                        '${currentUserModel!.userRole == 'Admin' ? projectServices.getAllCompleteProjectNumber(projectMap) : projectServices.getOverdueProjectNumber(projectMap, currentUserModel!.userId)} Project(s)',
                                         overflow: TextOverflow.ellipsis,
                                         style: TextStyle(
                                           fontFamily: 'MontMed',
@@ -381,7 +349,7 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
                                       style: TextStyle(
                                           fontFamily: 'MontMed', fontSize: 12)),
                                   Text(
-                                      '${taskService.getCompleteTaskNumber(taskMap, currentUserModel!.userId)} Task(s)',
+                                      '${currentUserModel!.userRole != 'Admin' ? taskService.getCompleteTaskNumber(taskMap, currentUserModel!.userId) : taskService.getAllCompleteTaskNumber(taskMap)} Task(s)',
                                       overflow: TextOverflow.ellipsis,
                                       style: TextStyle(fontFamily: 'MontMed'))
                                 ],
@@ -409,7 +377,7 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
                                             fontFamily: 'MontMed',
                                             fontSize: 12)),
                                     Text(
-                                        '${projectServices.getCompleteProjectNumber(projectMap, currentUserModel!.userId)} Project(s)',
+                                        '${currentUserModel!.userRole != 'Admin' ? projectServices.getCompleteProjectNumber(projectMap, currentUserModel!.userId) : projectServices.getAllCompleteProjectNumber(projectMap)} Project(s)',
                                         overflow: TextOverflow.ellipsis,
                                         style: TextStyle(fontFamily: 'MontMed'))
                                   ],
@@ -533,7 +501,10 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
                           child: Divider(),
                         ),
                         Column(
-                          children: joinedProjects.map((project) {
+                          children: (currentUserModel!.userRole == 'Admin'
+                                  ? allProjects
+                                  : joinedProjects)
+                              .map((project) {
                             return ListTile(
                               leading: const CircleAvatar(
                                 backgroundColor: Colors.black12,
@@ -561,6 +532,7 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
               ],
             ),
           ));
+        });
   }
 
   DateTime? stringToDateTime(
