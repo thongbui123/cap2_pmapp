@@ -1,5 +1,8 @@
 import 'package:capstone2_project_management_app/services/user_services.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+
+String uid = FirebaseAuth.instance.currentUser!.uid;
 
 ColoredBox loader() {
   return const ColoredBox(

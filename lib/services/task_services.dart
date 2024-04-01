@@ -92,12 +92,103 @@ class TaskService {
     return listAllTasks;
   }
 
+  double calculateTotalAverageTime(List<TaskModel> tasks) {
+    double totalAverageTime = 0;
+    for (var task in tasks) {
+      double averageTime = calculateAverageTime(task);
+      totalAverageTime += averageTime;
+    }
+    totalAverageTime /= tasks.length;
+    return totalAverageTime;
+  }
+
+  double calculateAverageTime(TaskModel task) {
+    DateTime startDate = DateTime.parse(task.taskStartDate);
+    DateTime endDate = DateTime.parse(task.taskEndDate);
+    Duration duration = endDate.difference(startDate);
+    double averageTime = duration.inDays.toDouble();
+    return averageTime;
+  }
+
   int getTaskNumberHasFromProject(
       Map<dynamic, dynamic> taskMap, String projectId) {
     int count = 0;
     for (var task in taskMap.values) {
       TaskModel taskModel = TaskModel.fromMap(Map<String, dynamic>.from(task));
       if (taskModel.projectId == projectId) {
+        count++;
+      }
+    }
+    return count;
+  }
+
+  List<TaskModel> getAllTaskModelInYear(
+      Map<dynamic, dynamic> taskMap, int currentYear) {
+    List<TaskModel> list = [];
+    for (var task in taskMap.values) {
+      TaskModel taskModel = TaskModel.fromMap(Map<String, dynamic>.from(task));
+      DateTime dateTime = DateTime.parse(taskModel.taskEndDate);
+      int taskYear = dateTime.year;
+      if (taskYear == currentYear) {
+        list.add(taskModel);
+      }
+    }
+    return list;
+  }
+
+  int getAllTaskNumberInYear(Map<dynamic, dynamic> taskMap, int currentYear) {
+    int count = 0;
+    for (var task in taskMap.values) {
+      TaskModel taskModel = TaskModel.fromMap(Map<String, dynamic>.from(task));
+      DateTime dateTime = DateTime.parse(taskModel.taskEndDate);
+      int taskYear = dateTime.year;
+      if (taskYear == currentYear) {
+        count++;
+      }
+    }
+    return count;
+  }
+
+  int getAllOverdueTaskNumberInYear(
+      Map<dynamic, dynamic> projectMap, int currentYear) {
+    int count = 0;
+    for (var project in projectMap.values) {
+      TaskModel projectModel =
+          TaskModel.fromMap(Map<String, dynamic>.from(project));
+      DateTime dateTime = DateTime.parse(projectModel.taskEndDate);
+      int projectYear = dateTime.year;
+      if (projectYear == currentYear && projectModel.taskStatus == 'Overdue') {
+        count++;
+      }
+    }
+    return count;
+  }
+
+  int getAllCompleteTaskNumberInYear(
+      Map<dynamic, dynamic> projectMap, int currentYear) {
+    int count = 0;
+    for (var project in projectMap.values) {
+      TaskModel projectModel =
+          TaskModel.fromMap(Map<String, dynamic>.from(project));
+      DateTime dateTime = DateTime.parse(projectModel.taskEndDate);
+      int projectYear = dateTime.year;
+      if (projectYear == currentYear && projectModel.taskStatus == 'Complete') {
+        count++;
+      }
+    }
+    return count;
+  }
+
+  int getAllInCompleteTaskNumberInYear(
+      Map<dynamic, dynamic> projectMap, int currentYear) {
+    int count = 0;
+    for (var project in projectMap.values) {
+      TaskModel projectModel =
+          TaskModel.fromMap(Map<String, dynamic>.from(project));
+      DateTime dateTime = DateTime.parse(projectModel.taskEndDate);
+      int projectYear = dateTime.year;
+      if (projectYear == currentYear &&
+          projectModel.taskStatus == 'Incomplete') {
         count++;
       }
     }

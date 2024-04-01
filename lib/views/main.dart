@@ -8,74 +8,67 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: SearchScreen(),
+      home: MyHomePage(),
     );
   }
 }
 
-class SearchScreen extends StatefulWidget {
+class MyHomePage extends StatefulWidget {
   @override
-  _SearchScreenState createState() => _SearchScreenState();
+  _MyHomePageState createState() => _MyHomePageState();
 }
 
-class _SearchScreenState extends State<SearchScreen> {
-  TextEditingController _searchController = TextEditingController();
-  List<String> _searchResults = [];
-  List<String> _allItems = [
-    'Apple',
-    'Banana',
-    'Orange',
-    'Pineapple',
-    'Grapes',
-    'Mango',
-    'Peach'
-  ];
+class _MyHomePageState extends State<MyHomePage> {
+  TextEditingController _textEditingController = TextEditingController();
+
+  void _showEditDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Edit Text'),
+          content: TextField(
+            controller: _textEditingController,
+            decoration: InputDecoration(hintText: 'Enter text'),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close dialog
+              },
+              child: Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                // Save the text
+                String editedText = _textEditingController.text;
+                // Do something with editedText
+                print('Edited Text: $editedText');
+                // Close dialog
+                Navigator.of(context).pop();
+              },
+              child: Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: TextField(
-          controller: _searchController,
-          decoration: InputDecoration(
-            hintText: 'Enter search term',
-          ),
+        title: Text('Edit Dialog Example'),
+      ),
+      body: Center(
+        child: IconButton(
+          icon: Icon(Icons.edit),
+          onPressed: () {
+            _showEditDialog(context);
+          },
         ),
       ),
-      body: Column(
-        children: [
-          ElevatedButton(
-            onPressed: _search,
-            child: Text('Search'),
-          ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: _searchResults.length,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text(_searchResults[index]),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
     );
-  }
-
-  void _search() {
-    String searchText = _searchController.text.toLowerCase();
-    _searchResults.clear();
-    if (searchText.isEmpty) {
-      setState(() {});
-      return;
-    }
-
-    _allItems.forEach((item) {
-      if (item.toLowerCase().contains(searchText)) {
-        _searchResults.add(item);
-      }
-    });
-    setState(() {});
   }
 }

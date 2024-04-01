@@ -13,20 +13,21 @@ class projectCreateStep2 extends StatefulWidget {
   State<projectCreateStep2> createState() => _projectCreateStep2State();
 }
 
-User? user;
-UserModel? currentUserModel;
-Map<dynamic, dynamic> projectMap = {};
-DatabaseReference? userRef;
-DatabaseReference? usersRef;
 List<String> list = <String>['Member', 'Leader'];
+List<String> allLeaders = [
+  "User 1",
+  "User 2",
+  "User 3",
+  "User 4",
+];
 
 class _projectCreateStep2State extends State<projectCreateStep2> {
-  List<String> allLeaders = [
-    "User 1",
-    "User 2",
-    "User 3",
-    "User 4",
-  ];
+  User? user;
+  UserModel? currentUserModel;
+  Map<dynamic, dynamic> projectMap = {};
+  DatabaseReference? userRef;
+  DatabaseReference? usersRef;
+
   _getUserDetails() async {
     DatabaseEvent snapshot = await userRef!.once();
 

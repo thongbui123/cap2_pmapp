@@ -39,8 +39,10 @@ class _NotificationScreenState extends State<NotificationScreen> {
   late UserModel userModel;
   late Map notificationMap;
   Map<String, dynamic> userMap = {};
+  Map<String, dynamic> castMap = {};
   NotificationService notificationService = NotificationService();
   late List<NotificationModel> listNotifications;
+  late List<NotificationModel> listNrNotifications;
   @override
   void initState() {
     super.initState();
@@ -49,7 +51,11 @@ class _NotificationScreenState extends State<NotificationScreen> {
     widget.userMap.forEach((key, value) {
       userMap[key.toString()] = value;
     });
+    notificationMap =
+        NotificationService().getSortedMap(notificationMap.cast());
     listNotifications = notificationService.getListAllNotifications(
+        notificationMap, userModel.userId);
+    listNrNotifications = notificationService.getListAllNotRead(
         notificationMap, userModel.userId);
   }
 
@@ -62,6 +68,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
           children: [
             DbSideMenu(
               userModel: userModel,
+              numNotRead: listNrNotifications.length,
             ),
             Expanded(
               child: Padding(
@@ -88,95 +95,112 @@ class _NotificationScreenState extends State<NotificationScreen> {
                             context:
                                 context, // Make sure to provide the BuildContext if this code is inside a widget build method
                             tiles: listNotifications.map((notification) {
-                              return ListTile(
-                                leading: const CircleAvatar(
-                                  child: Icon(
-                                    Icons.notifications,
-                                    color: Colors.black87,
+                              return ColoredBox(
+                                color: notification.readOrNot == 'No'
+                                    ? const Color.fromARGB(255, 218, 220, 225)
+                                    : Colors.white,
+                                child: ListTile(
+                                  leading: const CircleAvatar(
+                                    child: Icon(
+                                      Icons.notifications,
+                                      color: Colors.black87,
+                                    ),
                                   ),
-                                ),
-                                onTap: () {
-                                  if (notification.notificationType == 'User') {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => profile_screen(
-                                          userModel: userModel,
+                                  onTap: () {
+                                    if (notification.notificationType ==
+                                        'User') {
+                                      NotificationService().updateReadOrNot(
+                                          notification.notificationId);
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => profile_screen(
+                                            userModel: userModel,
+                                          ),
                                         ),
-                                      ),
-                                    );
-                                  }
-                                  if (notification.notificationType ==
-                                      'Project') {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) {
-                                          return StreamBuilder<List<Object>>(
-                                              stream: CombineLatestStream.list([
-                                                ProjectServices()
-                                                    .reference
-                                                    .child(notification
-                                                        .notificationRelatedId)
-                                                    .onValue,
-                                                ProjectServices()
-                                                    .reference
-                                                    .onValue,
-                                                PhaseServices()
-                                                    .phaseRef
-                                                    .onValue,
-                                                TaskService().taskRef.onValue,
-                                              ]),
-                                              builder: (context, snapshot) {
-                                                if (snapshot.hasError ||
-                                                    !snapshot.hasData) {
-                                                  return loader();
-                                                }
+                                      );
+                                    }
+                                    if (notification.notificationType ==
+                                        'Project') {
+                                      NotificationService().updateReadOrNot(
+                                          notification.notificationId);
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) {
+                                            return StreamBuilder<List<Object>>(
+                                                stream:
+                                                    CombineLatestStream.list([
+                                                  ProjectServices()
+                                                      .reference
+                                                      .child(notification
+                                                          .notificationRelatedId)
+                                                      .onValue,
+                                                  ProjectServices()
+                                                      .reference
+                                                      .onValue,
+                                                  PhaseServices()
+                                                      .phaseRef
+                                                      .onValue,
+                                                  TaskService().taskRef.onValue,
+                                                ]),
+                                                builder: (context, snapshot) {
+                                                  if (snapshot.hasError ||
+                                                      !snapshot.hasData) {
+                                                    return loader();
+                                                  }
 
-                                                var event_0 = snapshot.data![0]
-                                                    as DatabaseEvent;
-                                                var event_1 = snapshot.data![1]
-                                                    as DatabaseEvent;
-                                                var event_2 = snapshot.data![2]
-                                                    as DatabaseEvent;
-                                                var event_3 = snapshot.data![3]
-                                                    as DatabaseEvent;
-                                                var value_0 = event_0
-                                                    .snapshot.value as dynamic;
-                                                var value_1 = event_1
-                                                    .snapshot.value as dynamic;
-                                                var value_2 = event_2
-                                                    .snapshot.value as dynamic;
-                                                var value_3 = event_3
-                                                    .snapshot.value as dynamic;
-                                                ProjectModel projectModel =
-                                                    ProjectModel.fromMap(
-                                                        Map.from(value_0));
-                                                Map projectMap =
-                                                    Map.from(value_1);
-                                                Map phraseMap =
-                                                    Map.from(value_2);
-                                                Map taskMap = Map.from(value_3);
-                                                return ProjectDetailScreen(
-                                                    userModel: userModel,
-                                                    projectModel: projectModel,
-                                                    userMap: userMap,
-                                                    projectMap: projectMap,
-                                                    phraseMap: phraseMap,
-                                                    taskMap: taskMap);
-                                              });
-                                        },
-                                      ),
-                                    );
-                                  }
-                                },
-                                title: Text(notification.notificationContent,
-                                    style: TextStyle(
-                                        fontFamily: 'MontMed', fontSize: 13)),
-                                subtitle: Text(
-                                  notification.notificationDate,
-                                  style: const TextStyle(
-                                      fontFamily: 'MontMed', fontSize: 12),
+                                                  var event_0 =
+                                                      snapshot.data![0]
+                                                          as DatabaseEvent;
+                                                  var event_1 =
+                                                      snapshot.data![1]
+                                                          as DatabaseEvent;
+                                                  var event_2 =
+                                                      snapshot.data![2]
+                                                          as DatabaseEvent;
+                                                  var event_3 =
+                                                      snapshot.data![3]
+                                                          as DatabaseEvent;
+                                                  var value_0 = event_0.snapshot
+                                                      .value as dynamic;
+                                                  var value_1 = event_1.snapshot
+                                                      .value as dynamic;
+                                                  var value_2 = event_2.snapshot
+                                                      .value as dynamic;
+                                                  var value_3 = event_3.snapshot
+                                                      .value as dynamic;
+                                                  ProjectModel projectModel =
+                                                      ProjectModel.fromMap(
+                                                          Map.from(value_0));
+                                                  Map projectMap =
+                                                      Map.from(value_1);
+                                                  Map phraseMap =
+                                                      Map.from(value_2);
+                                                  Map taskMap =
+                                                      Map.from(value_3);
+                                                  return ProjectDetailScreen(
+                                                      userModel: userModel,
+                                                      projectModel:
+                                                          projectModel,
+                                                      userMap: userMap,
+                                                      projectMap: projectMap,
+                                                      phraseMap: phraseMap,
+                                                      taskMap: taskMap);
+                                                });
+                                          },
+                                        ),
+                                      );
+                                    }
+                                  },
+                                  title: Text(notification.notificationContent,
+                                      style: TextStyle(
+                                          fontFamily: 'MontMed', fontSize: 13)),
+                                  subtitle: Text(
+                                    notification.notificationDate,
+                                    style: const TextStyle(
+                                        fontFamily: 'MontMed', fontSize: 12),
+                                  ),
                                 ),
                               );
                             }),

@@ -1,4 +1,5 @@
 import 'package:capstone2_project_management_app/models/user_model.dart';
+import 'package:capstone2_project_management_app/services/notification_services.dart';
 import 'package:capstone2_project_management_app/views/subs/db_main_screen.dart';
 import 'package:capstone2_project_management_app/views/subs/db_main_screen_v2.dart';
 import 'package:capstone2_project_management_app/views/subs/db_side_menu.dart';
@@ -68,14 +69,25 @@ class _Dashboard_screenState extends State<Dashboard_screen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: userModel == null
-            ? Center(child: loader())
-            : SafeArea(
+        body: StreamBuilder<Object>(
+            stream: NotificationService().databaseReference.onValue,
+            builder: (context, snapshot) {
+              if (snapshot.hasError || !snapshot.hasData || userModel == null) {
+                return loader();
+              }
+              var event = snapshot.data! as DatabaseEvent;
+              var value = event.snapshot.value as dynamic;
+              Map notifiMap = Map<String, dynamic>.from(value);
+              int numNr = NotificationService()
+                  .getListAllNotRead(notifiMap, userModel!.userId)
+                  .length;
+              return SafeArea(
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     DbSideMenu(
                       userModel: userModel!,
+                      numNotRead: numNr,
                     ),
                     FutureBuilder<List<Map<String, dynamic>>>(
                       future:
@@ -115,7 +127,8 @@ class _Dashboard_screenState extends State<Dashboard_screen> {
                     // ),
                   ],
                 ),
-              ),
+              );
+            }),
         floatingActionButton: Visibility(
           visible: userModel?.userRole == "User" ? false : true,
           child: FloatingActionButton(

@@ -8,6 +8,7 @@ import 'package:capstone2_project_management_app/views/subs/project_create_step3
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 import '../../models/user_model.dart';
 import '../../services/project_services.dart';
@@ -356,6 +357,31 @@ class _ProjectCreateStep1State extends State<ProjectCreateStep1> {
                           height: 50,
                           child: TextButton(
                             onPressed: () {
+                              if (projectNameController.text == "") {
+                                Fluttertoast.showToast(
+                                    msg: 'Please fill in all input');
+                                return;
+                              }
+                              if (projectDescriptionController.text == "") {
+                                Fluttertoast.showToast(
+                                    msg: 'Please fill in all input');
+                                return;
+                              }
+                              if (startDateController.text == "") {
+                                Fluttertoast.showToast(
+                                    msg: 'Please fill in all input');
+                                return;
+                              }
+                              if (endDateController.text == "") {
+                                Fluttertoast.showToast(
+                                    msg: 'Please fill in all input');
+                                return;
+                              }
+                              if (selectedMember == "") {
+                                Fluttertoast.showToast(
+                                    msg: 'Please choose a team leader');
+                                return;
+                              }
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(

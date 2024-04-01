@@ -1,6 +1,7 @@
 import 'package:capstone2_project_management_app/models/phase_model.dart';
 import 'package:capstone2_project_management_app/models/project_model.dart';
 import 'package:capstone2_project_management_app/models/user_model.dart';
+import 'package:capstone2_project_management_app/services/notification_services.dart';
 import 'package:capstone2_project_management_app/services/phase_services.dart';
 import 'package:capstone2_project_management_app/services/user_services.dart';
 import 'package:capstone2_project_management_app/views/list_of_tasks_screen.dart';
@@ -10,6 +11,7 @@ import 'package:capstone2_project_management_app/views/subs/db_side_menu.dart';
 import 'package:capstone2_project_management_app/views/subs/sub_widgets.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class ProjectDetailScreen extends StatefulWidget {
   final UserModel userModel;
@@ -41,7 +43,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
   late PhaseModel phraseModel;
   UserServices userServices = UserServices();
   late UserModel _userModel;
-  PhaseServices phraseServices = PhaseServices();
+  PhaseServices phaseServices = PhaseServices();
   List<UserModel> allMembers = [];
   List<String> allMemberIds = [];
   late Map<String, dynamic> userMap;
@@ -49,13 +51,15 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
   List<UserModel> currentListModel = [];
   bool _customTileExpanded = false;
   late Map<dynamic, dynamic> projectMap;
-  late String currentPhraseName;
-  late String currentPhraseId;
+  late String currentPhaseName;
+  late String currentPhaseId;
   late int selectedIndex;
   late Map phaseMap;
   late Map taskMap;
   late List<PhaseModel> listPhases;
-  Map<int, String> mapPhraseIndex = {};
+  Map<int, String> mapPhaseIndex = {};
+  Map<int, String> mapPhaseId = {};
+  Map<String, bool> mapGetNotification = {};
   late int memberLength;
   @override
   void initState() {
@@ -65,222 +69,242 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
     _userModel = widget.userModel;
     projectMap = widget.projectMap;
     taskMap = widget.taskMap;
-    currentPhraseName = _projectModel.projectStatus;
     phaseMap = widget.phraseMap;
+    currentPhaseName = phaseServices.getPhaseNameFromId(
+        phaseMap, _projectModel.currentPhaseId);
     listPhases =
-        phraseServices.getPhaseListByProject(phaseMap, _projectModel.projectId);
+        phaseServices.getPhaseListByProject(phaseMap, _projectModel.projectId);
     memberLength = _projectModel.projectMembers.length;
     allMembers = userServices.getUserDataList(userMap).cast<UserModel>();
     allMemberIds = userServices.getUserIdList(userMap);
-    mapPhraseIndex = phraseServices.getMapPhaseIndex(listPhases);
-    selectedIndex =
-        phraseServices.getPhraseIndex(listPhases, currentPhraseName);
+    mapPhaseIndex = phaseServices.getMapPhaseIndex(listPhases);
+    mapPhaseId = phaseServices.getMapPhaseId(listPhases);
+    selectedIndex = phaseServices.getPhraseIndex(listPhases, currentPhaseName);
+    currentPhaseId = mapPhaseId[selectedIndex]!;
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            DbSideMenu(
-              userModel: _userModel,
-            ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(defaultPadding),
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          IconButton(
-                              icon: const Icon(Icons.arrow_back_ios),
-                              onPressed: () {
-                                Navigator.of(context).pushReplacement(
-                                  MaterialPageRoute(
-                                      builder: (context) => ListOfTaskScreen(
-                                            projectModel: _projectModel,
-                                            projectMap: projectMap,
-                                            userModel: _userModel,
-                                            taskMap: taskMap,
-                                          )),
-                                );
-                              }),
-                          const Text(
-                            'PROJECT',
-                            style: TextStyle(
-                              fontFamily: 'Anurati',
-                              fontSize: 30,
+    return StreamBuilder<Object>(
+        stream: NotificationService().databaseReference.onValue,
+        builder: (context, snapshot) {
+          if (snapshot.hasError || !snapshot.hasData) {
+            return loader();
+          }
+          var event = snapshot.data! as DatabaseEvent;
+          var value = event.snapshot.value as dynamic;
+          Map notifiMap = Map<String, dynamic>.from(value);
+          int numNr =
+              NotificationService().getListAllNotRead(notifiMap, uid).length;
+          return Scaffold(
+            body: SafeArea(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  DbSideMenu(
+                    userModel: _userModel,
+                    numNotRead: numNr,
+                  ),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.all(defaultPadding),
+                      child: SingleChildScrollView(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                IconButton(
+                                    icon: const Icon(Icons.arrow_back_ios),
+                                    onPressed: () {
+                                      Navigator.of(context).pushReplacement(
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                ListOfTaskScreen(
+                                                  projectModel: _projectModel,
+                                                  projectMap: projectMap,
+                                                  userModel: _userModel,
+                                                  taskMap: taskMap,
+                                                )),
+                                      );
+                                    }),
+                                const Text(
+                                  'PROJECT',
+                                  style: TextStyle(
+                                    fontFamily: 'Anurati',
+                                    fontSize: 30,
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                        ],
-                      ),
-                      const Divider(),
-                      ListTile(
-                        leading: const CircleAvatar(
-                            child: Icon(Icons.folder, color: Colors.orange)),
-                        title: Text(
-                            'Project Name: ${_projectModel.projectName}',
-                            style: const TextStyle(
-                                fontFamily: 'MontMed',
-                                color: Colors.black,
-                                fontSize: 13)),
-                        subtitle: Text(
-                          'Current State: ${(currentPhraseName == "Maintenance" ? currentPhraseName : "Under Development")}',
-                          style: const TextStyle(
-                              fontFamily: 'MontMed', fontSize: 12),
-                        ),
-                      ),
-                      const SizedBox(height: 5),
-                      Container(
-                        width: 50,
-                        height: 1,
-                        color: Colors.black,
-                      ),
-                      const SizedBox(height: 5),
-                      Text(
-                        'Description: ${_projectModel.projecctDescription}',
-                        style: const TextStyle(
-                            fontFamily: 'MontMed',
-                            color: Colors.black87,
-                            fontSize: 12),
-                      ),
-                      const SizedBox(height: 10),
-                      const Divider(),
-                      ListTile(
-                        leading: avatar(userMap, _projectModel.managerId),
-                        title: const Text('Assigned by: ',
-                            style: TextStyle(
-                                fontFamily: 'MontMed',
-                                fontSize: 12,
-                                color: Colors.black54)),
-                        subtitle: Text(
-                            userServices.getNameFromId(
-                                userMap, _projectModel.managerId),
-                            style: const TextStyle(
-                                fontFamily: 'MontMed', fontSize: 14)),
-                      ),
-                      const Divider(),
-                      ListTile(
-                        leading: const CircleAvatar(
-                          child: Icon(Icons.calendar_month),
-                        ),
-                        title: const Text('Start Date: ',
-                            style: TextStyle(
-                                fontFamily: 'MontMed',
-                                fontSize: 12,
-                                color: Colors.black54)),
-                        subtitle: Text(_projectModel.startDate,
-                            style: const TextStyle(
-                                fontFamily: 'MontMed', fontSize: 14)),
-                        trailing: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const SizedBox(height: 8),
-                              const Text('End Date: ',
+                            const Divider(),
+                            ListTile(
+                              leading: const CircleAvatar(
+                                  child:
+                                      Icon(Icons.folder, color: Colors.orange)),
+                              title: Text(
+                                  'Project Name: ${_projectModel.projectName}',
+                                  style: const TextStyle(
+                                      fontFamily: 'MontMed',
+                                      color: Colors.black,
+                                      fontSize: 13)),
+                              subtitle: Text(
+                                'Current State: ${_projectModel.projectStatus}',
+                                style: const TextStyle(
+                                    fontFamily: 'MontMed', fontSize: 12),
+                              ),
+                            ),
+                            const SizedBox(height: 5),
+                            Container(
+                              width: 50,
+                              height: 1,
+                              color: Colors.black,
+                            ),
+                            const SizedBox(height: 5),
+                            Text(
+                              'Description: ${_projectModel.projecctDescription}',
+                              style: const TextStyle(
+                                  fontFamily: 'MontMed',
+                                  color: Colors.black87,
+                                  fontSize: 12),
+                            ),
+                            const SizedBox(height: 10),
+                            const Divider(),
+                            ListTile(
+                              leading: avatar(userMap, _projectModel.managerId),
+                              title: const Text('Assigned by: ',
                                   style: TextStyle(
                                       fontFamily: 'MontMed',
                                       fontSize: 12,
                                       color: Colors.black54)),
-                              Text(_projectModel.endDate,
+                              subtitle: Text(
+                                  userServices.getNameFromId(
+                                      userMap, _projectModel.managerId),
                                   style: const TextStyle(
-                                      fontFamily: 'MontMed', fontSize: 14))
-                            ]),
-                      ),
-                      const Divider(),
-                      ListTile(
-                        leading: const CircleAvatar(
-                          child: Icon(Icons.account_tree_outlined),
-                        ),
-                        title: const Text('Current Phrase: ',
-                            style: TextStyle(
-                                fontFamily: 'MontMed',
-                                fontSize: 12,
-                                color: Colors.black54)),
-                        subtitle: Text(
-                          currentPhraseName,
-                          style: const TextStyle(
-                              fontFamily: 'MontMed', fontSize: 14),
-                        ),
-                        trailing: Visibility(
-                          visible: _userModel.userRole != 'User',
-                          child: TextButton(
-                            onPressed: () {
-                              _showStateDrawer(context);
-                            },
-                            child: const Text('Alter',
-                                style: TextStyle(
-                                    fontFamily: 'MontMed', fontSize: 14)),
-                          ),
-                        ),
-                      ),
-                      const Divider(),
-                      const SizedBox(height: 5),
-                      ListTile(
-                        leading: const CircleAvatar(
-                          child: Icon(Icons.people),
-                        ),
-                        title: const Text(
-                          'Participants: ',
-                          style: TextStyle(
-                              fontFamily: 'MontMed',
-                              fontSize: 12,
-                              color: Colors.black54),
-                        ),
-                        subtitle: Text(
-                          '$memberLength member(s)',
-                          style: const TextStyle(
-                            fontFamily: 'MontMed',
-                            fontSize: 14,
-                          ),
-                        ),
-                        trailing: TextButton(
-                          onPressed: () {
-                            _showStateBottomSheet(context,
-                                _projectModel.projectMembers, allMemberIds);
-                          },
-                          child: const Text(
-                            'View All ',
-                            style:
-                                TextStyle(fontFamily: 'MontMed', fontSize: 14),
-                          ),
-                        ),
-                      ),
-                      const Divider(),
-                      ListTile(
-                        leading: const CircleAvatar(
-                          child: Icon(Icons.settings),
-                        ),
-                        title: const Text('Advanced Options',
-                            style:
-                                TextStyle(fontFamily: 'MontMed', fontSize: 14)),
-                        trailing: Visibility(
-                          visible: _userModel.userRole != 'User',
-                          child: TextButton(
-                            onPressed: () {
-                              _showStateDrawer2(context);
-                            },
-                            child: const Text(
-                              'View',
-                              style: TextStyle(
-                                  fontFamily: 'MontMed', fontSize: 14),
+                                      fontFamily: 'MontMed', fontSize: 14)),
                             ),
-                          ),
+                            const Divider(),
+                            ListTile(
+                              leading: const CircleAvatar(
+                                child: Icon(Icons.calendar_month),
+                              ),
+                              title: const Text('Start Date: ',
+                                  style: TextStyle(
+                                      fontFamily: 'MontMed',
+                                      fontSize: 12,
+                                      color: Colors.black54)),
+                              subtitle: Text(_projectModel.startDate,
+                                  style: const TextStyle(
+                                      fontFamily: 'MontMed', fontSize: 14)),
+                              trailing: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const SizedBox(height: 8),
+                                    const Text('End Date: ',
+                                        style: TextStyle(
+                                            fontFamily: 'MontMed',
+                                            fontSize: 12,
+                                            color: Colors.black54)),
+                                    Text(_projectModel.endDate,
+                                        style: const TextStyle(
+                                            fontFamily: 'MontMed',
+                                            fontSize: 14))
+                                  ]),
+                            ),
+                            const Divider(),
+                            ListTile(
+                              leading: const CircleAvatar(
+                                child: Icon(Icons.account_tree_outlined),
+                              ),
+                              title: const Text('Current Phrase: ',
+                                  style: TextStyle(
+                                      fontFamily: 'MontMed',
+                                      fontSize: 12,
+                                      color: Colors.black54)),
+                              subtitle: Text(
+                                currentPhaseName,
+                                style: const TextStyle(
+                                    fontFamily: 'MontMed', fontSize: 14),
+                              ),
+                              trailing: Visibility(
+                                visible: _userModel.userRole != 'User',
+                                child: TextButton(
+                                  onPressed: () {
+                                    _showStateDrawer(context);
+                                  },
+                                  child: const Text('Alter',
+                                      style: TextStyle(
+                                          fontFamily: 'MontMed', fontSize: 14)),
+                                ),
+                              ),
+                            ),
+                            const Divider(),
+                            const SizedBox(height: 5),
+                            ListTile(
+                              leading: const CircleAvatar(
+                                child: Icon(Icons.people),
+                              ),
+                              title: const Text(
+                                'Participants: ',
+                                style: TextStyle(
+                                    fontFamily: 'MontMed',
+                                    fontSize: 12,
+                                    color: Colors.black54),
+                              ),
+                              subtitle: Text(
+                                '$memberLength member(s)',
+                                style: const TextStyle(
+                                  fontFamily: 'MontMed',
+                                  fontSize: 14,
+                                ),
+                              ),
+                              trailing: TextButton(
+                                onPressed: () {
+                                  _showStateBottomSheet(
+                                      context,
+                                      _projectModel.projectMembers,
+                                      allMemberIds);
+                                },
+                                child: const Text(
+                                  'View All ',
+                                  style: TextStyle(
+                                      fontFamily: 'MontMed', fontSize: 14),
+                                ),
+                              ),
+                            ),
+                            const Divider(),
+                            ListTile(
+                              leading: const CircleAvatar(
+                                child: Icon(Icons.settings),
+                              ),
+                              title: const Text('Advanced Options',
+                                  style: TextStyle(
+                                      fontFamily: 'MontMed', fontSize: 14)),
+                              trailing: Visibility(
+                                visible: _userModel.userRole != 'User',
+                                child: TextButton(
+                                  onPressed: () {
+                                    _showStateDrawer2(context);
+                                  },
+                                  child: const Text(
+                                    'View',
+                                    style: TextStyle(
+                                        fontFamily: 'MontMed', fontSize: 14),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const Divider(),
+                          ],
                         ),
                       ),
-                      const Divider(),
-                    ],
-                  ),
-                ),
+                    ),
+                  )
+                ],
               ),
-            )
-          ],
-        ),
-      ),
-    );
+            ),
+          );
+        });
   }
 
   void _showStateDrawer(BuildContext context) {
@@ -297,7 +321,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
               Row(
                 children: [
                   SizedBox(width: 25),
-                  Text('State: $currentPhraseName',
+                  Text('State: $currentPhaseName',
                       style:
                           const TextStyle(fontFamily: 'MontMed', fontSize: 16)),
                 ],
@@ -312,8 +336,10 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                   if (selectedIndex > 0) {
                     setState(() {
                       selectedIndex--;
-                      currentPhraseName = mapPhraseIndex[selectedIndex]!;
-                      _updateProjectStatus(currentPhraseName);
+                      currentPhaseName = mapPhaseIndex[selectedIndex]!;
+                      currentPhaseId = mapPhaseId[selectedIndex]!;
+                      _updateProjectStatus(
+                          currentPhaseName, currentPhaseId, uid);
                     });
                   }
                   Navigator.pop(context);
@@ -324,11 +350,13 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                 title: const Text('Conclude Phrase',
                     style: TextStyle(fontFamily: 'MontMed', fontSize: 14)),
                 onTap: () {
-                  if (selectedIndex < phaseMap.length - 1) {
+                  if (selectedIndex < listPhases.length - 1) {
                     setState(() {
                       selectedIndex++;
-                      currentPhraseName = mapPhraseIndex[selectedIndex]!;
-                      _updateProjectStatus(currentPhraseName);
+                      currentPhaseName = mapPhaseIndex[selectedIndex]!;
+                      currentPhaseId = mapPhaseId[selectedIndex]!;
+                      _updateProjectStatus(
+                          currentPhaseName, currentPhaseId, uid);
                     });
                   }
 
@@ -342,12 +370,36 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
     );
   }
 
-  Future<void> _updateProjectStatus(String currentPhraseName) async {
+  Future<void> _updateProjectStatus(
+      String currentPhraseName, String currentPhaseId, String uid) async {
     DatabaseReference projectRef =
         FirebaseDatabase.instance.ref().child('projects');
-
+    DateTime now = DateTime.now();
+    DateTime endDate = DateTime.parse(_projectModel.endDate);
+    if (selectedIndex >= 6) {
+      if (now.isAfter(endDate)) {
+        projectRef.child(_projectModel.projectId).update({
+          'projectStatus': 'Overdue',
+        });
+      } else {
+        projectRef.child(_projectModel.projectId).update({
+          'projectStatus': 'Done',
+        });
+      }
+    } else {
+      if (now.isAfter(endDate)) {
+        projectRef.child(_projectModel.projectId).update({
+          'projectStatus': 'Overdue',
+        });
+      } else {
+        projectRef.child(_projectModel.projectId).update({
+          'projectStatus': 'In progress',
+        });
+      }
+    }
     projectRef.child(_projectModel.projectId).update({
-      'projectStatus': currentPhraseName,
+      //'projectStatus': currentPhraseName,
+      'currentPhaseId': currentPhaseId,
     });
     DatabaseEvent snapshot = await projectRef.once();
     DatabaseEvent databaseEventModel =
@@ -359,6 +411,20 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
             databaseEventModel.snapshot.value as dynamic));
       });
     }
+    List<String> notificationReceivers = _projectModel.projectMembers;
+    if (uid != _projectModel.managerId) {
+      notificationReceivers.add(_projectModel.managerId);
+    }
+    if (uid != _projectModel.leaderId) {
+      notificationReceivers.add(_projectModel.leaderId);
+    }
+    String notificationContent =
+        'The current phase of ${_projectModel.projectName.toUpperCase()} project has been changed';
+    NotificationService().addNotification(notificationContent,
+        _projectModel.projectId, notificationReceivers, 'Project');
+    Fluttertoast.showToast(
+        msg:
+            'You have changed the current phase of ${_projectModel.projectName.toUpperCase()} project');
   }
 
   void _showStateDrawer2(BuildContext context) {

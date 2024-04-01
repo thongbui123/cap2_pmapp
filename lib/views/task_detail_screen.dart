@@ -18,6 +18,8 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 
+import '../services/notification_services.dart';
+
 class TaskDetailScreen extends StatefulWidget {
   final Map<String, dynamic> userMap;
   final TaskModel taskModel;
@@ -124,6 +126,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
           TaskService().taskRef.onValue,
           UserServices().databaseReference.onValue,
           TaskService().taskRef.child(taskModel.taskId).onValue,
+          NotificationService().databaseReference.onValue
         ]),
         builder: (context, snapshot) {
           if (snapshot.hasError || !snapshot.hasData) {
@@ -137,6 +140,13 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
           var dynamicTask = eventTask.snapshot.value as dynamic;
           var dynamicUser = eventUser.snapshot.value as dynamic;
           var dynamicTaskModel = eventTaskModel.snapshot.value as dynamic;
+          var notifiEvent = snapshot.data![4] as DatabaseEvent;
+          var notifiValue = notifiEvent.snapshot.value as dynamic;
+          Map notifiMap = Map<String, dynamic>.from(notifiValue);
+          //NotificationService().databaseReference.onValue
+          int numNr = NotificationService()
+              .getListAllNotRead(notifiMap, currentUserModel!.userId)
+              .length;
           commentMap = Map.from(dynamicComment);
           taskMap = Map.from(dynamicTask);
           userMap = Map.from(dynamicUser);
@@ -165,6 +175,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                 children: [
                   DbSideMenu(
                     userModel: currentUserModel!,
+                    numNotRead: numNr,
                   ),
                   Expanded(
                       child: Padding(

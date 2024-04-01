@@ -105,366 +105,384 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            DbSideMenu(
-              userModel: currentUserModel,
-            ),
-            Expanded(
-                child: Padding(
-              padding: const EdgeInsets.all(defaultPadding),
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Row(
-                      children: [
-                        Text(
-                          'LIST OF USERS',
-                          style: TextStyle(
-                            fontFamily: 'MontMed',
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const Divider(),
-                    SizedBox(height: 5),
-                    Container(
-                      padding: EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: Colors.indigo[50],
-                        borderRadius:
-                            BorderRadius.circular(5.0), // Set the border radius
-                      ),
-                      child: ExpansionTile(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.zero,
-                        ),
-                        initiallyExpanded: true,
-                        title: Row(
-                          children: [
-                            Icon(Icons.people, color: Colors.indigo),
-                            SizedBox(width: 10),
-                            Text('Member(s)',
-                                style: TextStyle(
-                                    fontFamily: 'MontMed', fontSize: 13)),
-                          ],
-                        ),
-                        trailing: Icon(
-                          _customTileExpanded0
-                              ? Icons.arrow_drop_down_circle
-                              : Icons.arrow_drop_down,
-                        ),
+    return StreamBuilder<Object>(
+        stream: NotificationService().databaseReference.onValue,
+        builder: (context, snapshot) {
+          if (snapshot.hasError || !snapshot.hasData) {
+            return loader();
+          }
+          var event = snapshot.data! as DatabaseEvent;
+          var value = event.snapshot.value as dynamic;
+          Map notifiMap = Map<String, dynamic>.from(value);
+          //NotificationService().databaseReference.onValue
+          int numNr = NotificationService()
+              .getListAllNotRead(notifiMap, currentUserModel.userId)
+              .length;
+          return Scaffold(
+            body: SafeArea(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  DbSideMenu(userModel: currentUserModel, numNotRead: numNr),
+                  Expanded(
+                      child: Padding(
+                    padding: const EdgeInsets.all(defaultPadding),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Divider(),
+                          const Row(
+                            children: [
+                              Text(
+                                'LIST OF USERS',
+                                style: TextStyle(
+                                  fontFamily: 'MontMed',
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const Divider(),
+                          SizedBox(height: 5),
                           Container(
-                            child: Column(
-                              children: listMembers.map((member) {
-                                return ListTile(
-                                  leading: avatar(userMap, member.userId),
-                                  title: Text(
-                                      '${member.userFirstName} ${member.userLastName}',
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
+                            padding: EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: Colors.indigo[50],
+                              borderRadius: BorderRadius.circular(
+                                  5.0), // Set the border radius
+                            ),
+                            child: ExpansionTile(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.zero,
+                              ),
+                              initiallyExpanded: true,
+                              title: Row(
+                                children: [
+                                  Icon(Icons.people, color: Colors.indigo),
+                                  SizedBox(width: 10),
+                                  Text('Member(s)',
                                       style: TextStyle(
                                           fontFamily: 'MontMed', fontSize: 13)),
-                                  subtitle: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Icon(
-                                            Icons.people,
-                                            size: 13,
-                                          ),
-                                          SizedBox(width: 5),
-                                          Text(
-                                              'Projects Joined: ${ProjectServices().getJoinedProjectNumber(projectMap, member.userId)}',
-                                              style: TextStyle(
-                                                  fontFamily: 'MontMed',
-                                                  fontSize: 12))
-                                        ],
-                                      ),
-                                    ],
+                                ],
+                              ),
+                              trailing: Icon(
+                                _customTileExpanded0
+                                    ? Icons.arrow_drop_down_circle
+                                    : Icons.arrow_drop_down,
+                              ),
+                              children: [
+                                Divider(),
+                                Container(
+                                  child: Column(
+                                    children: listMembers.map((member) {
+                                      return ListTile(
+                                        leading: avatar(userMap, member.userId),
+                                        title: Text(
+                                            '${member.userFirstName} ${member.userLastName}',
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                                fontFamily: 'MontMed',
+                                                fontSize: 13)),
+                                        subtitle: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Icon(
+                                                  Icons.people,
+                                                  size: 13,
+                                                ),
+                                                SizedBox(width: 5),
+                                                Text(
+                                                    'Projects Joined: ${ProjectServices().getJoinedProjectNumber(projectMap, member.userId)}',
+                                                    style: TextStyle(
+                                                        fontFamily: 'MontMed',
+                                                        fontSize: 12))
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                        trailing: IconButton(
+                                            icon: Icon(
+                                              Icons.border_color,
+                                              size: 14,
+                                            ),
+                                            onPressed: () {
+                                              _getUserCurrentRole(member);
+                                              _showStateDrawer(context, member);
+                                            }),
+                                      );
+                                    }).toList(),
                                   ),
-                                  trailing: IconButton(
-                                      icon: Icon(
-                                        Icons.border_color,
-                                        size: 14,
-                                      ),
-                                      onPressed: () {
-                                        _getUserCurrentRole(member);
-                                        _showStateDrawer(context, member);
-                                      }),
-                                );
-                              }).toList(),
+                                ),
+                              ],
+                              onExpansionChanged: (bool expanded) {
+                                setState(() {
+                                  _customTileExpanded0 = expanded;
+                                });
+                              },
+                            ),
+                          ),
+                          SizedBox(height: 10),
+                          Container(
+                            padding: EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: Colors.indigo[50],
+                              borderRadius: BorderRadius.circular(
+                                  5.0), // Set the border radius
+                            ),
+                            child: ExpansionTile(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.zero,
+                              ),
+                              initiallyExpanded: true,
+                              title: Row(
+                                children: [
+                                  Icon(Icons.person, color: Colors.indigo),
+                                  SizedBox(width: 10),
+                                  Text('Leader(s)',
+                                      style: TextStyle(
+                                          fontFamily: 'MontMed', fontSize: 13)),
+                                ],
+                              ),
+                              trailing: Icon(
+                                _customTileExpanded1
+                                    ? Icons.arrow_drop_down_circle
+                                    : Icons.arrow_drop_down,
+                              ),
+                              children: [
+                                Divider(),
+                                Container(
+                                  child: Column(
+                                    children: listLeaders.map((leader) {
+                                      return ListTile(
+                                        leading: avatar(userMap, leader.userId),
+                                        title: Text(
+                                            '${leader.userFirstName} ${leader.userLastName}',
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                                fontFamily: 'MontMed',
+                                                fontSize: 13)),
+                                        subtitle: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Icon(
+                                                  Icons.folder_open_sharp,
+                                                  size: 13,
+                                                ),
+                                                SizedBox(width: 5),
+                                                Text(
+                                                    'Project Joined: ${ProjectServices().getJoinedProjectNumber(projectMap, leader.userId)}',
+                                                    style: TextStyle(
+                                                        fontFamily: 'MontMed',
+                                                        fontSize: 12))
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                        trailing: IconButton(
+                                            icon: Icon(
+                                              Icons.border_color,
+                                              size: 14,
+                                            ),
+                                            onPressed: () {
+                                              _getUserCurrentRole(leader);
+                                              _showStateDrawer(context, leader);
+                                            }),
+                                      );
+                                    }).toList(),
+                                  ),
+                                ),
+                              ],
+                              onExpansionChanged: (bool expanded) {
+                                setState(() {
+                                  _customTileExpanded1 = expanded;
+                                });
+                              },
+                            ),
+                          ),
+                          SizedBox(height: 10),
+                          Container(
+                            padding: EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: Colors.indigo[50],
+                              borderRadius: BorderRadius.circular(
+                                  5.0), // Set the border radius
+                            ),
+                            child: ExpansionTile(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.zero,
+                              ),
+                              initiallyExpanded: true,
+                              title: Row(
+                                children: [
+                                  Icon(Icons.person, color: Colors.indigo),
+                                  SizedBox(width: 10),
+                                  Text('Manager(s)',
+                                      style: TextStyle(
+                                          fontFamily: 'MontMed', fontSize: 13)),
+                                ],
+                              ),
+                              trailing: Icon(
+                                _customTileExpanded2
+                                    ? Icons.arrow_drop_down_circle
+                                    : Icons.arrow_drop_down,
+                              ),
+                              children: [
+                                Divider(),
+                                Container(
+                                  child: Column(
+                                    children: listManagers.map((manager) {
+                                      return ListTile(
+                                        leading:
+                                            avatar(userMap, manager.userId),
+                                        title: Text(
+                                            '${manager.userFirstName} ${manager.userLastName}',
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                                fontFamily: 'MontMed',
+                                                fontSize: 13)),
+                                        subtitle: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Icon(
+                                                  Icons.folder_open_sharp,
+                                                  size: 13,
+                                                ),
+                                                SizedBox(width: 5),
+                                                Text(
+                                                    'Project Created: ${ProjectServices().getCreateProjectNumber(projectMap, manager.userId)}',
+                                                    style: TextStyle(
+                                                        fontFamily: 'MontMed',
+                                                        fontSize: 12))
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                        trailing: IconButton(
+                                            icon: Icon(
+                                              Icons.border_color,
+                                              size: 14,
+                                            ),
+                                            onPressed: () {
+                                              _getUserCurrentRole(manager);
+                                              _showStateDrawer(
+                                                  context, manager);
+                                            }),
+                                      );
+                                    }).toList(),
+                                  ),
+                                ),
+                              ],
+                              onExpansionChanged: (bool expanded) {
+                                setState(() {
+                                  _customTileExpanded2 = expanded;
+                                });
+                              },
+                            ),
+                          ),
+                          SizedBox(height: 10),
+                          Container(
+                            padding: EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: Colors.indigo[50],
+                              borderRadius: BorderRadius.circular(
+                                  5.0), // Set the border radius
+                            ),
+                            child: ExpansionTile(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.zero,
+                              ),
+                              initiallyExpanded: true,
+                              title: Row(
+                                children: [
+                                  Icon(Icons.person, color: Colors.indigo),
+                                  SizedBox(width: 10),
+                                  Text('Admin(s)',
+                                      style: TextStyle(
+                                          fontFamily: 'MontMed', fontSize: 13)),
+                                ],
+                              ),
+                              trailing: Icon(
+                                _customTileExpanded2
+                                    ? Icons.arrow_drop_down_circle
+                                    : Icons.arrow_drop_down,
+                              ),
+                              children: [
+                                Divider(),
+                                Container(
+                                  child: Column(
+                                    children: listAdmin.map((admin) {
+                                      return ListTile(
+                                        leading: avatar(userMap, admin.userId),
+                                        title: Text(
+                                            '${admin.userFirstName} ${admin.userLastName}',
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                                fontFamily: 'MontMed',
+                                                fontSize: 13)),
+                                        subtitle: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Icon(
+                                                  Icons.folder_open_sharp,
+                                                  size: 13,
+                                                ),
+                                                SizedBox(width: 5),
+                                                Text(
+                                                    'Project Created: ${ProjectServices().getCreateProjectNumber(projectMap, admin.userId)}',
+                                                    style: TextStyle(
+                                                        fontFamily: 'MontMed',
+                                                        fontSize: 12))
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                        trailing: IconButton(
+                                            icon: Icon(
+                                              Icons.border_color,
+                                              size: 14,
+                                            ),
+                                            onPressed: () {
+                                              _getUserCurrentRole(admin);
+                                              _showStateDrawer(context, admin);
+                                            }),
+                                      );
+                                    }).toList(),
+                                  ),
+                                ),
+                              ],
+                              onExpansionChanged: (bool expanded) {
+                                setState(() {
+                                  _customTileExpanded2 = expanded;
+                                });
+                              },
                             ),
                           ),
                         ],
-                        onExpansionChanged: (bool expanded) {
-                          setState(() {
-                            _customTileExpanded0 = expanded;
-                          });
-                        },
                       ),
                     ),
-                    SizedBox(height: 10),
-                    Container(
-                      padding: EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: Colors.indigo[50],
-                        borderRadius:
-                            BorderRadius.circular(5.0), // Set the border radius
-                      ),
-                      child: ExpansionTile(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.zero,
-                        ),
-                        initiallyExpanded: true,
-                        title: Row(
-                          children: [
-                            Icon(Icons.person, color: Colors.indigo),
-                            SizedBox(width: 10),
-                            Text('Leader(s)',
-                                style: TextStyle(
-                                    fontFamily: 'MontMed', fontSize: 13)),
-                          ],
-                        ),
-                        trailing: Icon(
-                          _customTileExpanded1
-                              ? Icons.arrow_drop_down_circle
-                              : Icons.arrow_drop_down,
-                        ),
-                        children: [
-                          Divider(),
-                          Container(
-                            child: Column(
-                              children: listLeaders.map((leader) {
-                                return ListTile(
-                                  leading: avatar(userMap, leader.userId),
-                                  title: Text(
-                                      '${leader.userFirstName} ${leader.userLastName}',
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                          fontFamily: 'MontMed', fontSize: 13)),
-                                  subtitle: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Icon(
-                                            Icons.folder_open_sharp,
-                                            size: 13,
-                                          ),
-                                          SizedBox(width: 5),
-                                          Text(
-                                              'Project Joined: ${ProjectServices().getJoinedProjectNumber(projectMap, leader.userId)}',
-                                              style: TextStyle(
-                                                  fontFamily: 'MontMed',
-                                                  fontSize: 12))
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                  trailing: IconButton(
-                                      icon: Icon(
-                                        Icons.border_color,
-                                        size: 14,
-                                      ),
-                                      onPressed: () {
-                                        _getUserCurrentRole(leader);
-                                        _showStateDrawer(context, leader);
-                                      }),
-                                );
-                              }).toList(),
-                            ),
-                          ),
-                        ],
-                        onExpansionChanged: (bool expanded) {
-                          setState(() {
-                            _customTileExpanded1 = expanded;
-                          });
-                        },
-                      ),
-                    ),
-                    SizedBox(height: 10),
-                    Container(
-                      padding: EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: Colors.indigo[50],
-                        borderRadius:
-                            BorderRadius.circular(5.0), // Set the border radius
-                      ),
-                      child: ExpansionTile(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.zero,
-                        ),
-                        initiallyExpanded: true,
-                        title: Row(
-                          children: [
-                            Icon(Icons.person, color: Colors.indigo),
-                            SizedBox(width: 10),
-                            Text('Manager(s)',
-                                style: TextStyle(
-                                    fontFamily: 'MontMed', fontSize: 13)),
-                          ],
-                        ),
-                        trailing: Icon(
-                          _customTileExpanded2
-                              ? Icons.arrow_drop_down_circle
-                              : Icons.arrow_drop_down,
-                        ),
-                        children: [
-                          Divider(),
-                          Container(
-                            child: Column(
-                              children: listManagers.map((manager) {
-                                return ListTile(
-                                  leading: avatar(userMap, manager.userId),
-                                  title: Text(
-                                      '${manager.userFirstName} ${manager.userLastName}',
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                          fontFamily: 'MontMed', fontSize: 13)),
-                                  subtitle: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Icon(
-                                            Icons.folder_open_sharp,
-                                            size: 13,
-                                          ),
-                                          SizedBox(width: 5),
-                                          Text(
-                                              'Project Created: ${ProjectServices().getCreateProjectNumber(projectMap, manager.userId)}',
-                                              style: TextStyle(
-                                                  fontFamily: 'MontMed',
-                                                  fontSize: 12))
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                  trailing: IconButton(
-                                      icon: Icon(
-                                        Icons.border_color,
-                                        size: 14,
-                                      ),
-                                      onPressed: () {
-                                        _getUserCurrentRole(manager);
-                                        _showStateDrawer(context, manager);
-                                      }),
-                                );
-                              }).toList(),
-                            ),
-                          ),
-                        ],
-                        onExpansionChanged: (bool expanded) {
-                          setState(() {
-                            _customTileExpanded2 = expanded;
-                          });
-                        },
-                      ),
-                    ),
-                    SizedBox(height: 10),
-                    Container(
-                      padding: EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: Colors.indigo[50],
-                        borderRadius:
-                            BorderRadius.circular(5.0), // Set the border radius
-                      ),
-                      child: ExpansionTile(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.zero,
-                        ),
-                        initiallyExpanded: true,
-                        title: Row(
-                          children: [
-                            Icon(Icons.person, color: Colors.indigo),
-                            SizedBox(width: 10),
-                            Text('Admin(s)',
-                                style: TextStyle(
-                                    fontFamily: 'MontMed', fontSize: 13)),
-                          ],
-                        ),
-                        trailing: Icon(
-                          _customTileExpanded2
-                              ? Icons.arrow_drop_down_circle
-                              : Icons.arrow_drop_down,
-                        ),
-                        children: [
-                          Divider(),
-                          Container(
-                            child: Column(
-                              children: listAdmin.map((admin) {
-                                return ListTile(
-                                  leading: avatar(userMap, admin.userId),
-                                  title: Text(
-                                      '${admin.userFirstName} ${admin.userLastName}',
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                          fontFamily: 'MontMed', fontSize: 13)),
-                                  subtitle: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Icon(
-                                            Icons.folder_open_sharp,
-                                            size: 13,
-                                          ),
-                                          SizedBox(width: 5),
-                                          Text(
-                                              'Project Created: ${ProjectServices().getCreateProjectNumber(projectMap, admin.userId)}',
-                                              style: TextStyle(
-                                                  fontFamily: 'MontMed',
-                                                  fontSize: 12))
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                  trailing: IconButton(
-                                      icon: Icon(
-                                        Icons.border_color,
-                                        size: 14,
-                                      ),
-                                      onPressed: () {
-                                        _getUserCurrentRole(admin);
-                                        _showStateDrawer(context, admin);
-                                      }),
-                                );
-                              }).toList(),
-                            ),
-                          ),
-                        ],
-                        onExpansionChanged: (bool expanded) {
-                          setState(() {
-                            _customTileExpanded2 = expanded;
-                          });
-                        },
-                      ),
-                    ),
-                  ],
-                ),
+                  )),
+                ],
               ),
-            )),
-          ],
-        ),
-      ),
-    );
+            ),
+          );
+        });
   }
 
   void _showStateDrawer(BuildContext context, UserModel userModel) {

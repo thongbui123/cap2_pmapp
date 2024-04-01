@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:capstone2_project_management_app/services/notification_services.dart';
 import 'package:capstone2_project_management_app/views/stats/stats.dart';
 import 'package:capstone2_project_management_app/views/subs/db_side_menu.dart';
 import 'package:capstone2_project_management_app/views/subs/sub_widgets.dart';
@@ -57,262 +58,285 @@ class _profile_screenState extends State<profile_screen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: userModel == null
-          ? Center(child: loader())
-          : SafeArea(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  DbSideMenu(
-                    userModel: userModel!,
-                  ),
-                  Expanded(
-                      child: Padding(
-                    padding: EdgeInsets.all(defaultPadding),
-                    child: SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'PROFLE',
-                            style: TextStyle(
-                              fontFamily: 'MontMed',
-                              fontSize: 16,
-                            ),
-                          ),
-                          Divider(),
-                          SizedBox(height: 10),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              CircleAvatar(
-                                radius: 70,
-                                child: userModel!.profileImage == ''
-                                    ? Text(
-                                        getFirstLetter(userModel!.userFirstName
-                                            .toString()),
-                                        style: const TextStyle(
-                                            fontFamily: 'Mounted',
-                                            fontSize: 80,
-                                            color: Colors.white),
-                                      )
-                                    : CircleAvatar(
-                                        radius: 66,
-                                        backgroundColor: Colors.white,
-                                        backgroundImage: showLocalFile
-                                            ? FileImage(imageFile!)
-                                                as ImageProvider
-                                            : NetworkImage(
-                                                userModel!.profileImage)),
-                              ),
-                              Visibility(
-                                visible: user!.uid == widget.userModel.userId,
-                                child: Container(
-                                  width: 10,
-                                  height: 2,
-                                  color: Colors.lightBlue,
-                                ),
-                              ),
-                              Ink(
-                                decoration: const ShapeDecoration(
-                                  color: Colors.lightBlue,
-                                  shape: CircleBorder(),
-                                ),
-                                child: Visibility(
-                                  visible: user!.uid == widget.userModel.userId,
-                                  child: IconButton(
-                                    icon: const Icon(
-                                      Icons.camera_alt,
-                                      size: 16,
-                                    ),
-                                    color: Colors.white,
-                                    onPressed: () {
-                                      showModalBottomSheet(
-                                          context: context,
-                                          builder: (context) {
-                                            return Padding(
-                                              padding: const EdgeInsets.all(10),
-                                              child: Column(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  ListTile(
-                                                    leading:
-                                                        const Icon(Icons.image),
-                                                    title: const Text(
-                                                        'From Gallery'),
-                                                    onTap: () {
-                                                      _pickImageFromGallery;
-                                                      Navigator.of(context)
-                                                          .pop();
-                                                    },
-                                                  ),
-                                                  ListTile(
-                                                    leading: const Icon(
-                                                        Icons.camera_alt),
-                                                    title: const Text(
-                                                        'From Camera'),
-                                                    onTap: () {
-                                                      _pickImageFromCamera(
-                                                          ImageSource.camera);
-                                                      Navigator.of(context)
-                                                          .pop();
-                                                    },
-                                                  ),
-                                                ],
-                                              ),
-                                            );
-                                          });
-                                    },
+    return StreamBuilder<Object>(
+        stream: NotificationService().databaseReference.onValue,
+        builder: (context, snapshot) {
+          if (snapshot.hasError || !snapshot.hasData) return loader();
+          var event = snapshot.data! as DatabaseEvent;
+          var value = event.snapshot.value as dynamic;
+          Map notifiMap = Map<String, dynamic>.from(value);
+          int numNr = NotificationService()
+              .getListAllNotRead(notifiMap, userModel!.userId)
+              .length;
+          return Scaffold(
+            body: userModel == null
+                ? Center(child: loader())
+                : SafeArea(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        DbSideMenu(
+                          userModel: userModel!,
+                          numNotRead: numNr,
+                        ),
+                        Expanded(
+                            child: Padding(
+                          padding: EdgeInsets.all(defaultPadding),
+                          child: SingleChildScrollView(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'PROFLE',
+                                  style: TextStyle(
+                                    fontFamily: 'MontMed',
+                                    fontSize: 16,
                                   ),
                                 ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 10),
-                          Divider(),
-                          ListTile(
-                            leading: CircleAvatar(
-                              child: Icon(Icons.person),
-                            ),
-                            title: Text('Full Name : ',
-                                style: TextStyle(
-                                    fontFamily: 'MontMed',
-                                    fontSize: 12,
-                                    color: Colors.black54)),
-                            subtitle: Text(
-                                '${userModel?.userFirstName} ${userModel?.userLastName}',
-                                style: TextStyle(
-                                    fontFamily: 'MontMed', fontSize: 14)),
-                          ),
-                          Divider(),
-                          ListTile(
-                            leading: CircleAvatar(
-                              child: Icon(Icons.star),
-                            ),
-                            title: Text('User Role : ',
-                                style: TextStyle(
-                                    fontFamily: 'MontMed',
-                                    fontSize: 12,
-                                    color: Colors.black54)),
-                            subtitle: Text(
-                                userModel?.userRole == 'User'
-                                    ? 'Member'
-                                    : '${userModel?.userRole}',
-                                style: TextStyle(
-                                    fontFamily: 'MontMed', fontSize: 14)),
-                          ),
-                          Divider(),
-                          ListTile(
-                            leading: CircleAvatar(
-                              child: Icon(Icons.mail),
-                            ),
-                            title: Text('Contact Email : ',
-                                style: TextStyle(
-                                    fontFamily: 'MontMed',
-                                    fontSize: 12,
-                                    color: Colors.black54)),
-                            subtitle: Text('${userModel?.userEmail}',
-                                style: TextStyle(
-                                    fontFamily: 'MontMed', fontSize: 14)),
-                          ),
-                          Divider(),
-                          ListTile(
-                            leading: CircleAvatar(
-                              child: Icon(Icons.phone),
-                            ),
-                            title: Text('Mobile Number : ',
-                                style: TextStyle(
-                                    fontFamily: 'MontMed',
-                                    fontSize: 12,
-                                    color: Colors.black54)),
-                            subtitle: Text('+84 444 131 49',
-                                style: TextStyle(
-                                    fontFamily: 'MontMed', fontSize: 14)),
-                            trailing: Visibility(
-                              visible: user!.uid == widget.userModel.userId,
-                              child: IconButton(
-                                onPressed: () {},
-                                icon: Icon(
-                                  Icons.border_color,
-                                  size: 15,
+                                Divider(),
+                                SizedBox(height: 10),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    CircleAvatar(
+                                      radius: 70,
+                                      child: userModel!.profileImage == ''
+                                          ? Text(
+                                              getFirstLetter(userModel!
+                                                  .userFirstName
+                                                  .toString()),
+                                              style: const TextStyle(
+                                                  fontFamily: 'Mounted',
+                                                  fontSize: 80,
+                                                  color: Colors.white),
+                                            )
+                                          : CircleAvatar(
+                                              radius: 66,
+                                              backgroundColor: Colors.white,
+                                              backgroundImage: showLocalFile
+                                                  ? FileImage(imageFile!)
+                                                      as ImageProvider
+                                                  : NetworkImage(
+                                                      userModel!.profileImage)),
+                                    ),
+                                    Visibility(
+                                      visible:
+                                          user!.uid == widget.userModel.userId,
+                                      child: Container(
+                                        width: 10,
+                                        height: 2,
+                                        color: Colors.lightBlue,
+                                      ),
+                                    ),
+                                    Ink(
+                                      decoration: const ShapeDecoration(
+                                        color: Colors.lightBlue,
+                                        shape: CircleBorder(),
+                                      ),
+                                      child: Visibility(
+                                        visible: user!.uid ==
+                                            widget.userModel.userId,
+                                        child: IconButton(
+                                          icon: const Icon(
+                                            Icons.camera_alt,
+                                            size: 16,
+                                          ),
+                                          color: Colors.white,
+                                          onPressed: () {
+                                            showModalBottomSheet(
+                                                context: context,
+                                                builder: (context) {
+                                                  return Padding(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            10),
+                                                    child: Column(
+                                                      mainAxisSize:
+                                                          MainAxisSize.min,
+                                                      children: [
+                                                        ListTile(
+                                                          leading: const Icon(
+                                                              Icons.image),
+                                                          title: const Text(
+                                                              'From Gallery'),
+                                                          onTap: () {
+                                                            _pickImageFromGallery;
+                                                            Navigator.of(
+                                                                    context)
+                                                                .pop();
+                                                          },
+                                                        ),
+                                                        ListTile(
+                                                          leading: const Icon(
+                                                              Icons.camera_alt),
+                                                          title: const Text(
+                                                              'From Camera'),
+                                                          onTap: () {
+                                                            _pickImageFromCamera(
+                                                                ImageSource
+                                                                    .camera);
+                                                            Navigator.of(
+                                                                    context)
+                                                                .pop();
+                                                          },
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  );
+                                                });
+                                          },
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ),
-                            ),
-                          ),
-                          Divider(),
-                          ListTile(
-                            title: Text('About yourself : ',
-                                style: TextStyle(
-                                    fontFamily: 'MontMed',
-                                    fontSize: 12,
-                                    color: Colors.black54)),
-                            subtitle: Text(
-                                'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla tempus mollis odio, et feugiat sem tincidunt sed. Integer at porttitor massa. Ut ullamcorper eros non orci porta posuere.',
-                                style: TextStyle(
-                                    fontFamily: 'MontMed', fontSize: 14)),
-                            trailing: Visibility(
-                              visible: user!.uid == widget.userModel.userId,
-                              child: IconButton(
-                                onPressed: () {},
-                                icon: Icon(
-                                  Icons.border_color,
-                                  size: 14,
+                                SizedBox(height: 10),
+                                Divider(),
+                                ListTile(
+                                  leading: CircleAvatar(
+                                    child: Icon(Icons.person),
+                                  ),
+                                  title: Text('Full Name : ',
+                                      style: TextStyle(
+                                          fontFamily: 'MontMed',
+                                          fontSize: 12,
+                                          color: Colors.black54)),
+                                  subtitle: Text(
+                                      '${userModel?.userFirstName} ${userModel?.userLastName}',
+                                      style: TextStyle(
+                                          fontFamily: 'MontMed', fontSize: 14)),
                                 ),
-                              ),
+                                Divider(),
+                                ListTile(
+                                  leading: CircleAvatar(
+                                    child: Icon(Icons.star),
+                                  ),
+                                  title: Text('User Role : ',
+                                      style: TextStyle(
+                                          fontFamily: 'MontMed',
+                                          fontSize: 12,
+                                          color: Colors.black54)),
+                                  subtitle: Text(
+                                      userModel?.userRole == 'User'
+                                          ? 'Member'
+                                          : '${userModel?.userRole}',
+                                      style: TextStyle(
+                                          fontFamily: 'MontMed', fontSize: 14)),
+                                ),
+                                Divider(),
+                                ListTile(
+                                  leading: CircleAvatar(
+                                    child: Icon(Icons.mail),
+                                  ),
+                                  title: Text('Contact Email : ',
+                                      style: TextStyle(
+                                          fontFamily: 'MontMed',
+                                          fontSize: 12,
+                                          color: Colors.black54)),
+                                  subtitle: Text('${userModel?.userEmail}',
+                                      style: TextStyle(
+                                          fontFamily: 'MontMed', fontSize: 14)),
+                                ),
+                                Divider(),
+                                ListTile(
+                                  leading: CircleAvatar(
+                                    child: Icon(Icons.phone),
+                                  ),
+                                  title: Text('Mobile Number : ',
+                                      style: TextStyle(
+                                          fontFamily: 'MontMed',
+                                          fontSize: 12,
+                                          color: Colors.black54)),
+                                  subtitle: Text('+84 444 131 49',
+                                      style: TextStyle(
+                                          fontFamily: 'MontMed', fontSize: 14)),
+                                  trailing: Visibility(
+                                    visible:
+                                        user!.uid == widget.userModel.userId,
+                                    child: IconButton(
+                                      onPressed: () {},
+                                      icon: Icon(
+                                        Icons.border_color,
+                                        size: 15,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Divider(),
+                                ListTile(
+                                  title: Text('About yourself : ',
+                                      style: TextStyle(
+                                          fontFamily: 'MontMed',
+                                          fontSize: 12,
+                                          color: Colors.black54)),
+                                  subtitle: Text(
+                                      'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla tempus mollis odio, et feugiat sem tincidunt sed. Integer at porttitor massa. Ut ullamcorper eros non orci porta posuere.',
+                                      style: TextStyle(
+                                          fontFamily: 'MontMed', fontSize: 14)),
+                                  trailing: Visibility(
+                                    visible:
+                                        user!.uid == widget.userModel.userId,
+                                    child: IconButton(
+                                      onPressed: () {},
+                                      icon: Icon(
+                                        Icons.border_color,
+                                        size: 14,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Divider(),
+                                ListTile(
+                                  leading: CircleAvatar(
+                                    child: Icon(Icons.folder),
+                                  ),
+                                  title: Text('Projects Related : ',
+                                      style: TextStyle(
+                                          fontFamily: 'MontMed',
+                                          fontSize: 12,
+                                          color: Colors.black54)),
+                                  subtitle: Text('3 Projects Participated',
+                                      style: TextStyle(
+                                          fontFamily: 'MontMed', fontSize: 14)),
+                                  trailing: IconButton(
+                                    onPressed: () {},
+                                    icon: Icon(
+                                      Icons.info,
+                                      size: 20,
+                                    ),
+                                  ),
+                                ),
+                                Divider(),
+                                ListTile(
+                                  leading: CircleAvatar(
+                                    child: Icon(Icons.layers),
+                                  ),
+                                  title: Text('Tasks Related : ',
+                                      style: TextStyle(
+                                          fontFamily: 'MontMed',
+                                          fontSize: 12,
+                                          color: Colors.black54)),
+                                  subtitle: Text('12 Tasks Participated',
+                                      style: TextStyle(
+                                          fontFamily: 'MontMed', fontSize: 14)),
+                                  trailing: IconButton(
+                                    onPressed: () {},
+                                    icon: Icon(
+                                      Icons.info,
+                                      size: 20,
+                                    ),
+                                  ),
+                                ),
+                                Divider(),
+                              ],
                             ),
                           ),
-                          Divider(),
-                          ListTile(
-                            leading: CircleAvatar(
-                              child: Icon(Icons.folder),
-                            ),
-                            title: Text('Projects Related : ',
-                                style: TextStyle(
-                                    fontFamily: 'MontMed',
-                                    fontSize: 12,
-                                    color: Colors.black54)),
-                            subtitle: Text('3 Projects Participated',
-                                style: TextStyle(
-                                    fontFamily: 'MontMed', fontSize: 14)),
-                            trailing: IconButton(
-                              onPressed: () {},
-                              icon: Icon(
-                                Icons.info,
-                                size: 20,
-                              ),
-                            ),
-                          ),
-                          Divider(),
-                          ListTile(
-                            leading: CircleAvatar(
-                              child: Icon(Icons.layers),
-                            ),
-                            title: Text('Tasks Related : ',
-                                style: TextStyle(
-                                    fontFamily: 'MontMed',
-                                    fontSize: 12,
-                                    color: Colors.black54)),
-                            subtitle: Text('12 Tasks Participated',
-                                style: TextStyle(
-                                    fontFamily: 'MontMed', fontSize: 14)),
-                            trailing: IconButton(
-                              onPressed: () {},
-                              icon: Icon(
-                                Icons.info,
-                                size: 20,
-                              ),
-                            ),
-                          ),
-                          Divider(),
-                        ],
-                      ),
+                        )),
+                      ],
                     ),
-                  )),
-                ],
-              ),
-            ),
-    );
+                  ),
+          );
+        });
   }
 
   String getHumanReadableDate(int dt) {

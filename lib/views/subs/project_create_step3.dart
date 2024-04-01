@@ -42,14 +42,13 @@ class _ProjectCreateStep3State extends State<ProjectCreateStep3> {
   List<String> phaseNames = [];
   List<Phase> phasesList = [
     Phase(
-        phaseName: "Requirement and Gathering",
-        phraseDescription: "Description"),
-    Phase(phaseName: "Planning", phraseDescription: "Description"),
-    Phase(phaseName: "Design", phraseDescription: "Description"),
-    Phase(phaseName: "Development", phraseDescription: "Description"),
-    Phase(phaseName: "Testing", phraseDescription: "Description"),
-    Phase(phaseName: "Deployment", phraseDescription: "Description"),
-    Phase(phaseName: "Maintenance", phraseDescription: "Description"),
+        phaseName: "Requirement and Gathering", phraseDescription: "1st Phase"),
+    Phase(phaseName: "Planning", phraseDescription: "2nd Phase"),
+    Phase(phaseName: "Design", phraseDescription: "3rd Phase"),
+    Phase(phaseName: "Development", phraseDescription: "4th Phase"),
+    Phase(phaseName: "Testing", phraseDescription: "5th Phase"),
+    Phase(phaseName: "Deployment", phraseDescription: "6th Phase"),
+    Phase(phaseName: "Maintenance", phraseDescription: "7th Phase"),
   ];
 
   List<Phase> additionPhrases = [
@@ -168,6 +167,7 @@ class _ProjectCreateStep3State extends State<ProjectCreateStep3> {
                               icon: const Icon(Icons.remove_circle),
                               color: Colors.redAccent,
                               onPressed: () {
+                                additionPhrases.remove(phase);
                                 _removeProcess(phase.phaseName);
                               },
                             ),
@@ -199,12 +199,13 @@ class _ProjectCreateStep3State extends State<ProjectCreateStep3> {
                     height: 50,
                     child: TextButton(
                       onPressed: () async {
-                        Navigator.pushReplacement(
+                        Navigator.pushAndRemoveUntil(
                           context,
                           MaterialPageRoute<void>(
                             builder: (BuildContext context) =>
                                 const Dashboard_screen(),
                           ),
+                          (Route<dynamic> route) => false,
                         );
                         ProjectServices projectServices = ProjectServices();
                         if (additionPhrases.isNotEmpty) {
@@ -222,14 +223,16 @@ class _ProjectCreateStep3State extends State<ProjectCreateStep3> {
                             phaseNames,
                             currentUserModel);
                         //Navigator.popUntil(context, ModalRoute.withName('/'));
+                        String currentPhaseId = "";
                         for (var phase in phasesList) {
-                          PhaseServices().addPhase(
+                          PhaseServices phaseServices = PhaseServices();
+                          phaseServices.addPhase(
                             phase.phaseName,
                             projectServices.realProjectID,
                             [],
                             phase.phraseDescription,
                           );
-                          phaseNames.add(projectServices.realProjectID);
+                          //phaseNames.add(projectServices.realProjectID);
                           DatabaseReference projectRef = FirebaseDatabase
                               .instance
                               .ref()
@@ -238,6 +241,12 @@ class _ProjectCreateStep3State extends State<ProjectCreateStep3> {
                           await projectRef.update({
                             'projectPhrases': phaseNames,
                           });
+                          if (phase == phasesList.first) {
+                            currentPhaseId = phaseServices.realPhaseId;
+                            await projectRef.update({
+                              'currentPhaseId': currentPhaseId,
+                            });
+                          }
                         }
                       },
                       child: Container(

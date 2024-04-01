@@ -45,6 +45,67 @@ class ProjectServices {
     return list;
   }
 
+  int getAllProjectInYear(Map<dynamic, dynamic> projectMap, int currentYear) {
+    int count = 0;
+    for (var project in projectMap.values) {
+      ProjectModel projectModel =
+          ProjectModel.fromMap(Map<String, dynamic>.from(project));
+      DateTime dateTime = DateTime.parse(projectModel.endDate);
+      int projectYear = dateTime.year;
+      if (projectYear == currentYear) {
+        count++;
+      }
+    }
+    return count;
+  }
+
+  int getAllOverdueTaskInYear(
+      Map<dynamic, dynamic> projectMap, int currentYear) {
+    int count = 0;
+    for (var project in projectMap.values) {
+      ProjectModel projectModel =
+          ProjectModel.fromMap(Map<String, dynamic>.from(project));
+      DateTime dateTime = DateTime.parse(projectModel.endDate);
+      int projectYear = dateTime.year;
+      if (projectYear == currentYear &&
+          projectModel.projectStatus == 'Overdue') {
+        count++;
+      }
+    }
+    return count;
+  }
+
+  int getAllDoneProjectInYear(
+      Map<dynamic, dynamic> projectMap, int currentYear) {
+    int count = 0;
+    for (var project in projectMap.values) {
+      ProjectModel projectModel =
+          ProjectModel.fromMap(Map<String, dynamic>.from(project));
+      DateTime dateTime = DateTime.parse(projectModel.endDate);
+      int projectYear = dateTime.year;
+      if (projectYear == currentYear && projectModel.projectStatus == 'Done') {
+        count++;
+      }
+    }
+    return count;
+  }
+
+  int getAllOnGoingTaskInYear(
+      Map<dynamic, dynamic> projectMap, int currentYear) {
+    int count = 0;
+    for (var project in projectMap.values) {
+      ProjectModel projectModel =
+          ProjectModel.fromMap(Map<String, dynamic>.from(project));
+      DateTime dateTime = DateTime.parse(projectModel.endDate);
+      int projectYear = dateTime.year;
+      if (projectYear == currentYear &&
+          projectModel.projectStatus == 'In progress') {
+        count++;
+      }
+    }
+    return count;
+  }
+
   List<ProjectModel> getSearchedProjectList(
       Map<dynamic, dynamic> projectMap, String output) {
     List<ProjectModel> list = [];
@@ -123,16 +184,17 @@ class ProjectServices {
       DateTime now = DateTime.now();
       DateTime endDate = DateTime.parse(projectModel.endDate);
       if ((projectModel.projectMembers.contains(id) ||
-              projectModel.managerId == id ||
-              projectModel.leaderId == id) &&
-          now.isAfter(endDate)) {
+                  projectModel.managerId == id ||
+                  projectModel.leaderId == id) &&
+              now.isAfter(endDate) ||
+          projectModel.projectStatus == 'Overdue') {
         count++;
       }
     }
     return count;
   }
 
-  int getAllOverdueProjectNumber(Map<dynamic, dynamic> projectMap, String id) {
+  int getAllOverdueProjectNumber(Map<dynamic, dynamic> projectMap) {
     int count = 0;
     for (var project in projectMap.values) {
       ProjectModel projectModel =
@@ -154,7 +216,7 @@ class ProjectServices {
       if ((projectModel.projectMembers.contains(id) ||
               projectModel.managerId == id ||
               projectModel.leaderId == id) &&
-          projectModel.projectStatus == 'Completed') {
+          projectModel.projectStatus == 'Done') {
         count++;
       }
     }
@@ -166,7 +228,7 @@ class ProjectServices {
     for (var project in projectMap.values) {
       ProjectModel projectModel =
           ProjectModel.fromMap(Map<String, dynamic>.from(project));
-      if (projectModel.projectStatus == 'Completed') {
+      if (projectModel.projectStatus == 'Done') {
         count++;
       }
     }
@@ -201,9 +263,10 @@ class ProjectServices {
             "${currentUserModel!.userFirstName} ${currentUserModel.userLastName}",
         'managerId': currentUserModel.userId,
         'leaderId': teamLeaderId,
+        'currentPhaseId': "",
         'startDate': startDate,
         'endDate': endDate,
-        'projectStatus': 'Requirement and Gathering',
+        'projectStatus': 'In progress',
         'projectMembers': members,
         'projectPhrases': phrases,
       });

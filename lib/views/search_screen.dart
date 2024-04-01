@@ -2,6 +2,7 @@ import 'package:capstone2_project_management_app/models/phase_model.dart';
 import 'package:capstone2_project_management_app/models/project_model.dart';
 import 'package:capstone2_project_management_app/models/task_model.dart';
 import 'package:capstone2_project_management_app/models/user_model.dart';
+import 'package:capstone2_project_management_app/services/notification_services.dart';
 import 'package:capstone2_project_management_app/services/phase_services.dart';
 import 'package:capstone2_project_management_app/services/project_services.dart';
 import 'package:capstone2_project_management_app/services/task_services.dart';
@@ -63,6 +64,7 @@ class _SearchScreenState extends State<SearchScreen> {
           taskService.taskRef.onValue,
           userServices.databaseReference.onValue,
           PhaseServices().phaseRef.onValue,
+          NotificationService().databaseReference.onValue,
         ]),
         builder: (context, snapshot) {
           if (!snapshot.hasData || snapshot.hasError) {
@@ -86,7 +88,12 @@ class _SearchScreenState extends State<SearchScreen> {
           var event3 = snapshot.data![3] as DatabaseEvent;
           var value3 = event3.snapshot.value as dynamic;
           Map phaseMap = Map<String, dynamic>.from(value3);
-
+          var event4 = snapshot.data![4] as DatabaseEvent;
+          var value4 = event4.snapshot.value as dynamic;
+          Map notifiMap = Map<String, dynamic>.from(value4);
+          int numNr = NotificationService()
+              .getListAllNotRead(notifiMap, userModel!.userId)
+              .length;
           return Scaffold(
             body: SafeArea(
               child: Row(
@@ -94,6 +101,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 children: [
                   DbSideMenu(
                     userModel: userModel!,
+                    numNotRead: numNr,
                   ),
                   Expanded(
                       child: Padding(

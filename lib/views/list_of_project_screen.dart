@@ -1,10 +1,13 @@
 import 'package:capstone2_project_management_app/models/project_model.dart';
 import 'package:capstone2_project_management_app/models/user_model.dart';
+import 'package:capstone2_project_management_app/services/notification_services.dart';
 import 'package:capstone2_project_management_app/views/list_of_tasks_screen.dart';
 import 'package:capstone2_project_management_app/views/stats/stats.dart';
 import 'package:capstone2_project_management_app/views/subs/db_side_menu.dart';
 import 'package:capstone2_project_management_app/views/subs/project_create_step1.dart';
+import 'package:capstone2_project_management_app/views/subs/sub_widgets.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 
 class ListOfProjectScreen extends StatefulWidget {
@@ -76,237 +79,257 @@ class _ListOfProjectScreenState extends State<ListOfProjectScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      floatingActionButton: Visibility(
-        visible: userModel?.userRole != 'User',
-        child: FloatingActionButton(
-          onPressed: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => ProjectCreateStep1(
-                    projectMap: projectMap, currentUserModel: userModel),
+    return StreamBuilder<Object>(
+        stream: NotificationService().databaseReference.onValue,
+        builder: (context, snapshot) {
+          if (snapshot.hasError || !snapshot.hasData) {
+            return loader();
+          }
+          var event = snapshot.data! as DatabaseEvent;
+          var value = event.snapshot.value as dynamic;
+          Map notifiMap = Map<String, dynamic>.from(value);
+          //NotificationService().databaseReference.onValue
+          int numNr =
+              NotificationService().getListAllNotRead(notifiMap, uid).length;
+          return Scaffold(
+            floatingActionButton: Visibility(
+              visible: userModel?.userRole != 'User',
+              child: FloatingActionButton(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => ProjectCreateStep1(
+                          projectMap: projectMap, currentUserModel: userModel),
+                    ),
+                  );
+                },
+                backgroundColor: Colors.deepOrangeAccent,
+                tooltip:
+                    'Add Project', // Optional tooltip text shown on long-press
+                child: Icon(
+                  Icons.create_new_folder,
+                  color: Colors.white,
+                ),
+                // Updated icon for the FAB
               ),
-            );
-          },
-          backgroundColor: Colors.deepOrangeAccent,
-          tooltip: 'Add Project', // Optional tooltip text shown on long-press
-          child: Icon(
-            Icons.create_new_folder,
-            color: Colors.white,
-          ),
-          // Updated icon for the FAB
-        ),
-      ),
-      body: SafeArea(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            DbSideMenu(
-              userModel: userModel!,
             ),
-            Expanded(
-              child: Padding(
-                padding: EdgeInsets.all(defaultPadding),
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Text(
-                            'PROJECTS',
-                            style: TextStyle(
-                              fontFamily: 'Anurati',
-                              fontSize: 30,
-                            ),
-                          ),
-                        ],
-                      ),
-                      Divider(),
-                      TabBar(
-                        controller: _tabController,
-                        tabs: [
-                          Tab(text: 'Recent'),
-                          Tab(text: 'All'),
-                        ],
-                        labelStyle: TextStyle(fontFamily: 'MontMed'),
-                      ),
-                      SizedBox(height: 10),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          TextButton(
-                            onPressed: () {
-                              _showFilterDrawer(context);
-                            },
-                            child: Row(
-                              children: [
-                                Icon(Icons.filter_list, size: 15),
-                                SizedBox(width: 10),
-                                Text(
-                                  'Filter',
-                                  style: TextStyle(
-                                      fontFamily: 'MontMed', fontSize: 14),
-                                ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(width: 5),
-                          Container(width: 1, height: 25, color: Colors.grey),
-                          SizedBox(width: 5),
-                          TextButton(
-                            onPressed: () {
-                              _showOrderDrawer(context);
-                            },
-                            child: Row(
-                              children: [
-                                Icon(Icons.import_export, size: 15),
-                                SizedBox(width: 10),
-                                Text(
-                                  'Order',
-                                  style: TextStyle(
-                                      fontFamily: 'MontMed', fontSize: 14),
-                                ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(width: 5),
-                          Container(width: 1, height: 25, color: Colors.grey),
-                          SizedBox(width: 5),
-                          TextButton(
-                            onPressed: () {
-                              _showStateDrawer(context);
-                            },
-                            child: Row(
-                              children: [
-                                Icon(Icons.data_saver_off, size: 15),
-                                SizedBox(width: 10),
-                                Text('State',
-                                    style: TextStyle(
-                                        fontFamily: 'MontMed', fontSize: 14)),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 5),
-                      Divider(),
-                      Container(
-                        height: 400,
-                        child: TabBarView(
-                          controller: _tabController,
+            body: SafeArea(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  DbSideMenu(
+                    userModel: userModel!,
+                    numNotRead: numNr,
+                  ),
+                  Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.all(defaultPadding),
+                      child: SingleChildScrollView(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // Content for Tab 1
-                            SingleChildScrollView(
-                              child: Column(
-                                children: allProjects.map(
-                                  (project) {
-                                    return Card(
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(
-                                            15.0), // Set the radius here
+                            Row(
+                              children: [
+                                Text(
+                                  'PROJECTS',
+                                  style: TextStyle(
+                                    fontFamily: 'Anurati',
+                                    fontSize: 30,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Divider(),
+                            TabBar(
+                              controller: _tabController,
+                              tabs: [
+                                Tab(text: 'Recent'),
+                                Tab(text: 'All'),
+                              ],
+                              labelStyle: TextStyle(fontFamily: 'MontMed'),
+                            ),
+                            SizedBox(height: 10),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                TextButton(
+                                  onPressed: () {
+                                    _showFilterDrawer(context);
+                                  },
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.filter_list, size: 15),
+                                      SizedBox(width: 10),
+                                      Text(
+                                        'Filter',
+                                        style: TextStyle(
+                                            fontFamily: 'MontMed',
+                                            fontSize: 14),
                                       ),
-                                      child: ListTile(
-                                        onTap: () {
-                                          Navigator.of(context).push(
-                                            MaterialPageRoute(
-                                              builder: (context) {
-                                                return ListOfTaskScreen(
-                                                  projectModel: project,
-                                                  projectMap: projectMap,
-                                                  userModel: userModel!,
-                                                  taskMap: taskMap,
+                                    ],
+                                  ),
+                                ),
+                                SizedBox(width: 5),
+                                Container(
+                                    width: 1, height: 25, color: Colors.grey),
+                                SizedBox(width: 5),
+                                TextButton(
+                                  onPressed: () {
+                                    _showOrderDrawer(context);
+                                  },
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.import_export, size: 15),
+                                      SizedBox(width: 10),
+                                      Text(
+                                        'Order',
+                                        style: TextStyle(
+                                            fontFamily: 'MontMed',
+                                            fontSize: 14),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                SizedBox(width: 5),
+                                Container(
+                                    width: 1, height: 25, color: Colors.grey),
+                                SizedBox(width: 5),
+                                TextButton(
+                                  onPressed: () {
+                                    _showStateDrawer(context);
+                                  },
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.data_saver_off, size: 15),
+                                      SizedBox(width: 10),
+                                      Text('State',
+                                          style: TextStyle(
+                                              fontFamily: 'MontMed',
+                                              fontSize: 14)),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 5),
+                            Divider(),
+                            Container(
+                              height: 400,
+                              child: TabBarView(
+                                controller: _tabController,
+                                children: [
+                                  // Content for Tab 1
+                                  SingleChildScrollView(
+                                    child: Column(
+                                      children: allProjects.map(
+                                        (project) {
+                                          return Card(
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(
+                                                  15.0), // Set the radius here
+                                            ),
+                                            child: ListTile(
+                                              onTap: () {
+                                                Navigator.of(context).push(
+                                                  MaterialPageRoute(
+                                                    builder: (context) {
+                                                      return ListOfTaskScreen(
+                                                        projectModel: project,
+                                                        projectMap: projectMap,
+                                                        userModel: userModel!,
+                                                        taskMap: taskMap,
+                                                      );
+                                                    },
+                                                  ),
                                                 );
                                               },
+                                              tileColor: Colors.deepOrange[50],
+                                              leading: const CircleAvatar(
+                                                child: Icon(
+                                                  Icons.folder,
+                                                  color: Colors.orange,
+                                                ),
+                                              ),
+                                              title: Text(
+                                                project.projectName.toString(),
+                                                style: TextStyle(
+                                                  fontFamily: 'MontMed',
+                                                  fontSize: 13,
+                                                ),
+                                              ),
+                                              subtitle: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    'Started Date: ${project.startDate}',
+                                                    style: const TextStyle(
+                                                      fontFamily: 'MontMed',
+                                                      fontSize: 12,
+                                                    ),
+                                                  ),
+                                                  Text(
+                                                    'Participant(s): ${project.projectMembers.length}',
+                                                    style: const TextStyle(
+                                                      fontFamily: 'MontMed',
+                                                      fontSize: 12,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
                                             ),
                                           );
                                         },
-                                        tileColor: Colors.deepOrange[50],
-                                        leading: const CircleAvatar(
-                                          child: Icon(
-                                            Icons.folder,
-                                            color: Colors.orange,
-                                          ),
-                                        ),
-                                        title: Text(
-                                          project.projectName.toString(),
-                                          style: TextStyle(
-                                            fontFamily: 'MontMed',
-                                            fontSize: 13,
-                                          ),
-                                        ),
-                                        subtitle: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              'Started Date: ${project.startDate}',
-                                              style: const TextStyle(
-                                                fontFamily: 'MontMed',
-                                                fontSize: 12,
+                                      ).toList(),
+                                    ),
+                                  ),
+                                  // Content for Tab 2
+                                  Container(
+                                    child: Column(
+                                      children: allProjects.map(
+                                        (project) {
+                                          return Card(
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(
+                                                  15.0), // Set the radius here
+                                            ),
+                                            child: ListTile(
+                                              leading: const CircleAvatar(
+                                                child: Icon(
+                                                  Icons.folder,
+                                                  color: Colors.orange,
+                                                ),
+                                              ),
+                                              tileColor: Colors.deepOrange[50],
+                                              title: Text(project.projectId,
+                                                  style: TextStyle(
+                                                      fontFamily: 'MontMed',
+                                                      fontSize: 13)),
+                                              subtitle: Text(
+                                                'Participants: 3',
+                                                style: const TextStyle(
+                                                    fontFamily: 'MontMed',
+                                                    fontSize: 12),
                                               ),
                                             ),
-                                            Text(
-                                              'Participant(s): ${project.projectMembers.length}',
-                                              style: const TextStyle(
-                                                fontFamily: 'MontMed',
-                                                fontSize: 12,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ).toList(),
+                                          );
+                                        },
+                                      ).toList(),
+                                    ),
+                                  )
+                                ],
                               ),
                             ),
-                            // Content for Tab 2
-                            Container(
-                              child: Column(
-                                children: allProjects.map(
-                                  (project) {
-                                    return Card(
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(
-                                            15.0), // Set the radius here
-                                      ),
-                                      child: ListTile(
-                                        leading: const CircleAvatar(
-                                          child: Icon(
-                                            Icons.folder,
-                                            color: Colors.orange,
-                                          ),
-                                        ),
-                                        tileColor: Colors.deepOrange[50],
-                                        title: Text(project.projectId,
-                                            style: TextStyle(
-                                                fontFamily: 'MontMed',
-                                                fontSize: 13)),
-                                        subtitle: Text(
-                                          'Participants: 3',
-                                          style: const TextStyle(
-                                              fontFamily: 'MontMed',
-                                              fontSize: 12),
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ).toList(),
-                              ),
-                            )
                           ],
                         ),
                       ),
-                    ],
-                  ),
-                ),
+                    ),
+                  )
+                ],
               ),
-            )
-          ],
-        ),
-      ),
-    );
+            ),
+          );
+        });
   }
 
   bool dateVisibility = true;

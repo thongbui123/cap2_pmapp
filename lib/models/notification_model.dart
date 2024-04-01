@@ -10,6 +10,7 @@ class NotificationModel {
   String notificationRelatedId;
   String notificationAuth;
   String notificationDate;
+  String readOrNot;
   List<String> notificationReceiver;
   NotificationModel({
     required this.notificationId,
@@ -18,6 +19,7 @@ class NotificationModel {
     required this.notificationRelatedId,
     required this.notificationAuth,
     required this.notificationDate,
+    required this.readOrNot,
     required this.notificationReceiver,
   });
 
@@ -28,6 +30,7 @@ class NotificationModel {
     String? notificationRelatedId,
     String? notificationAuth,
     String? notificationDate,
+    String? readOrNot,
     List<String>? notificationReceiver,
   }) {
     return NotificationModel(
@@ -38,6 +41,7 @@ class NotificationModel {
           notificationRelatedId ?? this.notificationRelatedId,
       notificationAuth: notificationAuth ?? this.notificationAuth,
       notificationDate: notificationDate ?? this.notificationDate,
+      readOrNot: readOrNot ?? this.readOrNot,
       notificationReceiver: notificationReceiver ?? this.notificationReceiver,
     );
   }
@@ -50,6 +54,7 @@ class NotificationModel {
       'notificationRelatedId': notificationRelatedId,
       'notificationAuth': notificationAuth,
       'notificationDate': notificationDate,
+      'readOrNot': readOrNot,
       'notificationReceiver': notificationReceiver,
     };
   }
@@ -62,6 +67,7 @@ class NotificationModel {
       notificationRelatedId: map['notificationRelatedId'] as String,
       notificationAuth: map['notificationAuth'] as String,
       notificationDate: map['notificationDate'] as String,
+      readOrNot: map['readOrNot'] as String,
       notificationReceiver: List<String>.from(
         (map['notificationReceiver'] as List<dynamic>?)
                 ?.map((notification) => notification as String)
@@ -78,7 +84,7 @@ class NotificationModel {
 
   @override
   String toString() {
-    return 'NotificationModel(notificationId: $notificationId, notificationContent: $notificationContent, notificationType: $notificationType, notificationRelatedId: $notificationRelatedId, notificationAuth: $notificationAuth, notificationDate: $notificationDate, notificationReceiver: $notificationReceiver)';
+    return 'NotificationModel(notificationId: $notificationId, notificationContent: $notificationContent, notificationType: $notificationType, notificationRelatedId: $notificationRelatedId, notificationAuth: $notificationAuth, notificationDate: $notificationDate, readOrNot: $readOrNot, notificationReceiver: $notificationReceiver)';
   }
 
   @override
@@ -91,6 +97,7 @@ class NotificationModel {
         other.notificationRelatedId == notificationRelatedId &&
         other.notificationAuth == notificationAuth &&
         other.notificationDate == notificationDate &&
+        other.readOrNot == readOrNot &&
         listEquals(other.notificationReceiver, notificationReceiver);
   }
 
@@ -102,6 +109,7 @@ class NotificationModel {
         notificationRelatedId.hashCode ^
         notificationAuth.hashCode ^
         notificationDate.hashCode ^
+        readOrNot.hashCode ^
         notificationReceiver.hashCode;
   }
 }

@@ -12,6 +12,7 @@ class ProjectModel {
   String projectStatus;
   String managerId;
   String leaderId;
+  String currentPhaseId;
   List<String> projectMembers;
   List<String> projectPhrases;
   ProjectModel({
@@ -23,6 +24,7 @@ class ProjectModel {
     required this.projectStatus,
     required this.managerId,
     required this.leaderId,
+    required this.currentPhaseId,
     required this.projectMembers,
     required this.projectPhrases,
   });
@@ -36,6 +38,7 @@ class ProjectModel {
     String? projectStatus,
     String? managerId,
     String? leaderId,
+    String? currentPhaseId,
     List<String>? projectMembers,
     List<String>? projectPhrases,
   }) {
@@ -48,6 +51,7 @@ class ProjectModel {
       projectStatus: projectStatus ?? this.projectStatus,
       managerId: managerId ?? this.managerId,
       leaderId: leaderId ?? this.leaderId,
+      currentPhaseId: currentPhaseId ?? this.currentPhaseId,
       projectMembers: projectMembers ?? this.projectMembers,
       projectPhrases: projectPhrases ?? this.projectPhrases,
     );
@@ -63,6 +67,7 @@ class ProjectModel {
       'projectStatus': projectStatus,
       'managerId': managerId,
       'leaderId': leaderId,
+      'currentPhaseId': currentPhaseId,
       'projectMembers': projectMembers,
       'projectPhrases': projectPhrases,
     };
@@ -78,8 +83,17 @@ class ProjectModel {
       projectStatus: map['projectStatus'] as String,
       managerId: map['managerId'] as String,
       leaderId: map['leaderId'] as String,
-      projectMembers: List<String>.from(map['projectMembers']),
-      projectPhrases: List<String>.from(map['projectPhrases']),
+      currentPhaseId: map['currentPhaseId'] as String,
+      projectMembers: List<String>.from(
+          (map['projectMembers'] as List<dynamic>?)
+                  ?.map((task) => task as String)
+                  .toList() ??
+              []),
+      projectPhrases: List<String>.from(
+          (map['projectPhrases'] as List<dynamic>?)
+                  ?.map((task) => task as String)
+                  .toList() ??
+              []),
     );
   }
 
@@ -90,7 +104,7 @@ class ProjectModel {
 
   @override
   String toString() {
-    return 'ProjectModel(projectId: $projectId, projectName: $projectName, projecctDescription: $projecctDescription, startDate: $startDate, endDate: $endDate, projectStatus: $projectStatus, managerId: $managerId, leaderId: $leaderId, projectMembers: $projectMembers, projectPhrases: $projectPhrases)';
+    return 'ProjectModel(projectId: $projectId, projectName: $projectName, projecctDescription: $projecctDescription, startDate: $startDate, endDate: $endDate, projectStatus: $projectStatus, managerId: $managerId, leaderId: $leaderId, currentPhaseId: $currentPhaseId, projectMembers: $projectMembers, projectPhrases: $projectPhrases)';
   }
 
   @override
@@ -105,6 +119,7 @@ class ProjectModel {
         other.projectStatus == projectStatus &&
         other.managerId == managerId &&
         other.leaderId == leaderId &&
+        other.currentPhaseId == currentPhaseId &&
         listEquals(other.projectMembers, projectMembers) &&
         listEquals(other.projectPhrases, projectPhrases);
   }
@@ -119,6 +134,7 @@ class ProjectModel {
         projectStatus.hashCode ^
         managerId.hashCode ^
         leaderId.hashCode ^
+        currentPhaseId.hashCode ^
         projectMembers.hashCode ^
         projectPhrases.hashCode;
   }

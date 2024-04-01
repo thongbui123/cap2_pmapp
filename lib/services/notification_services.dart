@@ -13,34 +13,39 @@ class NotificationService {
     DatabaseEvent databaseEvent = await databaseReference.once();
     if (databaseEvent.snapshot.value != null) {
       notificationMap = Map.from(databaseEvent.snapshot.value as dynamic);
-      List<MapEntry<dynamic, dynamic>> sortedEntries =
-          notificationMap.entries.toList();
-      sortedEntries.sort((a, b) {
-        return (b.value['timestamp'] as int)
-            .compareTo(a.value['timestamp'] as int);
-      });
-      notificationMap = Map.fromEntries(
-        sortedEntries.map(
-          (entry) {
-            return MapEntry(
-              entry.key,
-              {
-                'timestamp': entry.value['timestamp'],
-                'notificationId': entry.value['notificationId'],
-                'notificationContent': entry.value['notificationContent'],
-                'notificationType': entry.value['notificationType'],
-                'notificationAuth': entry.value['notificationAuthor'],
-                'notificationDate': entry.value['notificationDate'],
-                'notificationRelatedId': entry.value['notificationRelatedId'],
-                'notificationReceiver': entry.value['notificationReceiver'],
-              },
-            );
-          },
-        ),
-      );
-      return notificationMap;
+      return getSortedMap(notificationMap);
     }
     return {};
+  }
+
+  Map<String, dynamic> getSortedMap(Map<String, dynamic> notificationMap) {
+    List<MapEntry<dynamic, dynamic>> sortedEntries =
+        notificationMap.entries.toList();
+    sortedEntries.sort((a, b) {
+      return (b.value['timestamp'] as int)
+          .compareTo(a.value['timestamp'] as int);
+    });
+    notificationMap = Map.fromEntries(
+      sortedEntries.map(
+        (entry) {
+          return MapEntry(
+            entry.key,
+            {
+              'timestamp': entry.value['timestamp'],
+              'notificationId': entry.value['notificationId'],
+              'notificationContent': entry.value['notificationContent'],
+              'notificationType': entry.value['notificationType'],
+              'notificationAuth': entry.value['notificationAuth'],
+              'notificationDate': entry.value['notificationDate'],
+              'notificationRelatedId': entry.value['notificationRelatedId'],
+              'notificationReceiver': entry.value['notificationReceiver'],
+              'readOrNot': entry.value['readOrNot']
+            },
+          );
+        },
+      ),
+    );
+    return notificationMap;
   }
 
   Future<void> addNotification(
@@ -65,9 +70,16 @@ class NotificationService {
             DateFormat('yyyy-MM-dd | HH:mm').format(DateTime.now()),
         'notificationRelatedId': notificationRelatedId,
         'notificationReceiver': notificationReceiver,
+        'readOrNot': 'No',
         'timestamp': ServerValue.timestamp
       });
     }
+  }
+
+  Future<void> updateReadOrNot(String notificationId) async {
+    await databaseReference.child(notificationId).update({
+      'readOrNot': 'Yes',
+    });
   }
 
   List<NotificationModel> getListAllNotifications(
@@ -77,6 +89,20 @@ class NotificationService {
       NotificationModel notificationModel =
           NotificationModel.fromMap(Map<String, dynamic>.from(task));
       if (notificationModel.notificationReceiver.contains(relatedId)) {
+        listAllNotifications.add(notificationModel);
+      }
+    }
+    return listAllNotifications;
+  }
+
+  List<NotificationModel> getListAllNotRead(
+      Map<dynamic, dynamic> notificationMap, String relatedId) {
+    List<NotificationModel> listAllNotifications = [];
+    for (var task in notificationMap.values) {
+      NotificationModel notificationModel =
+          NotificationModel.fromMap(Map<String, dynamic>.from(task));
+      if (notificationModel.notificationReceiver.contains(relatedId) &&
+          notificationModel.readOrNot == 'No') {
         listAllNotifications.add(notificationModel);
       }
     }

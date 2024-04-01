@@ -1,3 +1,5 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'package:capstone2_project_management_app/models/notification_model.dart';
 import 'package:capstone2_project_management_app/models/user_model.dart';
 import 'package:capstone2_project_management_app/services/notification_services.dart';
 import 'package:capstone2_project_management_app/services/project_services.dart';
@@ -15,10 +17,16 @@ import 'package:rxdart/rxdart.dart';
 
 class DbSideMenu extends StatelessWidget {
   final UserModel userModel;
-  const DbSideMenu({super.key, required this.userModel});
+  final int numNotRead;
+  const DbSideMenu({
+    Key? key,
+    required this.userModel,
+    required this.numNotRead,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    int numNR = numNotRead;
     return Drawer(
       backgroundColor: Colors.black87,
       width: 65,
@@ -122,6 +130,10 @@ class DbSideMenu extends StatelessWidget {
                               Map mapUser = Map.from(dynamicUser);
                               Map mapNotification =
                                   Map.from(dynamicNotification);
+                              List<NotificationModel> list =
+                                  NotificationService().getListAllNotRead(
+                                      mapNotification, userModel.userId);
+                              numNR = list.length;
                               return NotificationScreen(
                                   userModel: userModel,
                                   notificationMap: mapNotification,
@@ -133,26 +145,29 @@ class DbSideMenu extends StatelessWidget {
                   // Handle menu item tap
                 },
               ),
-              Positioned(
-                bottom: 0,
-                right: 20,
-                child: Container(
-                  padding: EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: Colors.red,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  constraints: BoxConstraints(
-                    minWidth: 15,
-                    minHeight: 15,
-                  ),
-                  child: Text(
-                    '2',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 10,
+              Visibility(
+                visible: numNR > 0,
+                child: Positioned(
+                  bottom: 0,
+                  right: 20,
+                  child: Container(
+                    padding: EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                    textAlign: TextAlign.center,
+                    constraints: BoxConstraints(
+                      minWidth: 15,
+                      minHeight: 15,
+                    ),
+                    child: Text(
+                      numNR.toString(),
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.center,
+                    ),
                   ),
                 ),
               ),

@@ -5,6 +5,7 @@ import 'package:capstone2_project_management_app/models/project_model.dart';
 import 'package:capstone2_project_management_app/models/task_model.dart';
 import 'package:capstone2_project_management_app/models/user_model.dart';
 import 'package:capstone2_project_management_app/services/comment_service.dart';
+import 'package:capstone2_project_management_app/services/notification_services.dart';
 import 'package:capstone2_project_management_app/services/phase_services.dart';
 import 'package:capstone2_project_management_app/services/project_services.dart';
 import 'package:capstone2_project_management_app/services/task_services.dart';
@@ -141,8 +142,8 @@ class _ListOfTaskScreenState extends State<ListOfTaskScreen> {
             },
           ),
         );
-        phaseModel = phraseServices.getCurrentPhraseModelFromProject(
-            phaseMap, projectModel!.projectId, projectModel!.projectStatus);
+        // phaseModel = phraseServices.getCurrentPhraseModelFromProject(
+        //     phaseMap, projectModel!.projectId, projectModel!.projectStatus);
       });
     }
   }
@@ -155,6 +156,8 @@ class _ListOfTaskScreenState extends State<ListOfTaskScreen> {
           TaskService().taskRef.onValue,
           ProjectServices().reference.onValue,
           PhaseServices().phaseRef.onValue,
+          NotificationService().databaseReference.onValue,
+          PhaseServices().phaseRef.child(projectModel!.currentPhaseId).onValue,
         ]),
         builder: (context, snapshot) {
           if (snapshot.hasError || !snapshot.hasData) {
@@ -173,8 +176,15 @@ class _ListOfTaskScreenState extends State<ListOfTaskScreen> {
           var valuePhase = eventPhase.snapshot.value as dynamic;
           phaseMap = Map.from(valuePhase);
           phaseMap = PhaseServices().sortedPhaseMap(phaseMap);
-          phaseModel = PhaseServices().getCurrentPhraseModelFromProject(
-              phaseMap, projectModel!.projectId, projectModel!.projectStatus);
+          var eventNotifi = snapshot.data![4] as DatabaseEvent;
+          var valueNotifi = eventNotifi.snapshot.value as dynamic;
+          Map notifiMap = Map<String, dynamic>.from(valueNotifi);
+          //NotificationService().databaseReference.onValue
+          int numNr =
+              NotificationService().getListAllNotRead(notifiMap, uid).length;
+          var eventPhaseModel = snapshot.data![5] as DatabaseEvent;
+          var valuePhaseModel = eventPhaseModel.snapshot.value as dynamic;
+          phaseModel = PhaseModel.fromMap(Map.from(valuePhaseModel));
           listJoinedProjects = projectServices.getJoinedProjectList(
               projectMap, currentUserModel);
           projectModel = (widget.projectModel == null)
@@ -213,9 +223,7 @@ class _ListOfTaskScreenState extends State<ListOfTaskScreen> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  DbSideMenu(
-                    userModel: currentUserModel,
-                  ),
+                  DbSideMenu(userModel: currentUserModel, numNotRead: numNr),
                   Expanded(
                       child: Padding(
                           padding: const EdgeInsets.all(defaultPadding),
