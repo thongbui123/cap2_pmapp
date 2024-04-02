@@ -310,18 +310,23 @@ class _statistic_screenState extends State<statistic_screen> {
                                               size: 25,
                                               color: Colors.purpleAccent),
                                           SizedBox(width: 10),
-                                          Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text('Time/Task: ',
-                                                  style: TextStyle(
-                                                      fontFamily: 'MontMed',
-                                                      fontSize: 11)),
-                                              Text('$averageTaskTime days',
-                                                  style: TextStyle(
-                                                      fontFamily: 'MontMed'))
-                                            ],
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text('Time/Task: ',
+                                                    style: TextStyle(
+                                                        fontFamily: 'MontMed',
+                                                        fontSize: 11)),
+                                                Text(
+                                                    '${double.parse(averageTaskTime.toStringAsFixed(1))} days',
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    style: TextStyle(
+                                                        fontFamily: 'MontMed'))
+                                              ],
+                                            ),
                                           ),
                                         ],
                                       ),
