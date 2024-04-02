@@ -81,10 +81,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
                         children: [
                           Text(
                             'NOTIFICATION',
-                            style: TextStyle(
-                              fontFamily: 'Anurati',
-                              fontSize: 30,
-                            ),
+                            style:
+                                TextStyle(fontFamily: 'MontMed', fontSize: 20),
                           ),
                         ],
                       ),

@@ -1,4 +1,6 @@
+import 'package:capstone2_project_management_app/models/project_model.dart';
 import 'package:capstone2_project_management_app/models/task_model.dart';
+import 'package:capstone2_project_management_app/models/user_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -44,16 +46,19 @@ class TaskService {
     }
   }
 
-  List<TaskModel> getJoinedTaskListFromProject(
-      Map<dynamic, dynamic> taskMap, String memberId, String projectId) {
+  List<TaskModel> getJoinedTaskListFromProject(Map<dynamic, dynamic> taskMap,
+      UserModel userModel, ProjectModel projectModel) {
     List<TaskModel> listAllTasks = [];
     for (var task in taskMap.values) {
       TaskModel taskModel = TaskModel.fromMap(Map<String, dynamic>.from(task));
       DateTime now = DateTime.now();
       DateTime endDate = DateTime.parse(taskModel.taskEndDate);
-      if ((taskModel.taskMembers.contains(memberId) ||
-              taskModel.assignById == memberId) &&
-          taskModel.projectId == projectId) {
+      if ((taskModel.taskMembers.contains(userModel.userId) ||
+              taskModel.assignById == userModel.userId ||
+              projectModel.leaderId == userModel.userId ||
+              projectModel.managerId == userModel.userId ||
+              userModel.userRole == 'Admin') &&
+          taskModel.projectId == projectModel.projectId) {
         if (taskModel.taskStatus != 'Complete' && now.isBefore(endDate)) {
           listAllTasks.add(taskModel);
         }
@@ -230,14 +235,17 @@ class TaskService {
     return list;
   }
 
-  int getJoinedTaskNumberFromProject(
-      Map<dynamic, dynamic> taskMap, String memberId, String projectId) {
+  int getJoinedTaskNumberFromProject(Map<dynamic, dynamic> taskMap,
+      UserModel userModel, ProjectModel projectModel) {
     int count = 0;
     for (var task in taskMap.values) {
       TaskModel taskModel = TaskModel.fromMap(Map<String, dynamic>.from(task));
-      if ((taskModel.taskMembers.contains(memberId) ||
-              taskModel.assignById == memberId) &&
-          taskModel.projectId == projectId) {
+      if ((taskModel.taskMembers.contains(userModel.userId) ||
+              taskModel.assignById == userModel.userId ||
+              projectModel.leaderId == userModel.userId ||
+              projectModel.managerId == userModel.userId ||
+              userModel.userRole == 'Admin') &&
+          taskModel.projectId == projectModel.projectId) {
         count++;
       }
     }
@@ -278,16 +286,26 @@ class TaskService {
     return listOverdou;
   }
 
-  List<TaskModel> getOverdouTaskListFromProject(
-      Map<dynamic, dynamic> taskMap, String id, String projectId) {
+  // (taskModel.taskMembers.contains(id) ||
+  //             taskModel.assignById == id ||
+  //             projectModel.leaderId == id ||
+  //             projectModel.managerId == id) &&
+  //         taskModel.projectId == projectModel.projectId
+
+  List<TaskModel> getOverdouTaskListFromProject(Map<dynamic, dynamic> taskMap,
+      UserModel userModel, ProjectModel projectModel) {
     List<TaskModel> listOverdou = [];
     for (var task in taskMap.values) {
       TaskModel taskModel = TaskModel.fromMap(Map<String, dynamic>.from(task));
       DateTime now = DateTime.now();
       DateTime endDate = DateTime.parse(taskModel.taskEndDate);
-      if ((taskModel.taskMembers.contains(id) || taskModel.assignById == id) &&
+      if ((taskModel.taskMembers.contains(userModel.userId) ||
+              taskModel.assignById == userModel.userId ||
+              projectModel.leaderId == userModel.userId ||
+              projectModel.managerId == userModel.userId ||
+              userModel.userRole == 'Admin') &&
           now.isAfter(endDate) &&
-          taskModel.projectId == projectId) {
+          taskModel.projectId == projectModel.projectId) {
         if (taskModel.taskStatus == 'Incomplete') {
           listOverdou.add(taskModel);
         }
@@ -310,13 +328,17 @@ class TaskService {
     return listOverdou;
   }
 
-  List<TaskModel> getCompleteTaskListByProject(
-      Map<dynamic, dynamic> taskMap, String id, String projectId) {
+  List<TaskModel> getCompleteTaskListByProject(Map<dynamic, dynamic> taskMap,
+      UserModel userModel, ProjectModel projectModel) {
     List<TaskModel> listOverdou = [];
     for (var task in taskMap.values) {
       TaskModel taskModel = TaskModel.fromMap(Map<String, dynamic>.from(task));
-      if ((taskModel.taskMembers.contains(id) || taskModel.assignById == id) &&
-          taskModel.projectId == projectId) {
+      if ((taskModel.taskMembers.contains(userModel.userId) ||
+              taskModel.assignById == userModel.userId ||
+              projectModel.leaderId == userModel.userId ||
+              projectModel.managerId == userModel.userId ||
+              userModel.userRole == 'Admin') &&
+          taskModel.projectId == projectModel.projectId) {
         if (taskModel.taskStatus == 'Complete') {
           listOverdou.add(taskModel);
         }

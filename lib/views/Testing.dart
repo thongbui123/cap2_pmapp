@@ -242,7 +242,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             const Icon(Icons.work),
                             const SizedBox(width: 20, height: 40),
                             Text(
-                              'Years of Experience: ${getYearExp(userModel!.dt)}',
+                              'Years of Experience: ',
                               style: const TextStyle(
                                   fontSize: 16, fontFamily: 'Consolas'),
                             ),

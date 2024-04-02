@@ -99,6 +99,20 @@ class _ListOfTaskScreenState extends State<ListOfTaskScreen> {
     }
   }
 
+  sortDecending<T>(List<TaskModel> list,
+      Comparable<T> Function(TaskModel obj) getAttribute) {
+    setState(() {
+      list.sort((a, b) => getAttribute(b).compareTo(getAttribute(a) as T));
+    });
+  }
+
+  sortAscending<T>(List<TaskModel> list,
+      Comparable<T> Function(TaskModel obj) getAttribute) {
+    setState(() {
+      list.sort((a, b) => getAttribute(a).compareTo(getAttribute(b) as T));
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<List<Object>>(
@@ -144,13 +158,13 @@ class _ListOfTaskScreenState extends State<ListOfTaskScreen> {
               ? listJoinedProjects.first
               : widget.projectModel;
           listCompleteTasks = taskService.getCompleteTaskListByProject(
-              taskMap, currentUserModel.userId, projectModel!.projectId);
+              taskMap, currentUserModel, projectModel!);
           listJoinedTasks = taskService.getJoinedTaskListFromProject(
-              taskMap, currentUserModel.userId, projectModel!.projectId);
+              taskMap, currentUserModel, projectModel!);
           listOverdueTasks = taskService.getOverdouTaskListFromProject(
-              taskMap, currentUserModel.userId, projectModel!.projectId);
+              taskMap, currentUserModel, projectModel!);
           taskLength = taskService.getJoinedTaskNumberFromProject(
-              taskMap, currentUserModel.userId, projectModel!.projectId);
+              taskMap, currentUserModel, projectModel!);
           _fetchCalendarEvents();
           return Scaffold(
             floatingActionButton: Visibility(
@@ -189,9 +203,7 @@ class _ListOfTaskScreenState extends State<ListOfTaskScreen> {
                                   Text(
                                     'TASKS',
                                     style: TextStyle(
-                                      fontFamily: 'Anurati',
-                                      fontSize: 30,
-                                    ),
+                                        fontFamily: 'MontMed', fontSize: 20),
                                   ),
                                 ],
                               ),
@@ -243,7 +255,7 @@ class _ListOfTaskScreenState extends State<ListOfTaskScreen> {
                                           Icon(Icons.filter_list, size: 15),
                                           SizedBox(width: 10),
                                           Text(
-                                            'Filter',
+                                            'Sort',
                                             overflow: TextOverflow.ellipsis,
                                             style: TextStyle(
                                                 fontFamily: 'MontMed',
@@ -397,7 +409,7 @@ class _ListOfTaskScreenState extends State<ListOfTaskScreen> {
                       title: Text(project.projectName,
                           style: const TextStyle(fontFamily: 'MontMed')),
                       subtitle: Text(
-                        "Task numbers: ${taskService.getJoinedTaskNumberFromProject(taskMap, currentUserModel.userId, project.projectId)}",
+                        "Task numbers: ${taskService.getJoinedTaskNumberFromProject(taskMap, currentUserModel, project)}",
                         style: const TextStyle(fontFamily: 'MontMed'),
                       ),
                       onTap: () {
@@ -405,19 +417,13 @@ class _ListOfTaskScreenState extends State<ListOfTaskScreen> {
                           projectModel = project;
                           listJoinedTasks =
                               taskService.getJoinedTaskListFromProject(
-                                  taskMap,
-                                  currentUserModel.userId,
-                                  projectModel!.projectId);
+                                  taskMap, currentUserModel, projectModel!);
                           listOverdueTasks =
                               taskService.getOverdouTaskListFromProject(
-                                  taskMap,
-                                  currentUserModel.userId,
-                                  projectModel!.projectId);
+                                  taskMap, currentUserModel, projectModel!);
                           taskLength =
                               taskService.getJoinedTaskNumberFromProject(
-                                  taskMap,
-                                  currentUserModel.userId,
-                                  projectModel!.projectId);
+                                  taskMap, currentUserModel, projectModel!);
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -470,7 +476,7 @@ class _ListOfTaskScreenState extends State<ListOfTaskScreen> {
               const Row(
                 children: [
                   SizedBox(width: 25),
-                  Text('Filter by:',
+                  Text('Sort by:',
                       style: TextStyle(fontFamily: 'MontMed', fontSize: 16)),
                 ],
               ),
@@ -483,6 +489,14 @@ class _ListOfTaskScreenState extends State<ListOfTaskScreen> {
                   onTap: () {
                     numberVisibility = true;
                     nameVisibility = false;
+
+                    sortAscending(
+                        listJoinedTasks, (obj) => obj.taskMembers.length);
+                    sortAscending(
+                        listCompleteTasks, (obj) => obj.taskMembers.length);
+                    sortAscending(
+                        listOverdueTasks, (obj) => obj.taskMembers.length);
+
                     Navigator.pop(context);
                   },
                   trailing: Container(
@@ -497,6 +511,11 @@ class _ListOfTaskScreenState extends State<ListOfTaskScreen> {
                   onTap: () {
                     numberVisibility = false;
                     nameVisibility = true;
+
+                    sortAscending(listJoinedTasks, (obj) => obj.taskName);
+                    sortAscending(listCompleteTasks, (obj) => obj.taskName);
+                    sortAscending(listOverdueTasks, (obj) => obj.taskName);
+
                     Navigator.pop(context);
                   },
                   trailing: Container(
@@ -540,6 +559,11 @@ class _ListOfTaskScreenState extends State<ListOfTaskScreen> {
                   onTap: () {
                     ascendingVisibility = true;
                     descendingVisibility = false;
+                    setState(() {
+                      sortAscending(listJoinedTasks, (obj) => obj.taskName);
+                      sortAscending(listCompleteTasks, (obj) => obj.taskName);
+                      sortAscending(listOverdueTasks, (obj) => obj.taskName);
+                    });
                     Navigator.pop(context);
                   },
                   trailing: Container(
@@ -691,11 +715,11 @@ class _ExpansionTileTasksState extends State<ExpansionTileTasks> {
     currentUserModel = widget.currentUserModel;
     projectModel = widget.projectModel;
     listDoneTasks = taskService.getCompleteTaskListByProject(
-        taskMap, currentUserModel.userId, projectModel.projectId);
+        taskMap, currentUserModel, projectModel);
     listJoinedTasks = taskService.getJoinedTaskListFromProject(
-        taskMap, currentUserModel.userId, projectModel.projectId);
+        taskMap, currentUserModel, projectModel);
     listOverdueTasks = taskService.getOverdouTaskListFromProject(
-        taskMap, currentUserModel.userId, projectModel.projectId);
+        taskMap, currentUserModel, projectModel);
     groupEvents = widget.taskCalendarEvents;
     super.initState();
   }

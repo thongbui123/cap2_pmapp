@@ -131,9 +131,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                                 const Text(
                                   'PROJECT',
                                   style: TextStyle(
-                                    fontFamily: 'Anurati',
-                                    fontSize: 30,
-                                  ),
+                                      fontFamily: 'MontMed', fontSize: 20),
                                 ),
                               ],
                             ),

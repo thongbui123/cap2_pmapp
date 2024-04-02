@@ -12,6 +12,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
@@ -68,9 +69,16 @@ class _profile_screenState extends State<profile_screen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('$label'),
+          title: Text(
+            '$label',
+            style: TextStyle(fontFamily: 'MontMed', fontSize: 16),
+          ),
           content: TextField(
             controller: _textEditingController,
+            keyboardType: TextInputType.number,
+            inputFormatters: <TextInputFormatter>[
+              FilteringTextInputFormatter.digitsOnly
+            ],
             decoration: InputDecoration(hintText: 'Enter text'),
           ),
           actions: <Widget>[
@@ -78,7 +86,10 @@ class _profile_screenState extends State<profile_screen> {
               onPressed: () {
                 Navigator.of(context).pop(); // Close dialog
               },
-              child: Text('Cancel'),
+              child: Text(
+                'Cancel',
+                style: TextStyle(fontFamily: 'MontMed'),
+              ),
             ),
             ElevatedButton(
               onPressed: () async {
@@ -102,7 +113,10 @@ class _profile_screenState extends State<profile_screen> {
                   return;
                 }
               },
-              child: Text('Save'),
+              child: Text(
+                'Save',
+                style: TextStyle(fontFamily: 'MontMed'),
+              ),
             ),
           ],
         );
@@ -116,7 +130,10 @@ class _profile_screenState extends State<profile_screen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('$label'),
+          title: Text(
+            '$label',
+            style: TextStyle(fontFamily: 'MontMed', fontSize: 16),
+          ),
           content: TextField(
             controller: _textEditingController,
             decoration: InputDecoration(hintText: 'Enter text'),
@@ -128,7 +145,10 @@ class _profile_screenState extends State<profile_screen> {
               onPressed: () {
                 Navigator.of(context).pop(); // Close dialog
               },
-              child: Text('Cancel'),
+              child: Text(
+                'Cancel',
+                style: TextStyle(fontFamily: 'MontMed'),
+              ),
             ),
             ElevatedButton(
               onPressed: () async {
@@ -140,7 +160,10 @@ class _profile_screenState extends State<profile_screen> {
                 await userRef!.update({'dt': editedText});
                 Navigator.of(context).pop();
               },
-              child: Text('Save'),
+              child: Text(
+                'Save',
+                style: TextStyle(fontFamily: 'MontMed'),
+              ),
             ),
           ],
         );
@@ -377,7 +400,7 @@ class _profile_screenState extends State<profile_screen> {
                                     child: IconButton(
                                       onPressed: () {
                                         _showPhoneEditDialog(
-                                            context, 'Change Phone Number');
+                                            context, 'Phone Number');
                                       },
                                       icon: Icon(
                                         Icons.border_color,
@@ -388,10 +411,10 @@ class _profile_screenState extends State<profile_screen> {
                                 ),
                                 Divider(),
                                 ListTile(
-                                  title: Text('About yourself : ',
+                                  title: Text('About Yourself : ',
                                       style: TextStyle(
                                           fontFamily: 'MontMed',
-                                          fontSize: 12,
+                                          fontSize: 14,
                                           color: Colors.black54)),
                                   subtitle: Text('${userModel!.dt}',
                                       style: TextStyle(

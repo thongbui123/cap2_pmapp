@@ -108,10 +108,7 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
                 }),
             const Text(
               'NEW TASK',
-              style: TextStyle(
-                fontFamily: 'Anurati',
-                fontSize: 30,
-              ),
+              style: TextStyle(fontFamily: 'MontMed', fontSize: 20),
             ),
           ],
         ),

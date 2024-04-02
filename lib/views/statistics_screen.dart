@@ -125,9 +125,7 @@ class _statistic_screenState extends State<statistic_screen> {
                             const Text(
                               'STATISTIC',
                               style: TextStyle(
-                                fontFamily: 'Anurati',
-                                fontSize: 30,
-                              ),
+                                  fontFamily: 'MontMed', fontSize: 20),
                             ),
                             Divider(),
                             Container(

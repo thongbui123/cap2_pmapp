@@ -139,9 +139,7 @@ class _ListOfProjectScreenState extends State<ListOfProjectScreen>
                                 Text(
                                   'PROJECTS',
                                   style: TextStyle(
-                                    fontFamily: 'Anurati',
-                                    fontSize: 30,
-                                  ),
+                                      fontFamily: 'MontMed', fontSize: 20),
                                 ),
                               ],
                             ),
@@ -149,7 +147,7 @@ class _ListOfProjectScreenState extends State<ListOfProjectScreen>
                             TabBar(
                               controller: _tabController,
                               tabs: [
-                                Tab(text: 'Recent'),
+                                Tab(text: 'New'),
                                 Tab(text: 'All'),
                               ],
                               labelStyle: TextStyle(fontFamily: 'MontMed'),
@@ -167,7 +165,7 @@ class _ListOfProjectScreenState extends State<ListOfProjectScreen>
                                       Icon(Icons.filter_list, size: 15),
                                       SizedBox(width: 10),
                                       Text(
-                                        'Filter',
+                                        'Sort',
                                         style: TextStyle(
                                             fontFamily: 'MontMed',
                                             fontSize: 14),
@@ -227,7 +225,7 @@ class _ListOfProjectScreenState extends State<ListOfProjectScreen>
                                   // Content for Tab 1
                                   SingleChildScrollView(
                                     child: Column(
-                                      children: allProjects.map(
+                                      children: allProjects.take(4).map(
                                         (project) {
                                           return Card(
                                             shape: RoundedRectangleBorder(
@@ -291,36 +289,54 @@ class _ListOfProjectScreenState extends State<ListOfProjectScreen>
                                   ),
                                   // Content for Tab 2
                                   Container(
-                                    child: Column(
-                                      children: allProjects.map(
-                                        (project) {
-                                          return Card(
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(
-                                                  15.0), // Set the radius here
-                                            ),
-                                            child: ListTile(
-                                              leading: const CircleAvatar(
-                                                child: Icon(
-                                                  Icons.folder,
-                                                  color: Colors.orange,
+                                    child: SingleChildScrollView(
+                                      child: Column(
+                                        children: allProjects.map(
+                                          (project) {
+                                            return Card(
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.circular(
+                                                    15.0), // Set the radius here
+                                              ),
+                                              child: ListTile(
+                                                onTap: () {
+                                                  Navigator.of(context).push(
+                                                    MaterialPageRoute(
+                                                      builder: (context) {
+                                                        return ListOfTaskScreen(
+                                                          projectModel: project,
+                                                          projectMap:
+                                                              projectMap,
+                                                          userModel: userModel!,
+                                                          taskMap: taskMap,
+                                                        );
+                                                      },
+                                                    ),
+                                                  );
+                                                },
+                                                leading: const CircleAvatar(
+                                                  child: Icon(
+                                                    Icons.folder,
+                                                    color: Colors.orange,
+                                                  ),
+                                                ),
+                                                tileColor:
+                                                    Colors.deepOrange[50],
+                                                title: Text(project.projectName,
+                                                    style: TextStyle(
+                                                        fontFamily: 'MontMed',
+                                                        fontSize: 13)),
+                                                subtitle: Text(
+                                                  'Participants: ${project.projectMembers.length}',
+                                                  style: const TextStyle(
+                                                      fontFamily: 'MontMed',
+                                                      fontSize: 12),
                                                 ),
                                               ),
-                                              tileColor: Colors.deepOrange[50],
-                                              title: Text(project.projectId,
-                                                  style: TextStyle(
-                                                      fontFamily: 'MontMed',
-                                                      fontSize: 13)),
-                                              subtitle: Text(
-                                                'Participants: 3',
-                                                style: const TextStyle(
-                                                    fontFamily: 'MontMed',
-                                                    fontSize: 12),
-                                              ),
-                                            ),
-                                          );
-                                        },
-                                      ).toList(),
+                                            );
+                                          },
+                                        ).toList(),
+                                      ),
                                     ),
                                   )
                                 ],
@@ -355,7 +371,7 @@ class _ListOfProjectScreenState extends State<ListOfProjectScreen>
               Row(
                 children: [
                   SizedBox(width: 25),
-                  Text('Filter by:',
+                  Text('Sort by:',
                       style: TextStyle(fontFamily: 'MontMed', fontSize: 16)),
                 ],
               ),

@@ -194,9 +194,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                               const Text(
                                 'TASK',
                                 style: TextStyle(
-                                    fontFamily: 'MontMed',
-                                    fontSize: 30,
-                                    fontWeight: FontWeight.bold),
+                                    fontFamily: 'MontMed', fontSize: 20),
                               ),
                             ],
                           ),
@@ -690,11 +688,25 @@ class _StatefulBottomSheetWidgetState extends State<StatefulBottomSheetWidget> {
                                 UserServices().getNameFromId(userMap, member),
                                 style: const TextStyle(
                                     fontFamily: 'MontMed', fontSize: 13)),
-                            subtitle: Text(
-                              '${TaskService().getJoinedTaskListFromProject(taskMap, member, projectModel.projectId).length} Task(s) Involved',
-                              style: const TextStyle(
-                                  fontFamily: 'MontMed', fontSize: 12),
-                            ),
+                            subtitle: StreamBuilder<Object>(
+                                stream: UserServices()
+                                    .databaseReference
+                                    .child(member)
+                                    .onValue,
+                                builder: (context, snapshot) {
+                                  if (snapshot.hasError || !snapshot.hasData) {
+                                    return loader();
+                                  }
+                                  var event = snapshot.data! as DatabaseEvent;
+                                  var value = event.snapshot.value as dynamic;
+                                  UserModel streamUserModel =
+                                      UserModel.fromMap(Map.from(value));
+                                  return Text(
+                                    '${TaskService().getJoinedTaskListFromProject(taskMap, streamUserModel, projectModel).length} Task(s) Involved',
+                                    style: const TextStyle(
+                                        fontFamily: 'MontMed', fontSize: 12),
+                                  );
+                                }),
                             onTap: () {
                               setState(() {
                                 currentList.add(member);
