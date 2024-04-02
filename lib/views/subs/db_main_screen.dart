@@ -47,8 +47,10 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
     currentUserModel = widget.currentUserModel;
     projectMap = widget.projectMap;
     taskMap = widget.taskMap;
-    listAllTasks = taskService.getTaskListOnlyContainUser(
-        taskMap, currentUserModel!.userId);
+    listAllTasks = currentUserModel!.userRole != 'Admin'
+        ? taskService.getTaskListOnlyContainUser(
+            taskMap, currentUserModel!.userId)
+        : taskService.getAllTaskModelList(taskMap);
     allProjects = projectServices.getAllProjectList(projectMap);
     joinedProjects =
         projectServices.getJoinedProjectList(projectMap, currentUserModel!);
@@ -277,16 +279,19 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
                         const Icon(Icons.playlist_remove_rounded,
                             size: 30, color: Colors.redAccent),
                         const SizedBox(width: 10),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text('Overdue:',
-                                style: TextStyle(
-                                    fontFamily: 'MontMed', fontSize: 12)),
-                            Text(
-                                '${currentUserModel!.userRole != 'Admin' ? taskService.getOverdouTaskNumber(taskMap, currentUserModel!.userId) : taskService.getAllOverdouTaskNumber(taskMap)} Task(s)',
-                                style: const TextStyle(fontFamily: 'MontMed'))
-                          ],
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text('Overdue:',
+                                  style: TextStyle(
+                                      fontFamily: 'MontMed', fontSize: 12)),
+                              Text(
+                                  '${currentUserModel!.userRole != 'Admin' ? taskService.getOverdouTaskNumber(taskMap, currentUserModel!.userId) : taskService.getAllOverdouTaskNumber(taskMap)} Task(s)',
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(fontFamily: 'MontMed'))
+                            ],
+                          ),
                         ),
                       ],
                     ),
@@ -338,17 +343,19 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
                         const Icon(Icons.layers,
                             size: 30, color: Colors.blueAccent),
                         const SizedBox(width: 10),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text('Finalized:',
-                                style: TextStyle(
-                                    fontFamily: 'MontMed', fontSize: 12)),
-                            Text(
-                                '${currentUserModel!.userRole != 'Admin' ? taskService.getCompleteTaskNumber(taskMap, currentUserModel!.userId) : taskService.getAllCompleteTaskNumber(taskMap)} Task(s)',
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(fontFamily: 'MontMed'))
-                          ],
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text('Finalized:',
+                                  style: TextStyle(
+                                      fontFamily: 'MontMed', fontSize: 12)),
+                              Text(
+                                  '${currentUserModel!.userRole != 'Admin' ? taskService.getCompleteTaskNumber(taskMap, currentUserModel!.userId) : taskService.getAllCompleteTaskNumber(taskMap)} Task(s)',
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(fontFamily: 'MontMed'))
+                            ],
+                          ),
                         ),
                       ],
                     ),
@@ -385,12 +392,15 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
               ],
             ),
           ),
+
+          // CAI NAY GAY RA OVERFLOW
           const SizedBox(height: 10),
           Container(
             padding: const EdgeInsets.all(5),
             color: Colors.green[50],
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
                   child: Container(
@@ -399,7 +409,7 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
                           BorderRadius.circular(5.0), // Set the border radius
                     ),
                     height: 200,
-                    child: Dashboard_chart(
+                    child: DashboardChart(
                       listAllTasks: listAllTasks,
                     ),
                   ),
@@ -542,18 +552,18 @@ class _DashboardMainV1State extends State<DashboardMainV1> {
   }
 }
 
-class Dashboard_chart extends StatefulWidget {
+class DashboardChart extends StatefulWidget {
   List<TaskModel> listAllTasks;
-  Dashboard_chart({
+  DashboardChart({
     Key? key,
     required this.listAllTasks,
   }) : super(key: key);
 
   @override
-  State<Dashboard_chart> createState() => _Dashboard_chartState();
+  State<DashboardChart> createState() => _DashboardChartState();
 }
 
-class _Dashboard_chartState extends State<Dashboard_chart> {
+class _DashboardChartState extends State<DashboardChart> {
   late List<TaskModel> listAllTasks;
   int totalTasks = 0;
   int doneTaskNumber = 0;

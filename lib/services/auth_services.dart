@@ -94,11 +94,11 @@ class AuthServices {
           'userFirstName': firstName,
           'userLastName': lastName,
           'userEmail': email,
-          'dt': dt,
+          'dt': "",
           'userId': uid,
           'profileImage': '',
           'userRole': selectedRole,
-          'userPhone': 000000000
+          'userPhone': ""
         });
         Fluttertoast.showToast(msg: 'Successful');
         // ignore: use_build_context_synchronously

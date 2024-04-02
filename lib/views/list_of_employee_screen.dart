@@ -178,13 +178,15 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
                                     children: listMembers.map((member) {
                                       return ListTile(
                                         leading: avatar(userMap, member.userId),
-                                        title: Text(
-                                            '${member.userFirstName} ${member.userLastName}',
-                                            maxLines: 2,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: TextStyle(
-                                                fontFamily: 'MontMed',
-                                                fontSize: 13)),
+                                        title: Expanded(
+                                          child: Text(
+                                              '${member.userFirstName} ${member.userLastName}',
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(
+                                                  fontFamily: 'MontMed',
+                                                  fontSize: 13)),
+                                        ),
                                         subtitle: Column(
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
@@ -196,11 +198,15 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
                                                   size: 13,
                                                 ),
                                                 SizedBox(width: 5),
-                                                Text(
-                                                    'Projects Joined: ${ProjectServices().getJoinedProjectNumber(projectMap, member.userId)}',
-                                                    style: TextStyle(
-                                                        fontFamily: 'MontMed',
-                                                        fontSize: 12))
+                                                Expanded(
+                                                  child: Text(
+                                                      'Joined: ${ProjectServices().getJoinedProjectNumber(projectMap, member.userId)} project(s)',
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                      style: TextStyle(
+                                                          fontFamily: 'MontMed',
+                                                          fontSize: 12)),
+                                                )
                                               ],
                                             ),
                                           ],
@@ -260,13 +266,15 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
                                     children: listLeaders.map((leader) {
                                       return ListTile(
                                         leading: avatar(userMap, leader.userId),
-                                        title: Text(
-                                            '${leader.userFirstName} ${leader.userLastName}',
-                                            maxLines: 2,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: TextStyle(
-                                                fontFamily: 'MontMed',
-                                                fontSize: 13)),
+                                        title: Expanded(
+                                          child: Text(
+                                              '${leader.userFirstName} ${leader.userLastName}',
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(
+                                                  fontFamily: 'MontMed',
+                                                  fontSize: 13)),
+                                        ),
                                         subtitle: Column(
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
@@ -278,11 +286,15 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
                                                   size: 13,
                                                 ),
                                                 SizedBox(width: 5),
-                                                Text(
-                                                    'Project Joined: ${ProjectServices().getJoinedProjectNumber(projectMap, leader.userId)}',
-                                                    style: TextStyle(
-                                                        fontFamily: 'MontMed',
-                                                        fontSize: 12))
+                                                Expanded(
+                                                  child: Text(
+                                                      'Joined: ${ProjectServices().getJoinedProjectNumber(projectMap, leader.userId)} project(s)',
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                      style: TextStyle(
+                                                          fontFamily: 'MontMed',
+                                                          fontSize: 12)),
+                                                )
                                               ],
                                             ),
                                           ],
@@ -343,13 +355,15 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
                                       return ListTile(
                                         leading:
                                             avatar(userMap, manager.userId),
-                                        title: Text(
-                                            '${manager.userFirstName} ${manager.userLastName}',
-                                            maxLines: 2,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: TextStyle(
-                                                fontFamily: 'MontMed',
-                                                fontSize: 13)),
+                                        title: Expanded(
+                                          child: Text(
+                                              '${manager.userFirstName} ${manager.userLastName}',
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(
+                                                  fontFamily: 'MontMed',
+                                                  fontSize: 13)),
+                                        ),
                                         subtitle: Column(
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
@@ -361,11 +375,15 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
                                                   size: 13,
                                                 ),
                                                 SizedBox(width: 5),
-                                                Text(
-                                                    'Project Created: ${ProjectServices().getCreateProjectNumber(projectMap, manager.userId)}',
-                                                    style: TextStyle(
-                                                        fontFamily: 'MontMed',
-                                                        fontSize: 12))
+                                                Expanded(
+                                                  child: Text(
+                                                      'Created: ${ProjectServices().getCreateProjectNumber(projectMap, manager.userId)} project(s)',
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                      style: TextStyle(
+                                                          fontFamily: 'MontMed',
+                                                          fontSize: 12)),
+                                                )
                                               ],
                                             ),
                                           ],
@@ -426,13 +444,15 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
                                     children: listAdmin.map((admin) {
                                       return ListTile(
                                         leading: avatar(userMap, admin.userId),
-                                        title: Text(
-                                            '${admin.userFirstName} ${admin.userLastName}',
-                                            maxLines: 2,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: TextStyle(
-                                                fontFamily: 'MontMed',
-                                                fontSize: 13)),
+                                        title: Expanded(
+                                          child: Text(
+                                              '${admin.userFirstName} ${admin.userLastName}',
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(
+                                                  fontFamily: 'MontMed',
+                                                  fontSize: 13)),
+                                        ),
                                         subtitle: Column(
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
@@ -444,11 +464,15 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
                                                   size: 13,
                                                 ),
                                                 SizedBox(width: 5),
-                                                Text(
-                                                    'Project Created: ${ProjectServices().getCreateProjectNumber(projectMap, admin.userId)}',
-                                                    style: TextStyle(
-                                                        fontFamily: 'MontMed',
-                                                        fontSize: 12))
+                                                Expanded(
+                                                  child: Text(
+                                                      'Created: ${ProjectServices().getCreateProjectNumber(projectMap, admin.userId)} project(s)',
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                      style: TextStyle(
+                                                          fontFamily: 'MontMed',
+                                                          fontSize: 12)),
+                                                )
                                               ],
                                             ),
                                           ],

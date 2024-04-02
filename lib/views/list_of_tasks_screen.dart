@@ -38,12 +38,12 @@ class ListOfTaskScreen extends StatefulWidget {
   State<ListOfTaskScreen> createState() => _ListOfTaskScreenState();
 }
 
-PhaseModel? phaseModel;
+late PhaseModel phaseModel;
 
 class _ListOfTaskScreenState extends State<ListOfTaskScreen> {
   late UserModel currentUserModel;
   late ProjectModel? projectModel;
-  //late PhaseModel? phaseModel;
+  //late PhaseModel phaseModel;
   late Map<String, dynamic> userMap;
   late Map<String, dynamic> commentMap;
   late Map<dynamic, dynamic> projectMap;
@@ -64,21 +64,12 @@ class _ListOfTaskScreenState extends State<ListOfTaskScreen> {
     currentUserModel = widget.userModel;
     projectMap = widget.projectMap;
     taskMap = widget.taskMap;
-    listJoinedProjects =
-        projectServices.getJoinedProjectList(projectMap, currentUserModel);
+    listJoinedProjects = currentUserModel.userRole != 'Admin'
+        ? projectServices.getJoinedProjectList(projectMap, currentUserModel)
+        : projectServices.getAllProjectList(projectMap);
     projectModel = (widget.projectModel == null)
         ? listJoinedProjects.first
         : widget.projectModel;
-    // listCompleteTasks = taskService.getCompleteTaskListByProject(
-    //     taskMap, currentUserModel!.userId, projectModel!.projectId);
-    // listJoinedTasks = taskService.getJoinedTaskListFromProject(
-    //     taskMap, currentUserModel.userId, projectModel!.projectId);
-    // listOverdueTasks = taskService.getOverdouTaskListFromProject(
-    //     taskMap, currentUserModel.userId, projectModel!.projectId);
-    // taskLength = taskService.getJoinedTaskNumberFromProject(
-    //     taskMap, currentUserModel.userId, projectModel!.projectId);
-    //_getPhraseData();
-    //_fetchCalendarEvents();
     super.initState();
   }
 
@@ -105,46 +96,6 @@ class _ListOfTaskScreenState extends State<ListOfTaskScreen> {
       }
       //calendarTaskEvents[date_1]!.add(task);
       calendarTaskEvents[endDate]!.add(task);
-    }
-  }
-
-  Future<void> _getPhraseData() async {
-    DatabaseReference phraseRef =
-        FirebaseDatabase.instance.ref().child('phases');
-
-    DatabaseEvent snapshot = await phraseRef.orderByChild('timestamp').once();
-    if (snapshot.snapshot.value != null && snapshot.snapshot.value is Map) {
-      phaseMap = Map.from(snapshot.snapshot.value as dynamic);
-      phaseModel = PhaseServices()
-          .getPhraseModelFromName(phaseMap, projectModel!.projectStatus);
-      //taskLength = phraseModel!.listTasks.length;
-      List<MapEntry<dynamic, dynamic>> sortedEntries =
-          phaseMap.entries.toList();
-      sortedEntries.sort((a, b) {
-        return (a.value['timestamp'] as int)
-            .compareTo(b.value['timestamp'] as int);
-      });
-      setState(() {
-        phaseMap = Map.fromEntries(
-          sortedEntries.map(
-            (entry) {
-              return MapEntry(
-                entry.key,
-                {
-                  'timestamp': entry.value['timestamp'],
-                  'phraseId': entry.value['phraseId'],
-                  'phraseName': entry.value['phraseName'],
-                  'listTasks': entry.value['listTasks'],
-                  'phraseDescription': entry.value['phraseDescription'],
-                  'projectId': entry.value['projectId'],
-                },
-              );
-            },
-          ),
-        );
-        // phaseModel = phraseServices.getCurrentPhraseModelFromProject(
-        //     phaseMap, projectModel!.projectId, projectModel!.projectStatus);
-      });
     }
   }
 
@@ -185,8 +136,10 @@ class _ListOfTaskScreenState extends State<ListOfTaskScreen> {
           var eventPhaseModel = snapshot.data![5] as DatabaseEvent;
           var valuePhaseModel = eventPhaseModel.snapshot.value as dynamic;
           phaseModel = PhaseModel.fromMap(Map.from(valuePhaseModel));
-          listJoinedProjects = projectServices.getJoinedProjectList(
-              projectMap, currentUserModel);
+          listJoinedProjects = currentUserModel.userRole != 'Admin'
+              ? projectServices.getJoinedProjectList(
+                  projectMap, currentUserModel)
+              : projectServices.getAllProjectList(projectMap);
           projectModel = (widget.projectModel == null)
               ? listJoinedProjects.first
               : widget.projectModel;
@@ -277,23 +230,27 @@ class _ListOfTaskScreenState extends State<ListOfTaskScreen> {
                               const Divider(),
                               const SizedBox(height: 5),
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
+                                //mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  TextButton(
-                                    onPressed: () {
-                                      _showFilterDrawer(context);
-                                    },
-                                    child: const Row(
-                                      children: [
-                                        Icon(Icons.filter_list, size: 15),
-                                        SizedBox(width: 10),
-                                        Text(
-                                          'Filter',
-                                          style: TextStyle(
-                                              fontFamily: 'MontMed',
-                                              fontSize: 14),
-                                        ),
-                                      ],
+                                  Expanded(
+                                    child: TextButton(
+                                      onPressed: () {
+                                        _showFilterDrawer(context);
+                                      },
+                                      child: const Row(
+                                        children: [
+                                          Icon(Icons.filter_list, size: 15),
+                                          SizedBox(width: 10),
+                                          Text(
+                                            'Filter',
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                                fontFamily: 'MontMed',
+                                                fontSize: 14),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                   const SizedBox(width: 5),
@@ -321,19 +278,28 @@ class _ListOfTaskScreenState extends State<ListOfTaskScreen> {
                                   Container(
                                       width: 1, height: 25, color: Colors.grey),
                                   const SizedBox(width: 5),
-                                  TextButton(
-                                    onPressed: () {
-                                      _showStateDrawer(context);
-                                    },
-                                    child: const Row(
-                                      children: [
-                                        Icon(Icons.flag_outlined, size: 15),
-                                        SizedBox(width: 10),
-                                        Text('Priority',
-                                            style: TextStyle(
-                                                fontFamily: 'MontMed',
-                                                fontSize: 14)),
-                                      ],
+                                  Expanded(
+                                    child: TextButton(
+                                      onPressed: () {
+                                        _showStateDrawer(context);
+                                      },
+                                      child: Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        // mainAxisAlignment:
+                                        //     MainAxisAlignment.center,
+                                        children: [
+                                          Icon(Icons.flag_outlined, size: 15),
+                                          SizedBox(width: 10),
+                                          Expanded(
+                                            child: Text('Priority',
+                                                overflow: TextOverflow.ellipsis,
+                                                style: TextStyle(
+                                                    fontFamily: 'MontMed',
+                                                    fontSize: 14)),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -376,6 +342,7 @@ class _ListOfTaskScreenState extends State<ListOfTaskScreen> {
               projectModel: projectModel!,
               phraseMap: phaseMap,
               taskMap: taskMap,
+              phaseModel: phaseModel,
             ),
           );
         }
@@ -759,8 +726,13 @@ class _ExpansionTileTasksState extends State<ExpansionTileTasks> {
             children: [
               const Icon(Icons.calendar_month),
               const SizedBox(width: 10),
-              Text('Selected Day: ${_selectedDay.toString().split(' ')[0]}',
-                  style: const TextStyle(fontFamily: 'MontMed', fontSize: 13)),
+              Expanded(
+                child: Text(
+                    'Selected Day: ${_selectedDay.toString().split(' ')[0]}',
+                    overflow: TextOverflow.ellipsis,
+                    style:
+                        const TextStyle(fontFamily: 'MontMed', fontSize: 13)),
+              ),
             ],
           ),
           trailing: Icon(
@@ -813,7 +785,7 @@ class _ExpansionTileTasksState extends State<ExpansionTileTasks> {
                         _selectedDay = selectedDay;
                         _focusedDay = focusedDay;
                         if (groupEvents[selectedDay] != null) {
-                          showDateDialog(selectedDay, context);
+                          //showDateDialog(selectedDay, context);
                           for (var event in groupEvents[selectedDay]!) {
                             DateTime dateTimeParse =
                                 DateTime.parse(event.taskEndDate);
@@ -984,7 +956,8 @@ class _ExpansionTileTasksState extends State<ExpansionTileTasks> {
                     return FutureBuilder<List<Map<String, dynamic>>>(
                       future: Future.wait([
                         UserServices().getUserDataMap(),
-                        CommentService().getCommentMap()
+                        CommentService().getCommentMap(),
+                        PhaseServices().getPhraseMap()
                       ]),
                       builder: (context, snapshot) {
                         if (snapshot.connectionState ==
@@ -999,13 +972,14 @@ class _ExpansionTileTasksState extends State<ExpansionTileTasks> {
                         } else {
                           userMap = snapshot.data![0];
                           commentMap = snapshot.data![1];
+
                           return TaskDetailScreen(
                             taskModel: task,
                             userMap: userMap,
                             taskMap: taskMap,
                             commentMap: commentMap,
                             userModel: currentUserModel,
-                            phaseModel: phaseModel!,
+                            phaseModel: phaseModel,
                           );
                         }
                       },

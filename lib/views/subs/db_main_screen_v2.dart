@@ -198,10 +198,14 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                                 const Divider(),
                                 Row(
                                   children: <Widget>[
-                                    Text(
-                                      '${TaskService().getJoinedTaskNumber(taskMap, currentUserModel!.userId)} Task in Progress',
-                                      style: const TextStyle(
-                                          fontSize: 12, fontFamily: 'MontMed'),
+                                    Expanded(
+                                      child: Text(
+                                        '${TaskService().getJoinedTaskNumber(taskMap, currentUserModel!.userId)} Task in Progress',
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                            fontSize: 12,
+                                            fontFamily: 'MontMed'),
+                                      ),
                                     )
                                   ],
                                 ),
@@ -264,10 +268,13 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                               const Divider(),
                               Row(
                                 children: <Widget>[
-                                  Text(
-                                    '${projectServices.getJoinedProjectNumber(projectMap, currentUserModel!.userId)} Project(s) Joined',
-                                    style: const TextStyle(
-                                        fontSize: 12, fontFamily: 'MontMed'),
+                                  Expanded(
+                                    child: Text(
+                                      '${projectServices.getJoinedProjectNumber(projectMap, currentUserModel!.userId)} Project(s) Joined',
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                          fontSize: 12, fontFamily: 'MontMed'),
+                                    ),
                                   )
                                 ],
                               ),

@@ -1,6 +1,10 @@
 import 'dart:io';
 
+import 'package:capstone2_project_management_app/models/project_model.dart';
+import 'package:capstone2_project_management_app/models/task_model.dart';
 import 'package:capstone2_project_management_app/services/notification_services.dart';
+import 'package:capstone2_project_management_app/services/project_services.dart';
+import 'package:capstone2_project_management_app/services/task_services.dart';
 import 'package:capstone2_project_management_app/views/stats/stats.dart';
 import 'package:capstone2_project_management_app/views/subs/db_side_menu.dart';
 import 'package:capstone2_project_management_app/views/subs/sub_widgets.dart';
@@ -8,9 +12,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:ndialog/ndialog.dart';
+import 'package:rxdart/rxdart.dart';
 
 import '../models/user_model.dart';
 import '../services/image_services.dart';
@@ -30,7 +36,12 @@ class _profile_screenState extends State<profile_screen> {
   int _selectedIndex = 0;
   File? imageFile;
   bool showLocalFile = false;
+  Map projectMap = {};
+  Map taskMap = {};
+  List<ProjectModel> listJoinProjects = [];
+  List<TaskModel> listJoinTasks = [];
   ImageServices? imageServices;
+  TextEditingController _textEditingController = TextEditingController();
   String defaulAvatar =
       'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQGrQoGh518HulzrSYOTee8UO517D_j6h4AYQ&usqp=CAU';
   _getUserDetails() async {
@@ -49,25 +60,135 @@ class _profile_screenState extends State<profile_screen> {
     if (user != null) {
       userRef = FirebaseDatabase.instance.ref().child('users').child(user!.uid);
     }
-    if (widget.userModel.userId == user!.uid) {
-      _getUserDetails();
-    } else {
-      userModel = widget.userModel;
-    }
+  }
+
+  void _showPhoneEditDialog(BuildContext context, String label) {
+    _textEditingController.text = userModel!.userPhone.toString();
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('$label'),
+          content: TextField(
+            controller: _textEditingController,
+            decoration: InputDecoration(hintText: 'Enter text'),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close dialog
+              },
+              child: Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                // Save the text
+                String editedText = _textEditingController.text.trim();
+                // Do something with editedText
+                print('Edited Text: $editedText');
+                // Close dialog
+                if (!RegExp(r'[a-zA-Z]').hasMatch(editedText)) {
+                  int? number = int.tryParse(editedText);
+                  if (number != null) {
+                    await userRef!.update({'userPhone': number.toString()});
+                    print('Number: $number');
+                    Navigator.of(context).pop();
+                  } else {
+                    Fluttertoast.showToast(msg: 'Not correct phone number');
+                    return;
+                  }
+                } else {
+                  Fluttertoast.showToast(msg: '[Phone number contains letters');
+                  return;
+                }
+              },
+              child: Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showDtEditDialog(BuildContext context, String label) {
+    _textEditingController.text = userModel!.dt.toString();
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('$label'),
+          content: TextField(
+            controller: _textEditingController,
+            decoration: InputDecoration(hintText: 'Enter text'),
+            keyboardType: TextInputType.multiline,
+            maxLines: null, // Allow unlimited lines
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close dialog
+              },
+              child: Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                // Save the text
+                String editedText = _textEditingController.text.trim();
+                // Do something with editedText
+                print('Edited Text: $editedText');
+                // Close dialog
+                await userRef!.update({'dt': editedText});
+                Navigator.of(context).pop();
+              },
+              child: Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<Object>(
-        stream: NotificationService().databaseReference.onValue,
+    return StreamBuilder<List<Object>>(
+        stream: CombineLatestStream.list(
+          [
+            userRef!.onValue,
+            NotificationService().databaseReference.onValue,
+            ProjectServices().reference.onValue,
+            TaskService().taskRef.onValue
+          ],
+        ),
         builder: (context, snapshot) {
           if (snapshot.hasError || !snapshot.hasData) return loader();
-          var event = snapshot.data! as DatabaseEvent;
-          var value = event.snapshot.value as dynamic;
-          Map notifiMap = Map<String, dynamic>.from(value);
+          var event0 = snapshot.data![0] as DatabaseEvent;
+          var value0 = event0.snapshot.value as dynamic;
+          if (widget.userModel.userId == user!.uid) {
+            userModel = UserModel.fromMap(Map<String, dynamic>.from(value0));
+          } else {
+            userModel = widget.userModel;
+          }
+          var event1 = snapshot.data![1] as DatabaseEvent;
+          var value1 = event1.snapshot.value as dynamic;
+          Map notifiMap = Map<String, dynamic>.from(value1);
           int numNr = NotificationService()
               .getListAllNotRead(notifiMap, userModel!.userId)
               .length;
+          var event2 = snapshot.data![2] as DatabaseEvent;
+          var value2 = event2.snapshot.value as dynamic;
+          projectMap = Map.from(value2);
+          var event3 = snapshot.data![3] as DatabaseEvent;
+          var value3 = event3.snapshot.value as dynamic;
+          taskMap = Map.from(value3);
+          if (userModel!.userRole == 'Admin') {
+            listJoinProjects = ProjectServices().getAllProjectList(projectMap);
+            listJoinTasks = TaskService().getAllTaskModelList(taskMap);
+          } else {
+            listJoinProjects =
+                ProjectServices().getJoinedProjectList(projectMap, userModel!);
+            listJoinTasks =
+                TaskService().getJoinedTaskList(taskMap, userModel!.userId);
+          }
           return Scaffold(
             body: userModel == null
                 ? Center(child: loader())
@@ -247,14 +368,17 @@ class _profile_screenState extends State<profile_screen> {
                                           fontFamily: 'MontMed',
                                           fontSize: 12,
                                           color: Colors.black54)),
-                                  subtitle: Text('+84 444 131 49',
+                                  subtitle: Text('${userModel!.userPhone}',
                                       style: TextStyle(
                                           fontFamily: 'MontMed', fontSize: 14)),
                                   trailing: Visibility(
                                     visible:
                                         user!.uid == widget.userModel.userId,
                                     child: IconButton(
-                                      onPressed: () {},
+                                      onPressed: () {
+                                        _showPhoneEditDialog(
+                                            context, 'Change Phone Number');
+                                      },
                                       icon: Icon(
                                         Icons.border_color,
                                         size: 15,
@@ -269,15 +393,17 @@ class _profile_screenState extends State<profile_screen> {
                                           fontFamily: 'MontMed',
                                           fontSize: 12,
                                           color: Colors.black54)),
-                                  subtitle: Text(
-                                      'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla tempus mollis odio, et feugiat sem tincidunt sed. Integer at porttitor massa. Ut ullamcorper eros non orci porta posuere.',
+                                  subtitle: Text('${userModel!.dt}',
                                       style: TextStyle(
                                           fontFamily: 'MontMed', fontSize: 14)),
                                   trailing: Visibility(
                                     visible:
                                         user!.uid == widget.userModel.userId,
                                     child: IconButton(
-                                      onPressed: () {},
+                                      onPressed: () {
+                                        _showDtEditDialog(
+                                            context, 'About Yourself');
+                                      },
                                       icon: Icon(
                                         Icons.border_color,
                                         size: 14,
@@ -295,7 +421,8 @@ class _profile_screenState extends State<profile_screen> {
                                           fontFamily: 'MontMed',
                                           fontSize: 12,
                                           color: Colors.black54)),
-                                  subtitle: Text('3 Projects Participated',
+                                  subtitle: Text(
+                                      '${listJoinProjects.length} Projects Participated',
                                       style: TextStyle(
                                           fontFamily: 'MontMed', fontSize: 14)),
                                   trailing: IconButton(
@@ -316,7 +443,8 @@ class _profile_screenState extends State<profile_screen> {
                                           fontFamily: 'MontMed',
                                           fontSize: 12,
                                           color: Colors.black54)),
-                                  subtitle: Text('12 Tasks Participated',
+                                  subtitle: Text(
+                                      '${listJoinTasks.length} Tasks Participated',
                                       style: TextStyle(
                                           fontFamily: 'MontMed', fontSize: 14)),
                                   trailing: IconButton(

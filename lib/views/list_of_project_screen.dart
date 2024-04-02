@@ -1,6 +1,7 @@
 import 'package:capstone2_project_management_app/models/project_model.dart';
 import 'package:capstone2_project_management_app/models/user_model.dart';
 import 'package:capstone2_project_management_app/services/notification_services.dart';
+import 'package:capstone2_project_management_app/services/project_services.dart';
 import 'package:capstone2_project_management_app/views/list_of_tasks_screen.dart';
 import 'package:capstone2_project_management_app/views/stats/stats.dart';
 import 'package:capstone2_project_management_app/views/subs/db_side_menu.dart';
@@ -41,7 +42,9 @@ class _ListOfProjectScreenState extends State<ListOfProjectScreen>
     projectMap = widget.projectMap;
     taskMap = widget.taskMap;
     userModel = widget.currentUserModel;
-    allProjects = _getData();
+    allProjects = userModel!.userRole != 'Admin'
+        ? _getData()
+        : ProjectServices().getAllProjectList(projectMap);
     _tabController = TabController(length: 2, vsync: this);
   }
 
@@ -50,7 +53,9 @@ class _ListOfProjectScreenState extends State<ListOfProjectScreen>
     for (var project in projectMap.values) {
       ProjectModel projectModel =
           ProjectModel.fromMap(Map<String, dynamic>.from(project));
-      if (projectModel.projectMembers.contains(user!.uid)) {
+      if (projectModel.projectMembers.contains(user!.uid) ||
+          projectModel.leaderId == user!.uid ||
+          projectModel.managerId == user!.uid) {
         allProjects.add(projectModel);
       }
     }
@@ -93,7 +98,8 @@ class _ListOfProjectScreenState extends State<ListOfProjectScreen>
               NotificationService().getListAllNotRead(notifiMap, uid).length;
           return Scaffold(
             floatingActionButton: Visibility(
-              visible: userModel?.userRole != 'User',
+              visible: userModel?.userRole != 'User' &&
+                  userModel?.userRole != 'Team Leader',
               child: FloatingActionButton(
                 onPressed: () {
                   Navigator.of(context).push(

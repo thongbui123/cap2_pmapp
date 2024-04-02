@@ -122,6 +122,16 @@ class TaskService {
     return count;
   }
 
+  List<TaskModel> getAllTaskModelList(Map<dynamic, dynamic> taskMap) {
+    List<TaskModel> list = [];
+    for (var task in taskMap.values) {
+      TaskModel taskModel = TaskModel.fromMap(Map<String, dynamic>.from(task));
+
+      list.add(taskModel);
+    }
+    return list;
+  }
+
   List<TaskModel> getAllTaskModelInYear(
       Map<dynamic, dynamic> taskMap, int currentYear) {
     List<TaskModel> list = [];
@@ -205,6 +215,19 @@ class TaskService {
       }
     }
     return count;
+  }
+
+  List<TaskModel> getJoinedTaskList(
+      Map<dynamic, dynamic> taskMap, String memberId) {
+    List<TaskModel> list = [];
+    for (var task in taskMap.values) {
+      TaskModel taskModel = TaskModel.fromMap(Map<String, dynamic>.from(task));
+      if ((taskModel.taskMembers.contains(memberId) ||
+          taskModel.assignById == memberId)) {
+        list.add(taskModel);
+      }
+    }
+    return list;
   }
 
   int getJoinedTaskNumberFromProject(

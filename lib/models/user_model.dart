@@ -8,8 +8,8 @@ class UserModel {
   String userEmail;
   String userRole;
   String profileImage;
-  int userPhone;
-  int dt;
+  String userPhone;
+  String dt;
   UserModel({
     required this.userId,
     required this.userFirstName,
@@ -28,8 +28,8 @@ class UserModel {
     String? userEmail,
     String? userRole,
     String? profileImage,
-    int? userPhone,
-    int? dt,
+    String? userPhone,
+    String? dt,
   }) {
     return UserModel(
       userId: userId ?? this.userId,
@@ -64,8 +64,8 @@ class UserModel {
       userEmail: map['userEmail'] as String,
       userRole: map['userRole'] as String,
       profileImage: map['profileImage'] as String,
-      userPhone: map['userPhone'] as int,
-      dt: map['dt'] as int,
+      userPhone: map['userPhone'] as String,
+      dt: map['dt'] as String,
     );
   }
 

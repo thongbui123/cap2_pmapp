@@ -130,7 +130,8 @@ class _Dashboard_screenState extends State<Dashboard_screen> {
               );
             }),
         floatingActionButton: Visibility(
-          visible: userModel?.userRole == "User" ? false : true,
+          visible: userModel?.userRole != "User" &&
+              userModel?.userRole != "Team Leader",
           child: FloatingActionButton(
             onPressed: () {
               Navigator.of(context).push(MaterialPageRoute(builder: (context) {

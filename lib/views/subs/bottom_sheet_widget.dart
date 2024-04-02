@@ -152,19 +152,33 @@ class _StatefulBottomSheetWidgetState extends State<StatefulBottomSheetWidget> {
                                 shape: CircleBorder(),
                               ),
                               child: (member != currentList.first)
-                                  ? IconButton(
-                                      icon: const Icon(Icons.delete),
-                                      color: Colors.red,
-                                      onPressed: () {
-                                        _showDeleteMemberDialog(member);
-                                      },
+                                  ? Visibility(
+                                      visible: projectModel.projectMembers
+                                              .contains(uid) ||
+                                          projectModel.leaderId == uid ||
+                                          projectModel.managerId == uid ||
+                                          currentUserModel!.userRole == 'Admin',
+                                      child: IconButton(
+                                        icon: const Icon(Icons.delete),
+                                        color: Colors.red,
+                                        onPressed: () {
+                                          _showDeleteMemberDialog(member);
+                                        },
+                                      ),
                                     )
-                                  : IconButton(
-                                      icon: const Icon(Icons.change_circle),
-                                      color: Colors.blueAccent,
-                                      onPressed: () {
-                                        _showLeaderSelectionDialog(allLeader);
-                                      },
+                                  : Visibility(
+                                      visible: projectModel.projectMembers
+                                              .contains(uid) ||
+                                          projectModel.leaderId == uid ||
+                                          projectModel.managerId == uid ||
+                                          currentUserModel!.userRole == 'Admin',
+                                      child: IconButton(
+                                        icon: const Icon(Icons.change_circle),
+                                        color: Colors.blueAccent,
+                                        onPressed: () {
+                                          _showLeaderSelectionDialog(allLeader);
+                                        },
+                                      ),
                                     ),
                             ),
                           );
@@ -173,50 +187,57 @@ class _StatefulBottomSheetWidgetState extends State<StatefulBottomSheetWidget> {
                     ),
                   ),
                 ),
-                TextButton(
-                    onPressed: () async {
-                      DatabaseReference projectRef =
-                          FirebaseDatabase.instance.ref().child('projects');
-                      await projectRef.child(projectModel.projectId).update({
-                        'projectMembers': currentList,
-                      });
-                      // DatabaseEvent snapshot = await projectRef.once();
-                      // if (snapshot.snapshot.value != null &&
-                      //     snapshot.snapshot.value is Map) {
-                      //   setState(() {
-                      //     projectMap =
-                      //         Map.from(snapshot.snapshot.value as dynamic);
-                      //   });
-                      // }
-                      //Navigator.of(context).pop();
-                      List<String> afterList = getAfterList(mapGetNotification);
-                      if (afterList.isNotEmpty) {
-                        String notificationContent =
-                            'You have been added to the project of ${projectModel.projectName.toUpperCase()} as Member role';
-                        NotificationService().addNotification(
-                            notificationContent,
-                            projectModel.projectId,
-                            afterList,
-                            'Project');
-                        Fluttertoast.showToast(
-                            msg:
-                                'You have been added new members to the project of ${projectModel.projectName.toUpperCase()}');
-                      }
-                      Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(
-                          builder: (context) => ProjectDetailScreen(
-                            projectModel: projectModel,
-                            userMap: userMap,
-                            projectMap: projectMap,
-                            phraseMap: phraseMap,
-                            userModel: currentUserModel,
-                            taskMap: taskMap,
+                Visibility(
+                  visible: projectModel.projectMembers.contains(uid) ||
+                      projectModel.leaderId == uid ||
+                      projectModel.managerId == uid ||
+                      currentUserModel!.userRole == 'Admin',
+                  child: TextButton(
+                      onPressed: () async {
+                        DatabaseReference projectRef =
+                            FirebaseDatabase.instance.ref().child('projects');
+                        await projectRef.child(projectModel.projectId).update({
+                          'projectMembers': currentList,
+                        });
+                        // DatabaseEvent snapshot = await projectRef.once();
+                        // if (snapshot.snapshot.value != null &&
+                        //     snapshot.snapshot.value is Map) {
+                        //   setState(() {
+                        //     projectMap =
+                        //         Map.from(snapshot.snapshot.value as dynamic);
+                        //   });
+                        // }
+                        //Navigator.of(context).pop();
+                        List<String> afterList =
+                            getAfterList(mapGetNotification);
+                        if (afterList.isNotEmpty) {
+                          String notificationContent =
+                              'You have been added to the project of ${projectModel.projectName.toUpperCase()} as Member role';
+                          NotificationService().addNotification(
+                              notificationContent,
+                              projectModel.projectId,
+                              afterList,
+                              'Project');
+                          Fluttertoast.showToast(
+                              msg:
+                                  'You have been added new members to the project of ${projectModel.projectName.toUpperCase()}');
+                        }
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(
+                            builder: (context) => ProjectDetailScreen(
+                              projectModel: projectModel,
+                              userMap: userMap,
+                              projectMap: projectMap,
+                              phraseMap: phraseMap,
+                              userModel: currentUserModel,
+                              taskMap: taskMap,
+                            ),
                           ),
-                        ),
-                      );
-                      currentList = projectModel.projectMembers;
-                    },
-                    child: const Text('SAVE')),
+                        );
+                        currentList = projectModel.projectMembers;
+                      },
+                      child: const Text('SAVE')),
+                ),
               ],
             ),
           );

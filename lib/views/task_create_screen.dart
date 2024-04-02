@@ -20,6 +20,7 @@ class TaskCreateScreen extends StatefulWidget {
   final UserModel currentUserModel;
   final Map<String, dynamic> userMap;
   final ProjectModel projectModel;
+  final PhaseModel phaseModel;
   const TaskCreateScreen(
       {super.key,
       required this.projectMap,
@@ -27,7 +28,8 @@ class TaskCreateScreen extends StatefulWidget {
       required this.userMap,
       required this.projectModel,
       required this.phraseMap,
-      required this.taskMap});
+      required this.taskMap,
+      required this.phaseModel});
 
   @override
   State<TaskCreateScreen> createState() => _TaskCreateScreenState();
@@ -74,7 +76,7 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
     userMap = widget.userMap;
     projectModel = widget.projectModel;
     allMembers = projectModel!.projectMembers;
-    _getPhraseModel();
+    currentPhraseModel = widget.phaseModel;
   }
 
   _getPhraseModel() {

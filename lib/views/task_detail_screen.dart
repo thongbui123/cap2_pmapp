@@ -313,13 +313,19 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                                 '${CommentService().getListAllCommentLength(commentMap, taskModel.taskId)} comment(s) ',
                                 style: const TextStyle(
                                     fontFamily: 'MontMed', fontSize: 14)),
-                            trailing: TextButton(
-                                onPressed: () {
-                                  _showStateCommentSheet(context, commentMap);
-                                },
-                                child: const Text('View All ',
-                                    style: TextStyle(
-                                        fontFamily: 'MontMed', fontSize: 14))),
+                            trailing: Visibility(
+                              visible: taskModel.taskMembers.contains(uid) ||
+                                  taskModel.assignById == uid ||
+                                  currentUserModel!.userRole == 'Admin',
+                              child: TextButton(
+                                  onPressed: () {
+                                    _showStateCommentSheet(context, commentMap);
+                                  },
+                                  child: const Text('View All ',
+                                      style: TextStyle(
+                                          fontFamily: 'MontMed',
+                                          fontSize: 14))),
+                            ),
                           ),
                           const Divider(),
                           ListTile(
@@ -358,13 +364,19 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                             subtitle: const Text('Advanced Options',
                                 style: TextStyle(
                                     fontFamily: 'MontMed', fontSize: 14)),
-                            trailing: TextButton(
-                                onPressed: () {
-                                  _showStateBottomSheet3(context);
-                                },
-                                child: const Text('View All ',
-                                    style: TextStyle(
-                                        fontFamily: 'MontMed', fontSize: 14))),
+                            trailing: Visibility(
+                              visible: taskModel.taskMembers.contains(uid) ||
+                                  taskModel.assignById == uid ||
+                                  currentUserModel!.userRole == 'Admin',
+                              child: TextButton(
+                                  onPressed: () {
+                                    _showStateBottomSheet3(context);
+                                  },
+                                  child: const Text('View All ',
+                                      style: TextStyle(
+                                          fontFamily: 'MontMed',
+                                          fontSize: 14))),
+                            ),
                           ),
                           const Divider(),
                           ListTile(
@@ -379,16 +391,22 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                             subtitle: const Text('Finalize This Task',
                                 style: TextStyle(
                                     fontFamily: 'MontMed', fontSize: 14)),
-                            trailing: TextButton(
-                                onPressed: () {
-                                  _showYesNoDialog(context);
-                                },
-                                child: Text(
-                                    taskModel.taskStatus != 'Complete'
-                                        ? 'SUBMIT'
-                                        : 'UNSUBMIT',
-                                    style: const TextStyle(
-                                        fontFamily: 'MontMed', fontSize: 14))),
+                            trailing: Visibility(
+                              visible: taskModel.taskMembers.contains(uid) ||
+                                  taskModel.assignById == uid ||
+                                  currentUserModel!.userRole == 'Admin',
+                              child: TextButton(
+                                  onPressed: () {
+                                    _showYesNoDialog(context);
+                                  },
+                                  child: Text(
+                                      taskModel.taskStatus != 'Complete'
+                                          ? 'SUBMIT'
+                                          : 'UNSUBMIT',
+                                      style: const TextStyle(
+                                          fontFamily: 'MontMed',
+                                          fontSize: 14))),
+                            ),
                           ),
                           const Divider(),
                         ],

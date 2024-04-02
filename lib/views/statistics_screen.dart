@@ -118,284 +118,330 @@ class _statistic_screenState extends State<statistic_screen> {
                       child: Padding(
                     padding: EdgeInsets.all(defaultPadding),
                     child: SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'STATISTIC',
-                            style: TextStyle(
-                              fontFamily: 'Anurati',
-                              fontSize: 30,
+                      child: Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'STATISTIC',
+                              style: TextStyle(
+                                fontFamily: 'Anurati',
+                                fontSize: 30,
+                              ),
                             ),
-                          ),
-                          Divider(),
-                          Container(
-                            padding: EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(8)),
-                              color: Colors.indigo[50],
-                            ),
-                            child: Column(
-                              children: [
-                                Row(
-                                  children: [
-                                    Icon(Icons.bar_chart,
-                                        color: Colors.orangeAccent),
-                                    SizedBox(width: 5),
-                                    Text('Project Statistic:',
-                                        style: TextStyle(
-                                            fontFamily: 'MontMed',
-                                            fontSize: 14)),
-                                    Expanded(
-                                        child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.end,
-                                      children: [
-                                        YearDropdown(
-                                          currentYearLoad: currentYearLoad,
-                                        )
-                                      ],
-                                    )),
-                                  ],
-                                ),
-                                SizedBox(height: 20),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Expanded(
-                                      child: Container(
-                                        height: 200,
-                                        child: Dashboard_chart(
-                                            totalProject: numOfTotalProject,
-                                            totalDone: numOfDoneProject,
-                                            totalOverdue: numOfOverdueProject,
-                                            totalOnGoing: numOfOnGoingProject),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: 20),
-                                Row(
+                            Divider(),
+                            Container(
+                              padding: EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(8)),
+                                color: Colors.indigo[50],
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Icon(Icons.bar_chart,
+                                          color: Colors.orangeAccent),
+                                      SizedBox(width: 5),
+                                      Text('Project Statistic:',
+                                          style: TextStyle(
+                                              fontFamily: 'MontMed',
+                                              fontSize: 14)),
+                                      Expanded(
+                                          child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
+                                        children: [
+                                          YearDropdown(
+                                            currentYearLoad: currentYearLoad,
+                                          )
+                                        ],
+                                      )),
+                                    ],
+                                  ),
+                                  SizedBox(height: 20),
+                                  Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      Container(
-                                        height: 15,
-                                        width: 15,
-                                        color: Colors.lightBlueAccent,
+                                      Expanded(
+                                        child: Container(
+                                          height: 200,
+                                          child: Dashboard_chart(
+                                              totalProject: numOfTotalProject,
+                                              totalDone: numOfDoneProject,
+                                              totalOverdue: numOfOverdueProject,
+                                              totalOnGoing:
+                                                  numOfOnGoingProject),
+                                        ),
                                       ),
-                                      SizedBox(width: 10),
-                                      Text('In Progress',
-                                          style:
-                                              TextStyle(fontFamily: 'MontMed')),
-                                      SizedBox(width: 20),
-                                      Container(
-                                        height: 15,
-                                        width: 15,
-                                        color: Colors.greenAccent,
+                                    ],
+                                  ),
+                                  SizedBox(height: 20),
+                                  Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Container(
+                                          height: 15,
+                                          width: 15,
+                                          color: Colors.lightBlueAccent,
+                                        ),
+                                        SizedBox(width: 10),
+                                        Text('In Progress',
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                                fontFamily: 'MontMed')),
+                                        SizedBox(width: 20),
+                                        Container(
+                                          height: 15,
+                                          width: 15,
+                                          color: Colors.greenAccent,
+                                        ),
+                                        SizedBox(width: 10),
+                                        Expanded(
+                                          child: Text('Done',
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(
+                                                  fontFamily: 'MontMed')),
+                                        ),
+                                        SizedBox(width: 20),
+                                        Container(
+                                          height: 15,
+                                          width: 15,
+                                          color: Colors.redAccent,
+                                        ),
+                                        SizedBox(width: 10),
+                                        Expanded(
+                                          child: Text('Overdue',
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(
+                                                  fontFamily: 'MontMed')),
+                                        ),
+                                      ]),
+                                  SizedBox(height: 20),
+                                ],
+                              ),
+                            ),
+                            SizedBox(height: 10),
+                            Container(
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Container(
+                                      padding: EdgeInsets.all(15),
+                                      color: Colors.indigo[50],
+                                      child: Row(
+                                        children: [
+                                          Icon(Icons.playlist_play,
+                                              size: 30, color: Colors.blue),
+                                          SizedBox(width: 10),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text('Assigned:',
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    style: TextStyle(
+                                                        fontFamily: 'MontMed',
+                                                        fontSize: 11)),
+                                                Text('$numOfTotalTask Task(s)',
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    style: TextStyle(
+                                                        fontFamily: 'MontMed'))
+                                              ],
+                                            ),
+                                          ),
+                                        ],
                                       ),
-                                      SizedBox(width: 10),
-                                      Text('Done',
-                                          style:
-                                              TextStyle(fontFamily: 'MontMed')),
-                                      SizedBox(width: 20),
-                                      Container(
-                                        height: 15,
-                                        width: 15,
-                                        color: Colors.redAccent,
+                                    ),
+                                  ),
+                                  SizedBox(width: 10),
+                                  Expanded(
+                                    child: Container(
+                                      padding: EdgeInsets.all(15),
+                                      color: Colors.indigo[50],
+                                      child: Row(
+                                        children: [
+                                          Icon(Icons.playlist_add_check,
+                                              size: 30, color: Colors.green),
+                                          SizedBox(width: 10),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text('Completed:',
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    style: TextStyle(
+                                                        fontFamily: 'MontMed',
+                                                        fontSize: 11)),
+                                                Text('$numOfDoneTask Tasks',
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    style: TextStyle(
+                                                        fontFamily: 'MontMed'))
+                                              ],
+                                            ),
+                                          ),
+                                        ],
                                       ),
-                                      SizedBox(width: 10),
-                                      Text('Overdue',
-                                          style:
-                                              TextStyle(fontFamily: 'MontMed')),
-                                    ]),
-                                SizedBox(height: 20),
-                              ],
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                          SizedBox(height: 10),
-                          Container(
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: Container(
-                                    padding: EdgeInsets.all(15),
-                                    color: Colors.indigo[50],
-                                    child: Row(
-                                      children: [
-                                        Icon(Icons.playlist_play,
-                                            size: 30, color: Colors.blue),
-                                        SizedBox(width: 10),
-                                        Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text('Assigned: ',
-                                                style: TextStyle(
-                                                    fontFamily: 'MontMed',
-                                                    fontSize: 11)),
-                                            Text('$numOfTotalTask Task(s)',
-                                                style: TextStyle(
-                                                    fontFamily: 'MontMed'))
-                                          ],
-                                        ),
-                                      ],
+                            SizedBox(height: 10),
+                            Container(
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Container(
+                                      padding: EdgeInsets.all(15),
+                                      color: Colors.indigo[50],
+                                      child: Row(
+                                        children: [
+                                          Icon(Icons.timer,
+                                              size: 25,
+                                              color: Colors.purpleAccent),
+                                          SizedBox(width: 10),
+                                          Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text('Time/Task: ',
+                                                  style: TextStyle(
+                                                      fontFamily: 'MontMed',
+                                                      fontSize: 11)),
+                                              Text('$averageTaskTime days',
+                                                  style: TextStyle(
+                                                      fontFamily: 'MontMed'))
+                                            ],
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
-                                ),
-                                SizedBox(width: 10),
-                                Expanded(
-                                  child: Container(
-                                    padding: EdgeInsets.all(15),
-                                    color: Colors.indigo[50],
-                                    child: Row(
-                                      children: [
-                                        Icon(Icons.playlist_add_check,
-                                            size: 30, color: Colors.green),
-                                        SizedBox(width: 10),
-                                        Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text('Completed: ',
-                                                style: TextStyle(
-                                                    fontFamily: 'MontMed',
-                                                    fontSize: 11)),
-                                            Text('$numOfDoneTask Tasks',
-                                                style: TextStyle(
-                                                    fontFamily: 'MontMed'))
-                                          ],
-                                        ),
-                                      ],
+                                  SizedBox(width: 10),
+                                  Expanded(
+                                    child: Container(
+                                      padding: EdgeInsets.all(15),
+                                      color: Colors.indigo[50],
+                                      child: Row(
+                                        children: [
+                                          Icon(Icons.playlist_remove,
+                                              size: 30,
+                                              color: Colors.redAccent),
+                                          SizedBox(width: 10),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text('Overdue: ',
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    style: TextStyle(
+                                                        fontFamily: 'MontMed',
+                                                        fontSize: 11)),
+                                                Text('$numOfOverdueTask Tasks',
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    style: TextStyle(
+                                                        fontFamily: 'MontMed'))
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
-                          SizedBox(height: 10),
-                          Container(
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: Container(
-                                    padding: EdgeInsets.all(15),
-                                    color: Colors.indigo[50],
-                                    child: Row(
-                                      children: [
-                                        Icon(Icons.timer,
-                                            size: 25,
-                                            color: Colors.purpleAccent),
-                                        SizedBox(width: 10),
-                                        Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text('Time/Task: ',
-                                                style: TextStyle(
-                                                    fontFamily: 'MontMed',
-                                                    fontSize: 11)),
-                                            Text('$averageTaskTime days',
-                                                style: TextStyle(
-                                                    fontFamily: 'MontMed'))
-                                          ],
-                                        ),
-                                      ],
+                            SizedBox(height: 10),
+                            Container(
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Container(
+                                      padding: EdgeInsets.all(15),
+                                      color: Colors.indigo[50],
+                                      child: Row(
+                                        children: [
+                                          Icon(Icons.star,
+                                              size: 25,
+                                              color: Colors.deepOrange),
+                                          SizedBox(width: 10),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text('Leader Role:',
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    style: TextStyle(
+                                                        fontFamily: 'MontMed',
+                                                        fontSize: 11)),
+                                                Text('$leaderNumber People',
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    style: TextStyle(
+                                                        fontFamily: 'MontMed'))
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
-                                ),
-                                SizedBox(width: 10),
-                                Expanded(
-                                  child: Container(
-                                    padding: EdgeInsets.all(15),
-                                    color: Colors.indigo[50],
-                                    child: Row(
-                                      children: [
-                                        Icon(Icons.playlist_remove,
-                                            size: 30, color: Colors.redAccent),
-                                        SizedBox(width: 10),
-                                        Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text('Overdue: ',
-                                                style: TextStyle(
-                                                    fontFamily: 'MontMed',
-                                                    fontSize: 11)),
-                                            Text('$numOfOverdueTask Tasks',
-                                                style: TextStyle(
-                                                    fontFamily: 'MontMed'))
-                                          ],
-                                        ),
-                                      ],
+                                  SizedBox(width: 10),
+                                  Expanded(
+                                    child: Container(
+                                      padding: EdgeInsets.all(15),
+                                      color: Colors.indigo[50],
+                                      child: Row(
+                                        children: [
+                                          Icon(Icons.person,
+                                              size: 30,
+                                              color: Colors.redAccent),
+                                          SizedBox(width: 10),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text('Member Role:',
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    style: TextStyle(
+                                                        fontFamily: 'MontMed',
+                                                        fontSize: 11)),
+                                                Text('$memberNumber People',
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    style: TextStyle(
+                                                        fontFamily: 'MontMed'))
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
-                          SizedBox(height: 10),
-                          Container(
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: Container(
-                                    padding: EdgeInsets.all(15),
-                                    color: Colors.indigo[50],
-                                    child: Row(
-                                      children: [
-                                        Icon(Icons.star,
-                                            size: 25, color: Colors.deepOrange),
-                                        SizedBox(width: 10),
-                                        Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text('Leader Role: ',
-                                                style: TextStyle(
-                                                    fontFamily: 'MontMed',
-                                                    fontSize: 11)),
-                                            Text('$leaderNumber People',
-                                                overflow: TextOverflow.ellipsis,
-                                                style: TextStyle(
-                                                    fontFamily: 'MontMed'))
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(width: 10),
-                                Expanded(
-                                  child: Container(
-                                    padding: EdgeInsets.all(15),
-                                    color: Colors.indigo[50],
-                                    child: Row(
-                                      children: [
-                                        Icon(Icons.person,
-                                            size: 30, color: Colors.redAccent),
-                                        SizedBox(width: 10),
-                                        Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text('Member Role: ',
-                                                style: TextStyle(
-                                                    fontFamily: 'MontMed',
-                                                    fontSize: 11)),
-                                            Text('$memberNumber People',
-                                                overflow: TextOverflow.ellipsis,
-                                                style: TextStyle(
-                                                    fontFamily: 'MontMed'))
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   )),

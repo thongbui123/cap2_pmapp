@@ -75,15 +75,15 @@ class PhaseServices {
     return list;
   }
 
-  Future<Map> getPhraseMap() async {
+  Future<Map<String, dynamic>> getPhraseMap() async {
     DatabaseReference phraseRef =
         FirebaseDatabase.instance.ref().child('phases');
     DatabaseEvent databaseEvent =
         await phraseRef.orderByChild('timestamp').once();
-    Map<dynamic, dynamic> phraseMap = {};
+    Map<String, dynamic> phraseMap = {};
     if (databaseEvent.snapshot.value != null) {
       phraseMap = Map.from(databaseEvent.snapshot.value as dynamic);
-      phraseMap = sortedPhaseMap(phraseMap);
+      phraseMap = sortedPhaseMap(phraseMap).cast();
     }
 //    _getProjectDetails();
     return phraseMap;
