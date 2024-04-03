@@ -2,7 +2,7 @@
 import 'package:capstone2_project_management_app/models/user_model.dart';
 import 'package:capstone2_project_management_app/services/phase_services.dart';
 import 'package:capstone2_project_management_app/services/project_services.dart';
-import 'package:capstone2_project_management_app/views/dashboard_screen.dart';
+import 'package:capstone2_project_management_app/views/dashboard_screen/dashboard_screen.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 
@@ -203,7 +203,7 @@ class _ProjectCreateStep3State extends State<ProjectCreateStep3> {
                           context,
                           MaterialPageRoute<void>(
                             builder: (BuildContext context) =>
-                                const Dashboard_screen(),
+                                const DashboardScreen(),
                           ),
                           (Route<dynamic> route) => false,
                         );

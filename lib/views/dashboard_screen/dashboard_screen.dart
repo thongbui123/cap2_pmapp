@@ -1,22 +1,22 @@
 import 'package:capstone2_project_management_app/models/user_model.dart';
 import 'package:capstone2_project_management_app/services/notification_services.dart';
-import 'package:capstone2_project_management_app/views/subs/db_main_screen.dart';
-import 'package:capstone2_project_management_app/views/subs/db_main_screen_v2.dart';
+import 'package:capstone2_project_management_app/views/dashboard_screen/db_main_screen.dart';
+import 'package:capstone2_project_management_app/views/dashboard_screen/db_main_screen_v2.dart';
+import 'package:capstone2_project_management_app/views/project_screen/project_create_step1.dart';
 import 'package:capstone2_project_management_app/views/subs/db_side_menu.dart';
-import 'package:capstone2_project_management_app/views/subs/project_create_step1.dart';
 import 'package:capstone2_project_management_app/views/subs/sub_widgets.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 
-class Dashboard_screen extends StatefulWidget {
-  const Dashboard_screen({Key? key}) : super(key: key);
+class DashboardScreen extends StatefulWidget {
+  const DashboardScreen({Key? key}) : super(key: key);
 
   @override
-  State<Dashboard_screen> createState() => _Dashboard_screenState();
+  State<DashboardScreen> createState() => _DashboardScreenState();
 }
 
-class _Dashboard_screenState extends State<Dashboard_screen> {
+class _DashboardScreenState extends State<DashboardScreen> {
   User? user;
   UserModel? userModel;
   DatabaseReference? userRef;
@@ -28,9 +28,6 @@ class _Dashboard_screenState extends State<Dashboard_screen> {
     DatabaseEvent snapshot = await userRef!.once();
     userModel = UserModel.fromMap(
         Map<String, dynamic>.from(snapshot.snapshot.value as dynamic));
-    setState(() {
-      _getProjectValues();
-    });
   }
 
   Future<Map<String, dynamic>> _getProjectValues() async {

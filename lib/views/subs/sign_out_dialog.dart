@@ -1,5 +1,5 @@
 import 'package:capstone2_project_management_app/services/auth_services.dart';
-import 'package:capstone2_project_management_app/views/login_screen.dart';
+import 'package:capstone2_project_management_app/views/login_screen/login_screen.dart';
 import 'package:flutter/material.dart';
 
 class SignOutDialog {

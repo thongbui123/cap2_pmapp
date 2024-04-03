@@ -5,8 +5,8 @@ import 'package:capstone2_project_management_app/services/notification_services.
 import 'package:capstone2_project_management_app/services/phase_services.dart';
 import 'package:capstone2_project_management_app/services/project_services.dart';
 import 'package:capstone2_project_management_app/services/task_services.dart';
-import 'package:capstone2_project_management_app/views/profile_screen.dart';
-import 'package:capstone2_project_management_app/views/project_detail_screen.dart';
+import 'package:capstone2_project_management_app/views/login_screen/profile_screen.dart';
+import 'package:capstone2_project_management_app/views/project_screen/project_detail_screen.dart';
 import 'package:capstone2_project_management_app/views/stats/stats.dart';
 import 'package:capstone2_project_management_app/views/subs/db_side_menu.dart';
 import 'package:capstone2_project_management_app/views/subs/sub_widgets.dart';

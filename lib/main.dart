@@ -1,5 +1,5 @@
-import 'package:capstone2_project_management_app/views/dashboard_screen.dart';
-import 'package:capstone2_project_management_app/views/login_screen.dart';
+import 'package:capstone2_project_management_app/views/dashboard_screen/dashboard_screen.dart';
+import 'package:capstone2_project_management_app/views/login_screen/login_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -24,6 +24,6 @@ class MyApp extends StatelessWidget {
         ),
         home: FirebaseAuth.instance.currentUser == null
             ? const LoginScreen()
-            : const Dashboard_screen());
+            : const DashboardScreen());
   }
 }

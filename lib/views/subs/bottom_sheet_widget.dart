@@ -3,7 +3,7 @@ import 'package:capstone2_project_management_app/models/user_model.dart';
 import 'package:capstone2_project_management_app/services/notification_services.dart';
 import 'package:capstone2_project_management_app/services/project_services.dart';
 import 'package:capstone2_project_management_app/services/user_services.dart';
-import 'package:capstone2_project_management_app/views/project_detail_screen.dart';
+import 'package:capstone2_project_management_app/views/project_screen/project_detail_screen.dart';
 import 'package:capstone2_project_management_app/views/subs/sub_widgets.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';

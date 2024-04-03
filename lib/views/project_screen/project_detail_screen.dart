@@ -4,7 +4,7 @@ import 'package:capstone2_project_management_app/models/user_model.dart';
 import 'package:capstone2_project_management_app/services/notification_services.dart';
 import 'package:capstone2_project_management_app/services/phase_services.dart';
 import 'package:capstone2_project_management_app/services/user_services.dart';
-import 'package:capstone2_project_management_app/views/list_of_tasks_screen.dart';
+import 'package:capstone2_project_management_app/views/task_screen/list_of_tasks_screen.dart';
 import 'package:capstone2_project_management_app/views/stats/stats.dart';
 import 'package:capstone2_project_management_app/views/subs/bottom_sheet_widget.dart';
 import 'package:capstone2_project_management_app/views/subs/db_side_menu.dart';

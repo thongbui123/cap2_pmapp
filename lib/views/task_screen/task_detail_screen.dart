@@ -8,17 +8,17 @@ import 'package:capstone2_project_management_app/services/phase_services.dart';
 import 'package:capstone2_project_management_app/services/project_services.dart';
 import 'package:capstone2_project_management_app/services/task_services.dart';
 import 'package:capstone2_project_management_app/services/user_services.dart';
-import 'package:capstone2_project_management_app/views/list_of_tasks_screen.dart';
 import 'package:capstone2_project_management_app/views/stats/stats.dart';
 import 'package:capstone2_project_management_app/views/subs/db_side_menu.dart';
 import 'package:capstone2_project_management_app/views/subs/sub_widgets.dart';
+import 'package:capstone2_project_management_app/views/task_screen/list_of_tasks_screen.dart';
 import 'package:comment_box/comment/comment.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 
-import '../services/notification_services.dart';
+import '../../services/notification_services.dart';
 
 class TaskDetailScreen extends StatefulWidget {
   final Map<String, dynamic> userMap;

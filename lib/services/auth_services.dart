@@ -1,4 +1,4 @@
-import 'package:capstone2_project_management_app/views/dashboard_screen.dart';
+import 'package:capstone2_project_management_app/views/dashboard_screen/dashboard_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -25,7 +25,7 @@ class AuthServices {
         progressDialog.dismiss();
         // ignore: use_build_context_synchronously
         Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-          return const Dashboard_screen();
+          return const DashboardScreen();
         }));
       }
       progressDialog.dismiss();

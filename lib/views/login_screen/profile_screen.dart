@@ -19,8 +19,8 @@ import 'package:intl/intl.dart';
 import 'package:ndialog/ndialog.dart';
 import 'package:rxdart/rxdart.dart';
 
-import '../models/user_model.dart';
-import '../services/image_services.dart';
+import '../../models/user_model.dart';
+import '../../services/image_services.dart';
 
 class profile_screen extends StatefulWidget {
   final UserModel userModel;

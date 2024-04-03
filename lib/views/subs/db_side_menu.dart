@@ -4,10 +4,10 @@ import 'package:capstone2_project_management_app/models/user_model.dart';
 import 'package:capstone2_project_management_app/services/notification_services.dart';
 import 'package:capstone2_project_management_app/services/project_services.dart';
 import 'package:capstone2_project_management_app/services/user_services.dart';
-import 'package:capstone2_project_management_app/views/dashboard_screen.dart';
+import 'package:capstone2_project_management_app/views/dashboard_screen/dashboard_screen.dart';
 import 'package:capstone2_project_management_app/views/list_of_employee_screen.dart';
 import 'package:capstone2_project_management_app/views/notification_screen.dart';
-import 'package:capstone2_project_management_app/views/profile_screen.dart';
+import 'package:capstone2_project_management_app/views/login_screen/profile_screen.dart';
 import 'package:capstone2_project_management_app/views/statistics_screen.dart';
 import 'package:capstone2_project_management_app/views/subs/sign_out_dialog.dart';
 import 'package:capstone2_project_management_app/views/subs/sub_widgets.dart';
@@ -48,7 +48,7 @@ class DbSideMenu extends StatelessWidget {
             leading: const Icon(Icons.dashboard, color: Colors.white),
             onTap: () {
               Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-                return const Dashboard_screen();
+                return const DashboardScreen();
               }));
               // Handle menu item tap
             },

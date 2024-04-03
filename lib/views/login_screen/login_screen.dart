@@ -1,6 +1,6 @@
-import 'package:capstone2_project_management_app/views/register_screen_v2.dart';
+import 'package:capstone2_project_management_app/views/login_screen/register_screen_v2.dart';
 import 'package:flutter/material.dart';
-import '../services/auth_services.dart';
+import '../../services/auth_services.dart';
 import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {

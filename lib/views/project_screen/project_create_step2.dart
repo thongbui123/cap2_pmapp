@@ -1,5 +1,5 @@
 import 'package:capstone2_project_management_app/views/stats/stats.dart';
-import 'package:capstone2_project_management_app/views/subs/project_create_step1.dart';
+import 'package:capstone2_project_management_app/views/project_screen/project_create_step1.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
