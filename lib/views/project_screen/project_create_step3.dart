@@ -222,31 +222,38 @@ class _ProjectCreateStep3State extends State<ProjectCreateStep3> {
                             teamLeaderIdController,
                             phaseNames,
                             currentUserModel);
-                        //Navigator.popUntil(context, ModalRoute.withName('/'));
-                        String currentPhaseId = "";
-                        for (var phase in phasesList) {
+                        List<String> phaseIds = [];
+                        PhaseServices phaseServices = PhaseServices();
+                        phaseServices.addPhase(
+                          phasesList[0].phaseName,
+                          projectServices.realProjectID,
+                          [],
+                          phasesList[0].phraseDescription,
+                        );
+                        phaseIds.add(phaseServices.realPhaseId);
+                        await projectServices.reference
+                            .child(projectServices.realProjectID)
+                            .update({
+                          'currentPhaseId': phaseServices.realPhaseId,
+                          'projectPhrases': phaseIds,
+                        });
+                        for (int i = 1; i < phasesList.length; i++) {
                           PhaseServices phaseServices = PhaseServices();
                           phaseServices.addPhase(
-                            phase.phaseName,
+                            phasesList[i].phaseName,
                             projectServices.realProjectID,
                             [],
-                            phase.phraseDescription,
+                            phasesList[i].phraseDescription,
                           );
-                          //phaseNames.add(projectServices.realProjectID);
+                          phaseIds.add(phaseServices.realPhaseId);
                           DatabaseReference projectRef = FirebaseDatabase
                               .instance
                               .ref()
                               .child('projects')
                               .child(projectServices.realProjectID);
                           await projectRef.update({
-                            'projectPhrases': phaseNames,
+                            'projectPhrases': phaseIds,
                           });
-                          if (phase == phasesList.first) {
-                            currentPhaseId = phaseServices.realPhaseId;
-                            await projectRef.update({
-                              'currentPhaseId': currentPhaseId,
-                            });
-                          }
                         }
                       },
                       child: Container(

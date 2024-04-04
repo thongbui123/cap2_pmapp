@@ -84,7 +84,7 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
     for (var phrase in phraseMap.values) {
       PhaseModel phraseModel =
           PhaseModel.fromMap(Map<String, dynamic>.from(phrase));
-      if (phraseModel.phraseName == currentPhraseName) {
+      if (phraseModel.phaseName == currentPhraseName) {
         currentPhraseModel = phraseModel;
       }
     }
@@ -394,7 +394,7 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
                     .pushReplacement(MaterialPageRoute(builder: (context) {
                   return StreamBuilder<List<Object>>(
                       stream: CombineLatestStream.list([
-                        TaskService().taskRef.onValue,
+                        TaskService().reference.onValue,
                         ProjectServices().reference.onValue
                       ]),
                       builder: (context, snapshot) {
@@ -449,11 +449,11 @@ class _TaskCreateScreenState extends State<TaskCreateScreen> {
         endDateController.text,
         projectModel!.projectId,
         currentUserModel.userId,
-        currentPhraseModel.phraseId,
+        currentPhraseModel.phaseId,
         currentList);
     currentPhraseModel.listTasks.add(taskService.realTaskId);
     PhaseServices().updatePhraseTaskList(projectModel!.projectId,
-        currentPhraseModel.phraseId, currentPhraseModel.listTasks);
+        currentPhraseModel.phaseId, currentPhraseModel.listTasks);
   }
 
   Future<void> _selectDate(TextEditingController textEditingController,

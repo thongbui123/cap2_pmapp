@@ -8,6 +8,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 class ProjectServices {
   final DatabaseReference reference =
       FirebaseDatabase.instance.ref().child('projects');
+
   //late Map<dynamic, dynamic> projectMap;
   late String realProjectID;
   Future<Map> getProjectMap() async {
@@ -26,9 +27,28 @@ class ProjectServices {
     for (var project in projectMap.values) {
       ProjectModel projectModel =
           ProjectModel.fromMap(Map<String, dynamic>.from(project));
-      if ((projectModel.projectMembers.contains(currentUserModel.userId) ||
-          projectModel.managerId == currentUserModel.userId ||
-          projectModel.leaderId == currentUserModel.userId)) {
+      if (getRelateToProjectCondition(projectModel, currentUserModel)) {
+        joinedProjects.add(projectModel);
+      }
+    }
+    return joinedProjects;
+  }
+
+  bool getRelateToProjectCondition(
+      ProjectModel projectModel, UserModel currentUserModel) {
+    return (projectModel.projectMembers.contains(currentUserModel.userId) ||
+        projectModel.managerId == currentUserModel.userId ||
+        projectModel.leaderId == currentUserModel.userId);
+  }
+
+  List<ProjectModel> getJoinedOnGoingProjectList(
+      Map<dynamic, dynamic> projectMap, UserModel currentUserModel) {
+    List<ProjectModel> joinedProjects = [];
+    for (var project in projectMap.values) {
+      ProjectModel projectModel =
+          ProjectModel.fromMap(Map<String, dynamic>.from(project));
+      if (getRelateToProjectCondition(projectModel, currentUserModel) &&
+          projectModel.projectStatus == 'In progress') {
         joinedProjects.add(projectModel);
       }
     }
@@ -176,7 +196,8 @@ class ProjectServices {
     return count;
   }
 
-  int getOverdueProjectNumber(Map<dynamic, dynamic> projectMap, String id) {
+  int getJoinedOverdueProjectNumber(
+      Map<dynamic, dynamic> projectMap, String id) {
     int count = 0;
     for (var project in projectMap.values) {
       ProjectModel projectModel =
@@ -208,7 +229,8 @@ class ProjectServices {
     return count;
   }
 
-  int getCompleteProjectNumber(Map<dynamic, dynamic> projectMap, String id) {
+  int getJoinedCompleteProjectNumber(
+      Map<dynamic, dynamic> projectMap, String id) {
     int count = 0;
     for (var project in projectMap.values) {
       ProjectModel projectModel =
@@ -269,6 +291,7 @@ class ProjectServices {
         'projectStatus': 'In progress',
         'projectMembers': members,
         'projectPhrases': phrases,
+        'timestamp': ServerValue.timestamp
       });
       Fluttertoast.showToast(msg: 'New project has been created successfully');
     }

@@ -56,6 +56,7 @@ dependencies:
   circular_badge_avatar: ^0.1.2
   comment_box: ^0.0.18
   rxdart: ^0.27.7
+  collection: ^1.18.0
 
 
 

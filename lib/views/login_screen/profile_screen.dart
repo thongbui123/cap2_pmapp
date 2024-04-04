@@ -179,7 +179,7 @@ class _profile_screenState extends State<profile_screen> {
             userRef!.onValue,
             NotificationService().databaseReference.onValue,
             ProjectServices().reference.onValue,
-            TaskService().taskRef.onValue
+            TaskService().reference.onValue
           ],
         ),
         builder: (context, snapshot) {

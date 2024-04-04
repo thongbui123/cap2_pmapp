@@ -4,51 +4,51 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 
 class PhaseModel {
-  String phraseId;
+  String phaseId;
   String projectId;
-  String phraseName;
-  String phraseDescription;
+  String phaseName;
+  String phaseDescription;
   List<String> listTasks;
   PhaseModel({
-    required this.phraseId,
+    required this.phaseId,
     required this.projectId,
-    required this.phraseName,
-    required this.phraseDescription,
+    required this.phaseName,
+    required this.phaseDescription,
     required this.listTasks,
   });
 
   PhaseModel copyWith({
-    String? phraseId,
+    String? phaseId,
     String? projectId,
-    String? phraseName,
-    String? phraseDescription,
+    String? phaseName,
+    String? phaseDescription,
     List<String>? listTasks,
   }) {
     return PhaseModel(
-      phraseId: phraseId ?? this.phraseId,
+      phaseId: phaseId ?? this.phaseId,
       projectId: projectId ?? this.projectId,
-      phraseName: phraseName ?? this.phraseName,
-      phraseDescription: phraseDescription ?? this.phraseDescription,
+      phaseName: phaseName ?? this.phaseName,
+      phaseDescription: phaseDescription ?? this.phaseDescription,
       listTasks: listTasks ?? this.listTasks,
     );
   }
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
-      'phraseId': phraseId,
+      'phaseId': phaseId,
       'projectId': projectId,
-      'phraseName': phraseName,
-      'phraseDescription': phraseDescription,
+      'phaseName': phaseName,
+      'phaseDescription': phaseDescription,
       'listTasks': listTasks,
     };
   }
 
   factory PhaseModel.fromMap(Map<String, dynamic> map) {
     return PhaseModel(
-        phraseId: map['phraseId'] as String,
+        phaseId: map['phaseId'] as String,
         projectId: map['projectId'] as String,
-        phraseName: map['phraseName'] as String,
-        phraseDescription: map['phraseDescription'] as String,
+        phaseName: map['phaseName'] as String,
+        phaseDescription: map['phaseDescription'] as String,
         listTasks: List<String>.from(
           (map['listTasks'] as List<dynamic>?)
                   ?.map((task) => task as String)
@@ -64,26 +64,26 @@ class PhaseModel {
 
   @override
   String toString() {
-    return 'PhraseModel(phraseId: $phraseId, projectId: $projectId, phraseName: $phraseName, phraseDescription: $phraseDescription, listTasks: $listTasks)';
+    return 'PhaseModel(phaseId: $phaseId, projectId: $projectId, phaseName: $phaseName, phaseDescription: $phaseDescription, listTasks: $listTasks)';
   }
 
   @override
   bool operator ==(covariant PhaseModel other) {
     if (identical(this, other)) return true;
 
-    return other.phraseId == phraseId &&
+    return other.phaseId == phaseId &&
         other.projectId == projectId &&
-        other.phraseName == phraseName &&
-        other.phraseDescription == phraseDescription &&
+        other.phaseName == phaseName &&
+        other.phaseDescription == phaseDescription &&
         listEquals(other.listTasks, listTasks);
   }
 
   @override
   int get hashCode {
-    return phraseId.hashCode ^
+    return phaseId.hashCode ^
         projectId.hashCode ^
-        phraseName.hashCode ^
-        phraseDescription.hashCode ^
+        phaseName.hashCode ^
+        phaseDescription.hashCode ^
         listTasks.hashCode;
   }
 }

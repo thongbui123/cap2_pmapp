@@ -123,9 +123,9 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
     return StreamBuilder<List<Object>>(
         stream: CombineLatestStream.list([
           CommentService().databaseReference.onValue,
-          TaskService().taskRef.onValue,
+          TaskService().reference.onValue,
           UserServices().databaseReference.onValue,
-          TaskService().taskRef.child(taskModel.taskId).onValue,
+          TaskService().reference.child(taskModel.taskId).onValue,
           NotificationService().databaseReference.onValue
         ]),
         builder: (context, snapshot) {
@@ -556,7 +556,7 @@ class _StatefulBottomSheetWidgetState extends State<StatefulBottomSheetWidget> {
     return StreamBuilder<List<Object>>(
         stream: CombineLatestStream.list([
           UserServices().databaseReference.onValue,
-          TaskService().taskRef.onValue,
+          TaskService().reference.onValue,
           ProjectServices().reference.child(taskModel.projectId).onValue,
         ]),
         builder: (context, snapshot) {
@@ -643,7 +643,7 @@ class _StatefulBottomSheetWidgetState extends State<StatefulBottomSheetWidget> {
                                     _showDeleteMemberDialog(member);
                                   });
                                   TaskService()
-                                      .taskRef
+                                      .reference
                                       .child(taskModel.taskId)
                                       .update({
                                     'taskMembers': currentList,
@@ -713,7 +713,7 @@ class _StatefulBottomSheetWidgetState extends State<StatefulBottomSheetWidget> {
                                 allMembers.remove(member);
                               });
                               TaskService()
-                                  .taskRef
+                                  .reference
                                   .child(taskModel.taskId)
                                   .update({
                                 'taskMembers': currentList,
@@ -964,9 +964,9 @@ class _StatefulBottomSheetWidget3State
             stream: CombineLatestStream.list([
               UserServices().databaseReference.child(user!.uid).onValue,
               ProjectServices().reference.onValue,
-              TaskService().taskRef.onValue,
-              TaskService().taskRef.child(taskModel.taskId).onValue,
-              PhaseServices().phaseRef.child(phaseModel.phraseId).onValue,
+              TaskService().reference.onValue,
+              TaskService().reference.child(taskModel.taskId).onValue,
+              PhaseServices().reference.child(phaseModel.phaseId).onValue,
             ]),
             builder: (context, snapshot) {
               if (!snapshot.hasData || snapshot.hasError) return loader();
@@ -1018,7 +1018,7 @@ class _StatefulBottomSheetWidget3State
                               TextStyle(fontFamily: 'MontMed', fontSize: 12)),
                       onTap: () {
                         TaskService()
-                            .taskRef
+                            .reference
                             .child(taskModel.taskId)
                             .update({'taskStatus': 'Complete'});
                         Navigator.of(context).pop();
@@ -1037,7 +1037,7 @@ class _StatefulBottomSheetWidget3State
                               TextStyle(fontFamily: 'MontMed', fontSize: 12)),
                       onTap: () {
                         TaskService()
-                            .taskRef
+                            .reference
                             .child(taskModel.taskId)
                             .update({'taskStatus': 'Incomplete'});
                         Navigator.of(context).pop();
@@ -1057,7 +1057,7 @@ class _StatefulBottomSheetWidget3State
                               TextStyle(fontFamily: 'MontMed', fontSize: 12)),
                       onTap: () async {
                         await TaskService()
-                            .taskRef
+                            .reference
                             .child(taskModel.taskId)
                             .remove();
                         await PhaseServices()

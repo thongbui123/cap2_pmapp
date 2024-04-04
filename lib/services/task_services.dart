@@ -1,12 +1,15 @@
 import 'package:capstone2_project_management_app/models/project_model.dart';
 import 'package:capstone2_project_management_app/models/task_model.dart';
 import 'package:capstone2_project_management_app/models/user_model.dart';
+import 'package:collection/collection.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
+import '../models/phase_model.dart';
+
 class TaskService {
-  DatabaseReference taskRef = FirebaseDatabase.instance.ref().child('tasks');
+  DatabaseReference reference = FirebaseDatabase.instance.ref().child('tasks');
   late String realTaskId;
   Future<void> addTask(
     String taskName,
@@ -40,7 +43,7 @@ class TaskService {
         'assignById': assignById,
         'taskDescription': taskDescription,
         'taskMembers': taskMembers,
-        'timestamp': ServerValue.timestamp
+        'timestamp': ServerValue.timestamp,
       });
       Fluttertoast.showToast(msg: 'New task has been created successfully');
     }
@@ -95,6 +98,27 @@ class TaskService {
       }
     }
     return listAllTasks;
+  }
+
+  List<TaskModel> getTasksFilteredByCurrentPhase(List<ProjectModel> allProjects,
+      List<PhaseModel> allPhases, List<TaskModel> allTasks) {
+    List<TaskModel> filteredTasks = [];
+
+    // Iterate through each project
+    for (ProjectModel project in allProjects) {
+      // Find the current phase of the project
+      PhaseModel? currentPhase = allPhases
+          .firstWhereOrNull((phase) => phase.phaseId == project.currentPhaseId);
+      if (currentPhase != null) {
+        // Filter tasks based on the taskIds in the current phase
+        List<TaskModel> projectTasks = allTasks
+            .where((task) => currentPhase.listTasks.contains(task.taskId))
+            .toList();
+        filteredTasks.addAll(projectTasks);
+      }
+    }
+
+    return filteredTasks;
   }
 
   double calculateTotalAverageTime(List<TaskModel> tasks) {
@@ -347,7 +371,7 @@ class TaskService {
     return listOverdou;
   }
 
-  int getOverdouTaskNumber(Map<dynamic, dynamic> taskMap, String id) {
+  int getJoinedOverdouTaskNumber(Map<dynamic, dynamic> taskMap, String id) {
     int count = 0;
     for (var task in taskMap.values) {
       TaskModel taskModel = TaskModel.fromMap(Map<String, dynamic>.from(task));
@@ -374,7 +398,7 @@ class TaskService {
     return count;
   }
 
-  int getCompleteTaskNumber(Map<dynamic, dynamic> taskMap, String id) {
+  int getJoinedCompleteTaskNumber(Map<dynamic, dynamic> taskMap, String id) {
     int count = 0;
     for (var task in taskMap.values) {
       TaskModel taskModel = TaskModel.fromMap(Map<String, dynamic>.from(task));

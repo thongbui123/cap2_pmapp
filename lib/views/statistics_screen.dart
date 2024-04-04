@@ -81,7 +81,7 @@ class _statistic_screenState extends State<statistic_screen> {
         stream: CombineLatestStream.list([
           NotificationService().databaseReference.onValue,
           ProjectServices().reference.onValue,
-          TaskService().taskRef.onValue,
+          TaskService().reference.onValue,
           UserServices().databaseReference.onValue
         ]),
         builder: (context, snapshot) {

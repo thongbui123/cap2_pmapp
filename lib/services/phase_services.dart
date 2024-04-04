@@ -4,8 +4,8 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class PhaseServices {
-  DatabaseReference phaseRef = FirebaseDatabase.instance.ref().child('phases');
-  String realPhaseId = "";
+  DatabaseReference reference = FirebaseDatabase.instance.ref().child('phases');
+  late String realPhaseId;
   Future<void> addPhase(
     String phraseName,
     String projectId,
@@ -20,15 +20,16 @@ class PhaseServices {
       DatabaseReference phraseRef =
           FirebaseDatabase.instance.ref().child('phases');
       String? phraseId = phraseRef.push().key;
+      realPhaseId = phraseId!;
       await phraseRef.child(phraseId!).set({
-        'phraseId': phraseId,
-        'phraseName': phraseName,
+        'phaseId': phraseId,
+        'phaseName': phraseName,
         'listTasks': listTasks,
         'projectId': projectId,
-        'phraseDescription': phraseDescription,
+        'phaseDescription': phraseDescription,
         'timestamp': ServerValue.timestamp
       });
-      realPhaseId = phraseId;
+
       Fluttertoast.showToast(msg: 'New phrase has been created successfully');
     }
   }
@@ -57,14 +58,34 @@ class PhaseServices {
   String getPhaseNameFromId(Map phaseMap, String phraseId) {
     for (var phase in phaseMap.values) {
       PhaseModel phaseModel = PhaseModel.fromMap(Map.from(phase));
-      if (phaseModel.phraseId == phraseId) {
-        return phaseModel.phraseName;
+      if (phaseModel.phaseId == phraseId) {
+        return phaseModel.phaseName;
       }
     }
     return '';
   }
 
   List<PhaseModel> getPhaseListByProject(Map phaseMap, String projectId) {
+    List<PhaseModel> list = [];
+    for (var phase in phaseMap.values) {
+      PhaseModel phaseModel = PhaseModel.fromMap(Map.from(phase));
+      if (phaseModel.projectId == projectId) {
+        list.add(phaseModel);
+      }
+    }
+    return list;
+  }
+
+  List<PhaseModel> getAllPhaseList(Map phaseMap) {
+    List<PhaseModel> list = [];
+    for (var phase in phaseMap.values) {
+      PhaseModel phaseModel = PhaseModel.fromMap(Map.from(phase));
+      list.add(phaseModel);
+    }
+    return list;
+  }
+
+  List<PhaseModel> getPhaseListByProjectId(Map phaseMap, String projectId) {
     List<PhaseModel> list = [];
     for (var phase in phaseMap.values) {
       PhaseModel phaseModel = PhaseModel.fromMap(Map.from(phase));
@@ -115,9 +136,9 @@ class PhaseServices {
     for (var phrase in phaseMap.values) {
       PhaseModel phraseModel =
           PhaseModel.fromMap(Map<String, dynamic>.from(phrase));
-      mapName[phraseModel.phraseId] = phraseModel.phraseName;
-      if (phraseModel.phraseId == id) {
-        return mapName[phraseModel.phraseId].toString();
+      mapName[phraseModel.phaseId] = phraseModel.phaseName;
+      if (phraseModel.phaseId == id) {
+        return mapName[phraseModel.phaseId].toString();
       }
     }
     return "";
@@ -127,8 +148,8 @@ class PhaseServices {
     Map<String, int> mapName = {};
     int num = 0;
     for (var phrase in phaseList) {
-      mapName[phrase.phraseName] = num;
-      if (phrase.phraseName == phaseName) {
+      mapName[phrase.phaseName] = num;
+      if (phrase.phaseName == phaseName) {
         return num;
       }
       num++;
@@ -142,7 +163,7 @@ class PhaseServices {
     for (var phrase in phaseMap.values) {
       PhaseModel phraseModel =
           PhaseModel.fromMap(Map<String, dynamic>.from(phrase));
-      if (phraseModel.phraseName == phaseName) {
+      if (phraseModel.phaseName == phaseName) {
         result = phraseModel;
       }
     }
@@ -154,7 +175,7 @@ class PhaseServices {
     if (listTasks.contains(taskId)) {
       listTasks.remove(taskId);
     }
-    await phaseRef.child(phaseModel.phraseId).update({
+    await reference.child(phaseModel.phaseId).update({
       'listTasks': listTasks,
     });
   }
@@ -163,7 +184,7 @@ class PhaseServices {
     Map<int, String> mapId = {};
     int num = 0;
     for (var phase in phaseList) {
-      mapId[num] = phase.phraseId;
+      mapId[num] = phase.phaseId;
       num++;
     }
     print(mapId);
@@ -174,7 +195,7 @@ class PhaseServices {
     Map<int, String> mapName = {};
     int num = 0;
     for (var phase in phaseList) {
-      mapName[num] = phase.phraseName;
+      mapName[num] = phase.phaseName;
       num++;
     }
     print(mapName);

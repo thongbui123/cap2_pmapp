@@ -138,9 +138,11 @@ class _NotificationScreenState extends State<NotificationScreen> {
                                                       .reference
                                                       .onValue,
                                                   PhaseServices()
-                                                      .phaseRef
+                                                      .reference
                                                       .onValue,
-                                                  TaskService().taskRef.onValue,
+                                                  TaskService()
+                                                      .reference
+                                                      .onValue,
                                                 ]),
                                                 builder: (context, snapshot) {
                                                   if (snapshot.hasError ||

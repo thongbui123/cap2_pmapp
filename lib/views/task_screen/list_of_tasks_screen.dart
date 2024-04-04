@@ -118,11 +118,11 @@ class _ListOfTaskScreenState extends State<ListOfTaskScreen> {
     return StreamBuilder<List<Object>>(
         stream: CombineLatestStream.list([
           UserServices().databaseReference.onValue,
-          TaskService().taskRef.onValue,
+          TaskService().reference.onValue,
           ProjectServices().reference.onValue,
-          PhaseServices().phaseRef.onValue,
+          PhaseServices().reference.onValue,
           NotificationService().databaseReference.onValue,
-          PhaseServices().phaseRef.child(projectModel!.currentPhaseId).onValue,
+          PhaseServices().reference.child(projectModel!.currentPhaseId).onValue,
         ]),
         builder: (context, snapshot) {
           if (snapshot.hasError || !snapshot.hasData) {

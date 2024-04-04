@@ -2,11 +2,11 @@ import 'package:capstone2_project_management_app/models/project_model.dart';
 import 'package:capstone2_project_management_app/models/user_model.dart';
 import 'package:capstone2_project_management_app/services/notification_services.dart';
 import 'package:capstone2_project_management_app/services/project_services.dart';
-import 'package:capstone2_project_management_app/views/task_screen/list_of_tasks_screen.dart';
+import 'package:capstone2_project_management_app/views/project_screen/project_create_step1.dart';
 import 'package:capstone2_project_management_app/views/stats/stats.dart';
 import 'package:capstone2_project_management_app/views/subs/db_side_menu.dart';
-import 'package:capstone2_project_management_app/views/project_screen/project_create_step1.dart';
 import 'package:capstone2_project_management_app/views/subs/sub_widgets.dart';
+import 'package:capstone2_project_management_app/views/task_screen/list_of_tasks_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -62,6 +62,55 @@ class _ListOfProjectScreenState extends State<ListOfProjectScreen>
     return allProjects;
   }
 
+  String currentAttribute = "";
+  String currentOrder = "";
+  String currentStatus = "";
+  void _sortProjects(
+      String currentAttribute, String currentOrder, String currentStatus) {
+    setState(() {
+      switch (currentAttribute) {
+        case 'projectId':
+          allProjects.sort((a, b) => currentOrder == 'asc'
+              ? a.projectId.compareTo(b.projectId)
+              : b.projectId.compareTo(a.projectId));
+          break;
+        case 'projectName':
+          allProjects.sort((a, b) => currentOrder == 'asc'
+              ? a.projectName.compareTo(b.projectName)
+              : b.projectName.compareTo(a.projectName));
+          break;
+        case 'projectMembers':
+          allProjects.sort((a, b) => currentOrder == 'asc'
+              ? a.projectMembers.length.compareTo(b.projectMembers.length)
+              : b.projectMembers.length.compareTo(a.projectMembers.length));
+          break;
+        case 'startDate':
+          allProjects.sort((a, b) => currentOrder == 'asc'
+              ? a.startDate.compareTo(b.startDate)
+              : b.startDate.compareTo(a.startDate));
+          break;
+        case 'projectStatus':
+          allProjects.sort((a, b) {
+            if (a.projectStatus == currentStatus &&
+                b.projectStatus != currentStatus) {
+              return currentOrder == 'asc' ? -1 : 1;
+            } else if (a.projectStatus != currentStatus &&
+                b.projectStatus == currentStatus) {
+              return currentOrder == 'asc' ? 1 : -1;
+            } else {
+              return currentOrder == 'asc'
+                  ? a.projectStatus.compareTo(b.projectStatus)
+                  : b.projectStatus.compareTo(a.projectStatus);
+            }
+          });
+          break;
+        default:
+          // do nothing
+          break;
+      }
+    });
+  }
+
   sortDecending<T>(List<ProjectModel> list,
       Comparable<T> Function(ProjectModel obj) getAttribute) {
     setState(() {
@@ -98,8 +147,8 @@ class _ListOfProjectScreenState extends State<ListOfProjectScreen>
               NotificationService().getListAllNotRead(notifiMap, uid).length;
           return Scaffold(
             floatingActionButton: Visibility(
-              visible: userModel?.userRole != 'User' &&
-                  userModel?.userRole != 'Team Leader',
+              visible: userModel?.userRole == 'Admin' ||
+                  userModel?.userRole == 'Manager',
               child: FloatingActionButton(
                 onPressed: () {
                   Navigator.of(context).push(
@@ -112,7 +161,7 @@ class _ListOfProjectScreenState extends State<ListOfProjectScreen>
                 backgroundColor: Colors.deepOrangeAccent,
                 tooltip:
                     'Add Project', // Optional tooltip text shown on long-press
-                child: Icon(
+                child: const Icon(
                   Icons.create_new_folder,
                   color: Colors.white,
                 ),
@@ -357,6 +406,10 @@ class _ListOfProjectScreenState extends State<ListOfProjectScreen>
   bool dateVisibility = true;
   bool numberVisibility = false;
   bool nameVisibility = false;
+  bool ascendingVisibility = true;
+  bool descendingVisibility = false;
+  bool completedVisibility = true;
+  bool incompletedVisibility = false;
   void _showFilterDrawer(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -385,10 +438,10 @@ class _ListOfProjectScreenState extends State<ListOfProjectScreen>
                     dateVisibility = true;
                     numberVisibility = false;
                     nameVisibility = false;
-                    setState(() {
-                      sortAscending(allProjects, (obj) => obj.startDate);
-                      Navigator.pop(context);
-                    });
+                    currentAttribute = 'startDate';
+                    _sortProjects(
+                        currentAttribute, currentOrder, currentStatus);
+                    Navigator.pop(context);
                   },
                   trailing: Container(
                       child: Visibility(
@@ -403,8 +456,9 @@ class _ListOfProjectScreenState extends State<ListOfProjectScreen>
                     dateVisibility = false;
                     numberVisibility = true;
                     nameVisibility = false;
-                    sortAscending(allProjects = allProjects,
-                        (obj) => obj.projectMembers.length);
+                    currentAttribute = 'projectMembers';
+                    _sortProjects(
+                        currentAttribute, currentOrder, currentStatus);
                     Navigator.pop(context);
                   },
                   trailing: Container(
@@ -420,8 +474,10 @@ class _ListOfProjectScreenState extends State<ListOfProjectScreen>
                     dateVisibility = false;
                     numberVisibility = false;
                     nameVisibility = true;
-
-                    sortAscending(allProjects, (obj) => obj.projectName);
+                    currentAttribute = 'projectName';
+                    _sortProjects(
+                        currentAttribute, currentOrder, currentStatus);
+                    //sortAscending(allProjects, (obj) => obj.projectName);
                     Navigator.pop(context);
                   },
                   trailing: Container(
@@ -436,8 +492,6 @@ class _ListOfProjectScreenState extends State<ListOfProjectScreen>
     );
   }
 
-  bool ascendingVisibility = true;
-  bool descendingVisibility = false;
   void _showOrderDrawer(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -465,7 +519,9 @@ class _ListOfProjectScreenState extends State<ListOfProjectScreen>
                   onTap: () {
                     ascendingVisibility = true;
                     descendingVisibility = false;
-                    sortAscending(allProjects, (obj) => obj.projectName);
+                    currentOrder = 'asc';
+                    _sortProjects(
+                        currentAttribute, currentOrder, currentStatus);
                     Navigator.pop(context);
                   },
                   trailing: Container(
@@ -480,7 +536,9 @@ class _ListOfProjectScreenState extends State<ListOfProjectScreen>
                   onTap: () {
                     ascendingVisibility = false;
                     descendingVisibility = true;
-                    sortDecending(allProjects, (obj) => obj.projectName);
+                    currentOrder = 'desc';
+                    _sortProjects(
+                        currentAttribute, currentOrder, currentStatus);
                     Navigator.pop(context);
                   },
                   trailing: Container(
@@ -495,8 +553,6 @@ class _ListOfProjectScreenState extends State<ListOfProjectScreen>
     );
   }
 
-  bool completedVisibility = true;
-  bool incompletedVisibility = false;
   void _showStateDrawer(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -524,7 +580,9 @@ class _ListOfProjectScreenState extends State<ListOfProjectScreen>
                   onTap: () {
                     completedVisibility = true;
                     incompletedVisibility = false;
-
+                    currentStatus = 'Done';
+                    _sortProjects(
+                        currentAttribute, currentOrder, currentStatus);
                     Navigator.pop(context);
                   },
                   trailing: Container(
@@ -539,6 +597,9 @@ class _ListOfProjectScreenState extends State<ListOfProjectScreen>
                   onTap: () {
                     completedVisibility = false;
                     incompletedVisibility = true;
+                    currentStatus = 'In progress';
+                    _sortProjects(
+                        currentAttribute, currentOrder, currentStatus);
                     Navigator.pop(context);
                   },
                   trailing: Container(

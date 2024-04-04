@@ -306,7 +306,7 @@ class _DashboardMainV2State extends State<DashboardMainV2> {
                         ),
                         const SizedBox(width: 10),
                         Text(
-                            'Overdue Tasks (${TaskService().getOverdouTaskNumber(taskMap, currentUserModel!.userId)})',
+                            'Overdue Tasks (${TaskService().getJoinedOverdouTaskNumber(taskMap, currentUserModel!.userId)})',
                             style: const TextStyle(
                                 fontFamily: 'MontMed', fontSize: 13)),
                       ],

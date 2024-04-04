@@ -61,9 +61,9 @@ class _SearchScreenState extends State<SearchScreen> {
     return StreamBuilder<List<Object>>(
         stream: CombineLatestStream.list([
           projectServices.reference.onValue,
-          taskService.taskRef.onValue,
+          taskService.reference.onValue,
           userServices.databaseReference.onValue,
-          PhaseServices().phaseRef.onValue,
+          PhaseServices().reference.onValue,
           NotificationService().databaseReference.onValue,
         ]),
         builder: (context, snapshot) {
@@ -321,7 +321,7 @@ class _SearchScreenState extends State<SearchScreen> {
                                               builder: (context) =>
                                                   StreamBuilder<Object>(
                                                       stream: PhaseServices()
-                                                          .phaseRef
+                                                          .reference
                                                           .child(task.phraseId)
                                                           .onValue,
                                                       builder:

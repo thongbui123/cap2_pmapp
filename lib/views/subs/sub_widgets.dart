@@ -4,6 +4,11 @@ import 'package:flutter/material.dart';
 
 String uid = FirebaseAuth.instance.currentUser!.uid;
 
+TextStyle defaulLabelStyle = const TextStyle(
+  fontSize: 20,
+  fontFamily: 'MontMed',
+);
+
 ColoredBox loader() {
   return const ColoredBox(
     color: Colors.white,
